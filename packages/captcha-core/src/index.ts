@@ -4,6 +4,7 @@ export * from "./timing";
 export * from "./events/recorder";
 export * from "./events/gestures";
 export * from "./features/motion";
+export * from "./features/motion-series";
 export * from "./features/feature-set";
 export * from "./replay/timeline";
 export * from "./plugin/types";

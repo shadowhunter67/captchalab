@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { createEventRecorder, type FeatureSet, type InteractionSession, type VerificationResult } from "@captchalab/captcha-core";
+import { createEventRecorder, type EventRecorder, type FeatureSet, type InteractionSession, type VerificationResult } from "@captchalab/captcha-core";
 import {
   registry,
   type SliderAnswer,
@@ -12,9 +12,12 @@ import {
 import { SliderController, type SliderPhase, type SubmitVia } from "./slider-controller";
 import { SliderSurface } from "./SliderSurface";
 import { SliderInspect } from "./SliderInspect";
-import { TrajectoryReplay } from "./TrajectoryReplay";
+import type { SessionMarker } from "@/lib/replay/markers";
 
 interface Completed {
+  /** Increments per submission; keys the Inspect view so selection/replay never carry over. */
+  submission: number;
+  markers: SessionMarker[];
   answer: SliderAnswer;
   layout: SliderLayout;
   session: InteractionSession;
@@ -42,10 +45,13 @@ export function SliderSession({ challenge: initialChallenge, onNewChallenge }: P
   const [completed, setCompleted] = useState<Completed | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const [controller] = useState(() => {
+  // UI annotations that are not input events (see lib/replay/markers.ts). Local to this session.
+  const markersRef = useRef<SessionMarker[]>([]);
+  const submissionsRef = useRef(0);
+  const [{ controller, recorder }] = useState(() => {
     // Raw events go to the recorder buffer only; React state sees phase and the final result.
-    const recorder = createEventRecorder({ captchaId: slider.id });
-    return new SliderController({
+    const recorder: EventRecorder = createEventRecorder({ captchaId: slider.id });
+    const controller = new SliderController({
       recorder,
       onPosition: (p) => applyPositionRef.current(p),
       onPhase: setPhase,
@@ -55,7 +61,17 @@ export function SliderSession({ challenge: initialChallenge, onNewChallenge }: P
           // Correctness and behavior are computed independently by the plugin.
           const verification = slider.verify(challenge, answer, session);
           const featureSet = slider.extractFeatures(challenge, session, { layout });
-          setCompleted({ answer, layout, session, via, verification, featureSet });
+          submissionsRef.current += 1;
+          setCompleted({
+            submission: submissionsRef.current,
+            markers: [...markersRef.current],
+            answer,
+            layout,
+            session,
+            via,
+            verification,
+            featureSet,
+          });
           setError(null);
         } catch (err) {
           console.error("Slider submission failed", err instanceof Error ? err.message : "unknown error");
@@ -63,9 +79,12 @@ export function SliderSession({ challenge: initialChallenge, onNewChallenge }: P
         }
       },
     });
+    return { controller, recorder };
   });
 
   const tryAgain = (): void => {
+    // The handle snaps back to 0. That is a UI action, not input: record it as a marker so replay can show it.
+    markersRef.current.push({ type: "attempt-reset", t: recorder.elapsedMs(), position: 0 });
     setCompleted(null);
     setError(null);
     controller.tryAgain();
@@ -124,15 +143,16 @@ export function SliderSession({ challenge: initialChallenge, onNewChallenge }: P
       )}
 
       {completed && (
-        <>
-          <SliderInspect
-            verification={completed.verification}
-            featureSet={completed.featureSet}
-            session={completed.session}
-            via={completed.via}
-          />
-          <TrajectoryReplay session={completed.session} layout={completed.layout} challenge={challenge} />
-        </>
+        <SliderInspect
+          key={completed.submission}
+          verification={completed.verification}
+          featureSet={completed.featureSet}
+          session={completed.session}
+          markers={completed.markers}
+          layout={completed.layout}
+          challenge={challenge}
+          via={completed.via}
+        />
       )}
     </div>
   );

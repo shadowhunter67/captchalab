@@ -1,23 +1,29 @@
 /** Presentation helpers only. Feature values are never rounded in the feature layer. */
 
-const NONE = "n/a";
+/** Shown for a metric that is not available (null / NaN). */
+export const NO_VALUE = "—";
 
 export function formatMilliseconds(ms: number | null): string {
-  if (ms === null || !Number.isFinite(ms)) return NONE;
+  if (ms === null || !Number.isFinite(ms)) return NO_VALUE;
   return ms >= 1000 ? `${(ms / 1000).toFixed(2)} s` : `${Math.round(ms)} ms`;
 }
 
 export function formatPixels(px: number | null): string {
-  if (px === null || !Number.isFinite(px)) return NONE;
+  if (px === null || !Number.isFinite(px)) return NO_VALUE;
   return `${px.toFixed(1)} px`;
 }
 
 export function formatVelocity(pxPerSecond: number | null): string {
-  if (pxPerSecond === null || !Number.isFinite(pxPerSecond)) return NONE;
+  if (pxPerSecond === null || !Number.isFinite(pxPerSecond)) return NO_VALUE;
   return `${Math.round(pxPerSecond)} px/s`;
 }
 
+export function formatAcceleration(pxPerSecond2: number | null): string {
+  if (pxPerSecond2 === null || !Number.isFinite(pxPerSecond2)) return NO_VALUE;
+  return `${Math.round(pxPerSecond2)} px/s²`;
+}
+
 export function formatCount(n: number | null): string {
-  if (n === null || !Number.isFinite(n)) return NONE;
+  if (n === null || !Number.isFinite(n)) return NO_VALUE;
   return String(Math.round(n));
 }

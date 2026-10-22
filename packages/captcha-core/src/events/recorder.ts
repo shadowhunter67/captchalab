@@ -24,6 +24,8 @@ export interface RecorderOptions {
 export interface EventRecorder {
   /** Record an event; `t` is stamped by the recorder. Plain array push, no React, no copying of DOM events. */
   record(event: DistributiveOmit<InteractionEvent, "t">): void;
+  /** Monotonic ms since the recorder started (same clock as event `t`, never decreasing). */
+  elapsedMs(): number;
   readonly size: number;
   readonly dropped: number;
   /** Copy of the session so far; recording continues. For mid-session verify/inspect. */
@@ -53,6 +55,9 @@ export function createEventRecorder(options: RecorderOptions): EventRecorder {
   const startedAt = Date.now();
   const t0 = now();
   let lastT = 0;
+  let clock = 0;
+  /** Monotonic elapsed time shared by events and elapsedMs(), so markers and events never reorder. */
+  const mono = (elapsed: number): number => (clock = Math.max(clock, elapsed));
   const buffer: InteractionEvent[] = [];
   let lastMoveT = Number.NEGATIVE_INFINITY;
   let dropped = 0;
@@ -66,7 +71,7 @@ export function createEventRecorder(options: RecorderOptions): EventRecorder {
       id,
       captchaId: options.captchaId,
       startedAt,
-      durationMs: Math.max(last?.t ?? 0, lastT, now() - t0),
+      durationMs: Math.max(last?.t ?? 0, lastT, clock, now() - t0),
       events,
       inputModality: inferModality(events),
       ...(options.viewport ? { viewport: options.viewport } : {}),
@@ -81,7 +86,7 @@ export function createEventRecorder(options: RecorderOptions): EventRecorder {
         dropped++;
         return;
       }
-      const t = Math.max(lastT, elapsed); // monotonic even if the clock misbehaves
+      const t = mono(elapsed); // monotonic even if the clock misbehaves
       const isMove = event.type === "pointermove" || event.type === "touchmove";
       if ((isMove && t - lastMoveT < minMove) || buffer.length >= cap) {
         dropped++;
@@ -96,6 +101,10 @@ export function createEventRecorder(options: RecorderOptions): EventRecorder {
     },
     get dropped() {
       return dropped;
+    },
+    elapsedMs() {
+      const e = now() - t0;
+      return Number.isFinite(e) ? mono(e) : clock;
     },
     snapshot: () => build(buffer.slice()),
     finish() {

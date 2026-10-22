@@ -31,9 +31,9 @@ corepack pnpm --filter web test:e2e   # Playwright dùng Chrome cài sẵn (chan
 - `packages/captcha-core` — types/events (schema v2: pointerId, pointercancel), events (recorder, gestures), geometry, timing, features (motion, FeatureSet envelope), replay/timeline, plugin (types, defineCaptchaPlugin brand, typed registry factory, rng).
 - `packages/captcha-plugins` — registry.ts (compile-time map; thêm CAPTCHA mới = thêm vào object này) + `slider/` (tham chiếu: types=định nghĩa toán học, generator, verifier, feature-extractor, plugin).
 - `packages/config` — tsconfig.base.json.
-- `apps/web` — Next.js 16 + Tailwind 4 (App Router). `/` và `/playground/slider`. `features/slider/`: `slider-controller.ts` (state machine thuần, không DOM, có test), `SliderSurface` (DOM/pointer capture/ResizeObserver), `SliderSession` (1 challenge = 1 session, remount theo key), `SliderInspect`, `TrajectoryReplay` (+ `trajectory.ts`, `replay-state.ts` thuần). `lib/pointer-adapter.ts` = biên DOM→event chuẩn hoá. Math slider KHÔNG nằm ở web (dùng `slider/geometry.ts` của plugin).
+- `apps/web` — Next.js 16 + Tailwind 4 (App Router). `/` và `/playground/slider`. `features/slider/`: `slider-controller.ts` (state machine thuần, không DOM, có test), `SliderSurface` (DOM/pointer capture/ResizeObserver), `SliderSession` (1 challenge = 1 session, remount theo key), `SliderInspect` (ghép primitive), `SliderReplay`; selector/dữ liệu riêng Slider: `slider-view-data.ts`, `replay-state.ts` (handle replay từ gesture + marker). `lib/pointer-adapter.ts` = biên DOM→event chuẩn hoá. `components/inspect/` + `lib/inspect/` = primitive CHUNG (Card, VerificationSummary, MetricTable, TrajectoryView, MotionChart, EventTimeline, EventInspector, ReplayControls) — không được biết Slider. `lib/replay/` = replay-clock (state machine thuần), replay-driver (RAF), markers. Math slider KHÔNG nằm ở web (dùng `slider/geometry.ts` của plugin).
 - Chưa có: visualization package, synthetic, database, ui package.
-- ADR: `docs/adr/` (0001–0004).
+- ADR: `docs/adr/` (0001–0005).
 
 ## Bẫy đã biết
 
@@ -41,6 +41,9 @@ corepack pnpm --filter web test:e2e   # Playwright dùng Chrome cài sẵn (chan
 - Plugin phải tạo bằng `defineCaptchaPlugin` (đóng dấu + freeze); registry từ chối plugin viết tay. `extractFeatures(challenge, interaction, context)` — context là hình học UI (px).
 - Slider giả định handle căn GIỮA dưới con trỏ (u = x − trackLeft − handleWidth/2); UI phải theo mapping này.
 - Test compile-time = `@ts-expect-error` trong test, tsc kiểm tra; `pnpm -r typecheck` phải chạy cùng test.
+- Replay: mọi thao tác đổi ánh xạ thời gian (pause/speed/seek/restart) phải `settle()` + rebase mốc RAF trước (bug thật đã gặp). Reset do "Try again" là `SessionMarker` (web), KHÔNG phải InteractionEvent.
+- Chart vận tốc/gia tốc của Slider = chỉ drag handle (không hover), mỗi attempt 1 đường riêng; series tính ở core (`motion-series.ts`) trùng định nghĩa aggregate.
+- Playwright: SVG `line` rộng/cao 0 không bao giờ "visible" → dùng `toHaveCount`; `input[type=range]` cần `step="any"` nếu min lẻ.
 - Web: một bộ handler trên track (event từ handle nổi bọt lên) → mỗi event ghi đúng 1 lần. Resize giữa lúc kéo = huỷ attempt (ghi pointercancel, nhả capture, bỏ qua phần còn lại của con trỏ đó). Không setState theo pointermove (handle dịch bằng ref/transform).
 - Web giả định track không border, không CSS transform; track dịch ngang không đổi kích thước giữa lúc kéo sẽ lệch toạ độ (backlog).
 - "Try again" GỘP attempt vào cùng session (cố ý, `numberOfAttempts`); lần nộp bằng bàn phím sau pointer hiển thị metric kéo của lần trước (UI có ghi chú).

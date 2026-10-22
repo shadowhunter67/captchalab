@@ -83,7 +83,7 @@ describe("speed and acceleration", () => {
 
   it("computes signed acceleration", () => {
     const speeds = [{ t: 0, tMid: 0, v: 0 }, { t: 500, tMid: 500, v: 100 }];
-    expect(accelerations(speeds)).toEqual([{ t: 500, a: 200 }]);
+    expect(accelerations(speeds)).toEqual([{ t: 250, a: 200 }]);
   });
 });
 
@@ -195,6 +195,14 @@ describe("recorder", () => {
     expect(snap.events).toHaveLength(1);
     expect(r.snapshot().events).toHaveLength(2);
     expect(r.snapshot().id).toBe("i");
+  });
+
+  it("elapsedMs never decreases, even if the clock regresses, and orders with later events", () => {
+    const r = createEventRecorder({ captchaId: "x", now: clock([100, 150, 140, 120, 130]) });
+    expect(r.elapsedMs()).toBe(50);
+    expect(r.elapsedMs()).toBe(50); // clock went back (140 -> 40): clamped
+    r.record({ type: "keydown", code: "Tab" });
+    expect(r.snapshot().events[0]?.t).toBeGreaterThanOrEqual(50);
   });
 
   it("ignores events after finish and reports mixed modality", () => {

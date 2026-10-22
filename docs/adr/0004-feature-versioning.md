@@ -14,6 +14,8 @@ Behavioral features (velocity, direction changes, ...) are only comparable acros
 - Edge cases return `0`/`null`, never `NaN`. Segments with `dt <= 0` are skipped. Variance is population variance.
 - Features are descriptive measurements, not human/bot indicators.
 
+- Time series (`motion-series.ts`) reuse the same primitives as the aggregates and are tested against them. The acceleration *sample timestamp* is the centre between the two velocity midpoints; this is display metadata and does not change any aggregate value, so `motion@1` is unchanged.
+
 ## Alternatives considered
 - One feature interface with many optional fields: rejected (unclear which are present, grows without bound).
 

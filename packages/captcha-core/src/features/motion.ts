@@ -1,7 +1,7 @@
 import { countDirectionChanges, pathLength, type TimedPoint } from "../geometry";
 import { contactKey } from "../events/gestures";
 import { max, mean, variance } from "../timing";
-import { isPointerEvent, type InteractionSession } from "../types/events";
+import { isPointerEvent, type InteractionSession, type PointerInteractionEvent } from "../types/events";
 
 /**
  * Identify the shape/meaning of MotionFeatures. Bump the number when a definition below
@@ -86,6 +86,21 @@ export function pointerTracks(session: InteractionSession): TimedPoint[][] {
   return done.sort((p, q) => (p[0] as TimedPoint).t - (q[0] as TimedPoint).t);
 }
 
+/**
+ * Movement track of one gesture, with the same sample rules as pointerTracks: `click` excluded,
+ * samples sharing a timestamp collapse to the last one.
+ */
+export function gestureTrack(events: readonly PointerInteractionEvent[]): TimedPoint[] {
+  const points: TimedPoint[] = [];
+  for (const e of events) {
+    if (e.type === "click") continue;
+    const last = points[points.length - 1];
+    if (last && last.t === e.t) points[points.length - 1] = { t: e.t, x: e.x, y: e.y };
+    else points.push({ t: e.t, x: e.x, y: e.y });
+  }
+  return points;
+}
+
 export interface SpeedSample {
   t: number;
   /** midpoint time of the segment, ms */
@@ -121,7 +136,8 @@ export function accelerations(speeds: readonly SpeedSample[]): AccelerationSampl
     const c = speeds[i] as SpeedSample;
     const dt = c.tMid - p.tMid;
     if (dt <= 0) continue;
-    out.push({ t: c.tMid, a: ((c.v - p.v) / dt) * 1000 });
+    // Timestamp: centre of the interval the derivative is estimated over (between the two midpoints).
+    out.push({ t: (p.tMid + c.tMid) / 2, a: ((c.v - p.v) / dt) * 1000 });
   }
   return out;
 }

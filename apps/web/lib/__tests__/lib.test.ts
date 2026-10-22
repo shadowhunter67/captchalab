@@ -10,8 +10,8 @@ describe("format", () => {
     expect(formatVelocity(247.6)).toBe("248 px/s");
     expect(formatCount(3)).toBe("3");
     for (const f of [formatMilliseconds, formatPixels, formatVelocity, formatCount]) {
-      expect(f(null)).toBe("n/a");
-      expect(f(Number.NaN)).toBe("n/a");
+      expect(f(null)).toBe("—");
+      expect(f(Number.NaN)).toBe("—");
     }
   });
 });

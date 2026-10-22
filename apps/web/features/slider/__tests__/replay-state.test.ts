@@ -6,6 +6,7 @@ import {
   type InteractionSession,
 } from "@captchalab/captcha-core";
 import type { SliderLayout } from "@captchalab/captcha-plugins";
+import type { SessionMarker } from "@/lib/replay/markers";
 import { createHandleReplay } from "../replay-state";
 
 const layout: SliderLayout = { trackLeft: 0, trackWidth: 340, handleWidth: 40 }; // travel 300
@@ -20,9 +21,10 @@ const session = (events: InteractionEvent[]): InteractionSession => ({
   schemaVersion: SCHEMA_VERSION, id: "s", captchaId: "slider", startedAt: 0,
   durationMs: events.at(-1)?.t ?? 0, events, inputModality: "mouse",
 });
-const replay = (events: InteractionEvent[]) => {
+const reset = (t: number, position = 0): SessionMarker => ({ type: "attempt-reset", t, position });
+const replay = (events: InteractionEvent[], markers: SessionMarker[] = []) => {
   const s = session(events);
-  return createHandleReplay(s, createPointerTimeline(s), layout, H);
+  return createHandleReplay(s, createPointerTimeline(s), layout, H, markers);
 };
 
 describe("handle replay state", () => {
@@ -35,7 +37,7 @@ describe("handle replay state", () => {
       ev(400, "pointerup", 250),
     ]);
     expect(at(0)).toBe(0);
-    expect(at(150)).toBe(0); // hovering
+    expect(at(150)).toBe(0);
     expect(at(200)).toBe(200);
     expect(at(350)).toBe(250);
     expect(at(999)).toBe(250);
@@ -60,5 +62,41 @@ describe("handle replay state", () => {
   it("clamps to the handle travel", () => {
     const at = replay([ev(0, "pointerdown", 0), ev(100, "pointerup", 900)]);
     expect(at(200)).toBe(300);
+  });
+
+  it("an attempt-reset marker snaps the handle back between two attempts", () => {
+    const at = replay(
+      [ev(0, "pointerdown", 0), ev(100, "pointerup", 200), ev(900, "pointerdown", 20), ev(1000, "pointerup", 150)],
+      [reset(500)],
+    );
+    expect(at(300)).toBe(200); // released, not yet reset
+    expect(at(499)).toBe(200);
+    expect(at(500)).toBe(0); // reset
+    expect(at(800)).toBe(0);
+    expect(at(950)).toBeGreaterThan(0); // second drag follows the pointer
+    expect(at(2000)).toBe(150);
+  });
+
+  it("reset ordering on equal timestamps: marker before a drag starting then, after a drag ending then", () => {
+    const events = [ev(0, "pointerdown", 0), ev(100, "pointerup", 200), ev(500, "pointerdown", 40), ev(600, "pointerup", 80)];
+    expect(replay(events, [reset(500)])(500)).toBe(40); // drag starts at 500: reset already applied
+    expect(replay(events, [reset(100)])(100)).toBe(0); // drag ended at 100: the reset applies after it
+  });
+
+  it("two retries produce two resets; one-attempt sessions have none", () => {
+    const events = [
+      ev(0, "pointerdown", 0), ev(10, "pointerup", 100),
+      ev(100, "pointerdown", 0), ev(110, "pointerup", 120),
+      ev(200, "pointerdown", 0), ev(210, "pointerup", 140),
+    ];
+    const at = replay(events, [reset(50), reset(150)]);
+    expect([at(20), at(60), at(120), at(160), at(220)]).toEqual([100, 0, 120, 0, 140]);
+    const single = replay([ev(0, "pointerdown", 0), ev(10, "pointerup", 100)]);
+    expect(single(500)).toBe(100);
+  });
+
+  it("no drags at all: the handle stays at 0 (or at a marker's position)", () => {
+    expect(replay([])(10)).toBe(0);
+    expect(replay([], [reset(5, 0.5)])(10)).toBe(150);
   });
 });
