@@ -28,6 +28,16 @@ export function projectEventFields(e: InteractionEvent): EventField[] {
   return fields;
 }
 
+/** Legend entries for every discrete (non-move) timeline marker kind. */
+export const TIMELINE_LEGEND = [
+  { kind: "down", glyph: "●", label: "press" },
+  { kind: "up", glyph: "○", label: "release" },
+  { kind: "cancel", glyph: "✕", label: "cancel" },
+  { kind: "keydown", glyph: "■", label: "key down" },
+  { kind: "keyup", glyph: "□", label: "key up" },
+  { kind: "click", glyph: "◇", label: "click" },
+] as const;
+
 export type TimelineKind = "down" | "up" | "cancel" | "keydown" | "keyup" | "click" | "move";
 
 export function timelineKind(e: InteractionEvent): TimelineKind {

@@ -57,7 +57,7 @@ export function CheckboxSession({ challenge: initialChallenge, onNewChallenge }:
           const session = recorder.snapshot();
           // Correctness and behavior are computed independently by the plugin.
           const verification = checkbox.verify(challenge, answer, session);
-          const featureSet = checkbox.extractFeatures(challenge, session, undefined);
+          const featureSet = checkbox.extractFeatures(challenge, session);
           submissionsRef.current += 1;
           setCompleted({
             submission: submissionsRef.current,

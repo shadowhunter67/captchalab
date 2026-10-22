@@ -21,6 +21,8 @@ export interface ChartModel {
   yDomain: [number, number];
   /** One SVG path per segment with at least 2 samples; segments are never joined. */
   paths: string[];
+  /** Number (original 1-based segment index) at the first sample of each drawn segment; matches the legend/table/trajectory. */
+  labels: { x: number; y: number; text: string }[];
   /** Isolated samples (segments with exactly 1 sample) drawn as dots. */
   dots: { x: number; y: number }[];
   xTicks: ChartTick[];
@@ -86,8 +88,14 @@ export function buildChartModel(
 
   const paths: string[] = [];
   const dots: { x: number; y: number }[] = [];
-  for (const seg of segments) {
+  const labels: { x: number; y: number; text: string }[] = [];
+  for (const [segmentIndex, seg] of segments.entries()) {
     const pts = validSamples(seg);
+    if (pts.length > 0) {
+      const first = pts[0] as SeriesSample;
+      // Numbered by the ORIGINAL segment (attempt) index so it matches the legend, table and trajectory.
+      labels.push({ x: scaleX(first.t), y: scaleY(first.value), text: String(segmentIndex + 1) });
+    }
     if (pts.length === 1) {
       const p = pts[0] as SeriesSample;
       dots.push({ x: scaleX(p.t), y: scaleY(p.value) });
@@ -100,7 +108,7 @@ export function buildChartModel(
   const xTicks = [x0, (x0 + x1) / 2, x1].map((value) => ({ value, pos: scaleX(value) }));
   const zeroY = yMin <= 0 && yMax >= 0 ? scaleY(0) : null;
 
-  return { empty, sampleCount, xDomain: [x0, x1], yDomain: [yMin, yMax], paths, dots, xTicks, yTicks, zeroY, scaleX, scaleY, plot };
+  return { empty, sampleCount, xDomain: [x0, x1], yDomain: [yMin, yMax], paths, labels, dots, xTicks, yTicks, zeroY, scaleX, scaleY, plot };
 }
 
 /** Text alternative for a chart: the range actually present in the data. */

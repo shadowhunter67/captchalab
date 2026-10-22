@@ -1,6 +1,6 @@
 # Adding a CAPTCHA to CaptchaLab
 
-This guide takes you from nothing to a new CAPTCHA that can be tried, inspected and tested. There are two reference implementations: the **Slider** (drag, pointer motion, charts) and the **Checkbox** (press/keyboard activation, no trajectory, native control). When this guide says "see the Slider" or "see the Checkbox", read the named file; pick the one whose interaction is closest to yours. You do not need to read the whole repository first.
+This guide takes you from nothing to a new CAPTCHA that can be tried, inspected and tested. There are three reference implementations: the **Slider** (one drag, normalized geometry, charts), the **Checkbox** (press/keyboard activation, no trajectory, native control) and **Drag & Drop** (several draggables and drop targets, many attempts, per-attempt features, replay of moving objects). When this guide says "see the Slider/Checkbox/Drag & Drop", read the named file; pick the one whose interaction is closest to yours. You do not need to read the whole repository first.
 
 > **Reuse abstractions by behavior, not by file-name imitation.** A checkbox has no drag, so it needs no drag controller. Take the parts whose *job* you need.
 
@@ -53,7 +53,7 @@ Write the **mathematical definition of every feature in a comment next to its ty
 
 ### 2.4 Feature extractor (`feature-extractor.ts`)
 
-`extractFeatures(challenge, interaction, context)` returns a **`FeatureSet`** (a CAPTCHA with no UI geometry, like the Checkbox, uses the default `undefined` context and callers pass `undefined`):
+`extractFeatures(challenge, interaction, context)` returns a **`FeatureSet`**. A CAPTCHA with no UI geometry, like the Checkbox, uses the default `undefined` context and callers write `plugin.extractFeatures(challenge, session)`; one that needs geometry (Slider, Drag & Drop) declares a concrete context type and the compiler requires it (`FeatureContextArgs` in `captcha-core`). Do not declare a context as `void` or `Ctx | undefined` to dodge this:
 
 ```ts
 createFeatureSet(
@@ -67,6 +67,8 @@ createFeatureSet(
 - Reuse the core: `extractGestures` (per-contact press→release with end reason), `pointerTracks`, `extractMotionFeatures`. Select **one deterministic attempt** for attempt-based features and document the rule (Slider: the final completed handle drag).
 - Return `null` for "not available" rather than `0`.
 - Add a **golden test**: a fixed session must produce exact versions and hand-verified values, so a silent definition change fails CI.
+
+For several objects and attempts (Drag & Drop), do not stuff per-attempt data into the feature interface. Put the rules in pure plugin modules the **UI also uses**, so the two cannot disagree: `placement.ts` (`resolveDrop`, `grabOffsetOf`, `heldCenterOf`) is used by the web controller and replayed by `attempts.ts` (`deriveDragAttempts`), which the extractor, the replay and the Inspect view-data all consume. The extractor then returns aggregates; per-attempt detail is derived from the same helper wherever it is displayed. Semantic targets (`drag-item:<id>`) get `make…/parse…` helpers so strings are never parsed ad hoc.
 
 ### 2.5 Plugin and registry
 
@@ -112,7 +114,7 @@ The Slider's roles, so you can decide which you need:
 | DOM surface (events → controller, layout measurement) | `SliderSurface.tsx`, `CheckboxSurface.tsx` | always, but only as much as your UI needs. The Checkbox uses a **native** input as the source of truth and needs no pointer capture or geometry |
 | Session (one challenge = one recorder + controller + result; remounted per challenge) | `SliderSession.tsx`, `CheckboxSession.tsx` | always |
 | Page / challenge lifecycle | `SliderPlayground.tsx`, `CheckboxPlayground.tsx` + `app/playground/<id>/page.tsx` | always (add a route); use `useSeededChallenge` for `?seed=` / New challenge |
-| Inspect view-data (which data to show) | `slider-view-data.ts`, `checkbox-view-data.ts` | always |
+| Inspect view-data (which data to show) | `slider-view-data.ts`, `checkbox-view-data.ts`, `drag-drop-view-data.ts` | always. Several attempts: one segment per attempt, labelled ("Circle · attempt 2") and numbered by the ORIGINAL index everywhere |
 | Inspect composition | `SliderInspect.tsx`, `CheckboxInspect.tsx` | always |
 | Replay specifics (derived state model + the SVG that paints it) | `slider/replay-state.ts` + `SliderReplay.tsx`, `checkbox-replay-state.ts` + `CheckboxReplay.tsx` | when you replay; reuse `useReplayPanel` for the clock/scrubber glue |
 | Learn content | `CheckboxLearn.tsx` | when the CAPTCHA page is added (the Slider's is still a short details block) |
@@ -134,7 +136,7 @@ Generic building blocks live in `apps/web/components/inspect` and `apps/web/lib/
 | `VerificationSummary` | pass/fail + reason (+ the correctness-vs-behavior note) |
 | `MetricTable` over `InspectMetric[]` | any feature list; `null` shows "—"; units and formatting handled; per-metric `format` override |
 | `TrajectoryView` over `buildTrajectoryGeometry(tracks, bounds)` | pointer paths with start/end markers; your CAPTCHA supplies tracks, `underlay`/`overlay` |
-| `MotionChart` (+ its data table) over `MotionSeries` segments | velocity/acceleration; only for pointer-motion CAPTCHAs |
+| `MotionChart` (+ its data table) over `MotionSeries` segments, optional `segmentLabels` | velocity/acceleration; only for pointer-motion CAPTCHAs. Numbers in the chart, legend, table and trajectory all use the original segment index |
 | `EventExplorer` (= `EventTimeline` + `EventInspector`) with `useEventSelection(session)` | any session; selection is one event index bound to the session snapshot |
 | `ReplayControls` + `useReplayPanel` (over `ReplayDriver`) | play/pause/speed/scrub for a derived replay model; you supply only `drawFrame` |
 

@@ -46,9 +46,23 @@ export interface CaptchaPlugin<
   extractFeatures(
     challenge: TChallenge,
     interaction: InteractionSession,
-    context: TFeatureContext,
+    ...context: FeatureContextArgs<TFeatureContext>
   ): FeatureSet<TFeatures>;
 }
+
+/**
+ * The trailing argument list of extractFeatures: empty when the plugin needs no context
+ * (`TFeatureContext` is `undefined`), exactly one required context otherwise. So
+ * `plugin.extractFeatures(challenge, session)` for context-free plugins, and a missing context is
+ * still a compile error for plugins that need one.
+ *
+ * Edge cases (by design): `void` behaves like "no context" (TypeScript lets a trailing `void` be
+ * omitted), and a context type that includes `undefined` (`Ctx | undefined`) still takes one argument.
+ * Declare context-free plugins with the default (`undefined`) and required ones with a concrete object type.
+ */
+export type FeatureContextArgs<TFeatureContext> = [TFeatureContext] extends [undefined]
+  ? []
+  : [context: TFeatureContext];
 
 export const PLUGIN_BRAND: unique symbol = Symbol("captchalab.plugin");
 
@@ -61,14 +75,6 @@ export interface PluginBrand {
   readonly [PLUGIN_BRAND]: true;
 }
 
-/**
- * Constraint for registry maps only: matches any plugin by widening to `unknown`.
- * It is never the type a consumer receives; `registry.get(id)` returns the exact plugin type.
- * (Method-style members keep parameter bivariance, so concrete plugins satisfy this.)
- */
-export type AnyCaptchaPlugin = CaptchaPlugin<string, unknown, unknown, BaseCaptchaFeatures, unknown> &
-  PluginBrand;
-
 export type ChallengeOf<P> =
   P extends { generate(context: GenerateContext): infer C } ? C : never;
 export type AnswerOf<P> =
@@ -77,8 +83,13 @@ export type AnswerOf<P> =
     : never;
 export type FeaturesOf<P> =
   P extends { extractFeatures(...args: never[]): FeatureSet<infer F> } ? F : never;
-export type FeatureContextOf<P> =
-  P extends { extractFeatures(challenge: never, interaction: never, context: infer X): unknown } ? X : never;
+export type FeatureContextOf<P> = P extends {
+  extractFeatures(challenge: never, interaction: never, ...context: infer R): unknown;
+}
+  ? R extends [infer X]
+    ? X
+    : undefined
+  : never;
 
 /**
  * The only way to create a registrable plugin. Preserves the literal `id` and all generics,

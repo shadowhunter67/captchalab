@@ -1,3 +1,4 @@
 export * from "./registry";
 export * from "./slider";
 export * from "./checkbox";
+export * from "./drag-drop";

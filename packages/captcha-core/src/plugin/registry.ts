@@ -1,7 +1,7 @@
-import { PLUGIN_BRAND, type AnyCaptchaPlugin } from "./types";
+import { PLUGIN_BRAND, type PluginBrand } from "./types";
 
 /** Plugins keyed by their own id. */
-export type PluginMap = { readonly [id: string]: AnyCaptchaPlugin };
+export type PluginMap = { readonly [id: string]: PluginBrand & { readonly id: string } };
 
 /** Compile-time check that every key equals its plugin's `id`. */
 type IdsMatchKeys<M extends PluginMap> = { readonly [K in keyof M]: { readonly id: K } };
@@ -32,7 +32,7 @@ export function createPluginRegistry<const M extends PluginMap>(
 ): PluginRegistry<M> {
   const entries = Object.entries(plugins) as [PluginId<M>, M[PluginId<M>]][];
   for (const [key, plugin] of entries) {
-    const p = plugin as Partial<AnyCaptchaPlugin> | null | undefined;
+    const p = plugin as Partial<PluginBrand> | null | undefined; // untyped JS callers may pass anything
     if (!p || p[PLUGIN_BRAND] !== true) {
       throw new Error(`CAPTCHA plugin "${key}" must be created with defineCaptchaPlugin`);
     }

@@ -47,7 +47,7 @@ describe("CheckboxController", () => {
     });
     c2.pointerDown(at()); tick(50); c2.pointerUp(at()); c2.change(true);
     expect(controller.isPressed).toBe(false);
-    const set = registry.get("checkbox").extractFeatures(challenge, seen as never, undefined);
+    const set = registry.get("checkbox").extractFeatures(challenge, seen as never);
     expect(set.features).toMatchObject({ activationCount: 1, pressDuration: 50, successfulActivationIndex: 1 });
   });
 
@@ -72,7 +72,7 @@ describe("CheckboxController", () => {
     controller.pointerDown(at()); // next press: the first one was never released
     tick(30);
     controller.pointerUp(at());
-    const f = registry.get("checkbox").extractFeatures(challenge, recorder.snapshot(), undefined).features;
+    const f = registry.get("checkbox").extractFeatures(challenge, recorder.snapshot()).features;
     expect(f).toMatchObject({ activationCount: 1, pressDuration: 30 });
   });
 
@@ -124,7 +124,7 @@ describe("CheckboxController", () => {
     press(); controller.change(true);
     expect(submits).toHaveLength(2);
     expect(clears()).toBe(1);
-    const f = registry.get("checkbox").extractFeatures(challenge, recorder.snapshot(), undefined).features;
+    const f = registry.get("checkbox").extractFeatures(challenge, recorder.snapshot()).features;
     expect(f).toMatchObject({ activationCount: 3, successfulActivationIndex: 3 });
   });
 
@@ -132,7 +132,7 @@ describe("CheckboxController", () => {
     const { controller, recorder, submits } = setup();
     controller.change(true);
     expect(submits).toEqual([{ checked: true }]);
-    const f = registry.get("checkbox").extractFeatures(challenge, recorder.snapshot(), undefined).features;
+    const f = registry.get("checkbox").extractFeatures(challenge, recorder.snapshot()).features;
     expect(f).toMatchObject({ activationCount: 0, reactionTime: null, inputModality: "none" });
   });
 

@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { buildMotionSeries } from "@captchalab/captcha-core";
 import { formatAcceleration, formatVelocity } from "@/lib/format";
 import { buildChartModel, describeSeries, type ChartSize } from "../chart";
-import { countValidSamples, countValidSegments } from "../series";
+import { countValidSamples, countValidSegments, validSegmentIndexes } from "../series";
 import { DEFAULT_TABLE_ROWS, MAX_TABLE_ROWS, projectSeriesTable } from "../series-table";
 
 const size: ChartSize = { width: 400, height: 100, margin: { top: 10, right: 10, bottom: 20, left: 40 } };
@@ -13,9 +13,9 @@ describe("series table projection", () => {
   it("copies the series values and times unchanged, numbering segments and samples", () => {
     const t = projectSeriesTable([seg([[50, 100], [150, 300]]), seg([[5050, 40]])]);
     expect(t.rows).toEqual([
-      { segment: 1, sample: 1, t: 50, value: 100 },
-      { segment: 1, sample: 2, t: 150, value: 300 },
-      { segment: 2, sample: 1, t: 5050, value: 40 },
+      { segment: 1, segmentIndex: 0, sample: 1, t: 50, value: 100 },
+      { segment: 1, segmentIndex: 0, sample: 2, t: 150, value: 300 },
+      { segment: 2, segmentIndex: 1, sample: 1, t: 5050, value: 40 },
     ]);
     expect(t).toMatchObject({ total: 3, shown: 3, segments: 2 });
   });
@@ -60,6 +60,19 @@ describe("series table projection", () => {
     expect(all.total).toBe(2500);
     const small = projectSeriesTable([seg([[0, 1], [1, 2]])], Number.POSITIVE_INFINITY);
     expect(small.shown).toBe(2);
+  });
+
+  it("keeps the ORIGINAL segment index even when earlier segments have no valid samples", () => {
+    const t = projectSeriesTable([[], seg([[0, Number.NaN]]), seg([[5, 1]])]);
+    expect(t.rows).toEqual([{ segment: 1, segmentIndex: 2, sample: 1, t: 5, value: 1 }]);
+    expect(validSegmentIndexes([[], seg([[0, Number.NaN]]), seg([[5, 1]])])).toEqual([2]);
+  });
+
+  it("chart numbers follow the ORIGINAL segment index, not the filtered order", () => {
+    const segments = [seg([[0, Number.NaN]]), seg([[5, 1], [6, 2]]), seg([[9, 3], [10, 4]])];
+    const chart = buildChartModel(segments, [0, 10], size, true);
+    expect(chart.labels.map((l) => l.text)).toEqual(["2", "3"]); // attempt 1 had no valid samples
+    expect(projectSeriesTable(segments).rows.map((r) => r.segmentIndex + 1)).toEqual([2, 2, 3, 3]);
   });
 
   it("empty input gives an empty table", () => {

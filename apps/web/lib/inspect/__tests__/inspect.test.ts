@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { SCHEMA_VERSION, type InteractionEvent, type InteractionSession } from "@captchalab/captcha-core";
 import { buildChartModel, describeSeries, type ChartSize } from "../chart";
-import { binContainsTime, buildTimelineModel, projectEventFields, stepSelection, timelineKind } from "../events";
+import { TIMELINE_LEGEND, binContainsTime, buildTimelineModel, projectEventFields, stepSelection, timelineKind } from "../events";
 import { formatMetricValue, interactionMetrics } from "../metrics";
 import { buildTrajectoryGeometry } from "../trajectory";
 
@@ -83,6 +83,16 @@ describe("timeline model", () => {
       .filter((b) => binContainsTime(m, b, t));
     expect(containing).toHaveLength(1);
     expect(binContainsTime(m, { from: 0.9, to: 1, count: 1, firstIndex: 0 }, m.endT)).toBe(true);
+  });
+
+  it("the legend has a glyph for every discrete kind a session can produce, including click", () => {
+    const click: InteractionEvent = { t: 5, type: "click", x: 1, y: 1, pointerId: 1, pointerType: "mouse" };
+    expect(timelineKind(click)).toBe("click");
+    const kinds = new Set(TIMELINE_LEGEND.map((l) => l.kind));
+    for (const e of [click, ptr(0, "pointerdown"), ptr(0, "pointerup"), ptr(0, "pointercancel"), { t: 0, type: "keydown", code: "A" } as InteractionEvent, { t: 0, type: "keyup", code: "A" } as InteractionEvent]) {
+      expect(kinds.has(timelineKind(e) as never)).toBe(true);
+    }
+    expect(new Set(TIMELINE_LEGEND.map((l) => l.glyph)).size).toBe(TIMELINE_LEGEND.length);
   });
 
   it("classifies kinds and steps selection within bounds", () => {

@@ -24,6 +24,12 @@ export default function HomePage() {
         >
           Open Checkbox Playground
         </Link>
+        <Link
+          href="/playground/drag-drop"
+          className="inline-block rounded-md border border-line bg-panel px-4 py-2.5 font-medium hover:bg-track"
+        >
+          Open Drag &amp; Drop Playground
+        </Link>
       </div>
     </main>
   );

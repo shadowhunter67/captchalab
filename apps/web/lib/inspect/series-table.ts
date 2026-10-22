@@ -8,6 +8,8 @@ export const MAX_TABLE_ROWS = 1000;
 export interface SeriesTableRow {
   /** 1-based, counting only segments that have at least one valid sample. */
   segment: number;
+  /** 0-based index of the segment in the input (aligned with caller-supplied labels). */
+  segmentIndex: number;
   /** 1-based position of the sample inside its segment. */
   sample: number;
   /** ms since session start */
@@ -39,13 +41,13 @@ export function projectSeriesTable(
   const rows: SeriesTableRow[] = [];
   let total = 0;
   let segmentNumber = 0;
-  for (const seg of segments) {
+  for (const [segmentIndex, seg] of segments.entries()) {
     const valid = validSamples(seg);
     if (valid.length === 0) continue;
     segmentNumber++;
     valid.forEach((s, i) => {
       total++;
-      if (rows.length < cap) rows.push({ segment: segmentNumber, sample: i + 1, t: s.t, value: s.value });
+      if (rows.length < cap) rows.push({ segment: segmentNumber, segmentIndex, sample: i + 1, t: s.t, value: s.value });
     });
   }
   return { rows, total, shown: rows.length, segments: segmentNumber };

@@ -14,6 +14,8 @@ export interface TrajectoryGeometry {
   paths: string[];
   start: { x: number; y: number } | null;
   end: { x: number; y: number } | null;
+  /** First point of every non-empty track (numbered by its ORIGINAL track index when there are several). */
+  trackStarts: { x: number; y: number; index: number }[];
   /** First and last sample time (ms since session start); null without samples. */
   span: { startT: number; endT: number } | null;
 }
@@ -49,8 +51,10 @@ export function buildTrajectoryGeometry(
   let start: TrajectoryGeometry["start"] = null;
   let end: TrajectoryGeometry["end"] = null;
   const paths: string[] = [];
-  for (const track of tracks) {
+  const trackStarts: { x: number; y: number; index: number }[] = [];
+  for (const [index, track] of tracks.entries()) {
     if (track.length === 0) continue;
+    trackStarts.push({ x: (track[0] as TimedPoint).x, y: (track[0] as TimedPoint).y, index });
     paths.push(track.map((p, i) => `${i === 0 ? "M" : "L"}${p.x.toFixed(2)} ${p.y.toFixed(2)}`).join(" "));
     for (const p of track) {
       grow(p.x, p.y);
@@ -66,13 +70,14 @@ export function buildTrajectoryGeometry(
   }
 
   if (!Number.isFinite(minX)) {
-    return { viewBox: { x: 0, y: 0, width: 1, height: 1 }, paths, start, end, span: null };
+    return { viewBox: { x: 0, y: 0, width: 1, height: 1 }, paths, start, end, trackStarts, span: null };
   }
   return {
     viewBox: { x: minX - PAD, y: minY - PAD, width: maxX - minX + 2 * PAD, height: maxY - minY + 2 * PAD },
     paths,
     start,
     end,
+    trackStarts,
     span: start && end ? { startT, endT } : null,
   };
 }

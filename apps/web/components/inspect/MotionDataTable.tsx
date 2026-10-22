@@ -16,6 +16,8 @@ interface Props {
   formatCell: (value: number) => string;
   /** What one segment is called to a reader (e.g. "Drag"). */
   segmentLabel: string;
+  /** Optional name per input segment (aligned with `segments`), e.g. "Circle · attempt 2". */
+  segmentLabels?: readonly string[];
   testId: string;
 }
 
@@ -28,7 +30,7 @@ interface Props {
  *  - The first cell of each row is its row header ("Drag 2 · sample 5"), so every value is announced
  *    with the movement it belongs to. Each segment is its own <tbody>.
  */
-export function MotionDataTable({ title, unit, segments, formatCell, segmentLabel, testId }: Props) {
+export function MotionDataTable({ title, unit, segments, formatCell, segmentLabel, segmentLabels, testId }: Props) {
   const [open, setOpen] = useState(false);
   // `showAllFor` remembers which dataset was expanded; a different `segments` shows the default view again.
   const [showAllFor, setShowAllFor] = useState<typeof segments | null>(null);
@@ -41,6 +43,8 @@ export function MotionDataTable({ title, unit, segments, formatCell, segmentLabe
     [open, segments, showAll],
   );
 
+  // Named by the ORIGINAL segment index, so "Attempt 3" here is line 3 in the chart and path 3 in the trajectory.
+  const nameOf = (segmentIndex: number): string => segmentLabels?.[segmentIndex] ?? `${segmentLabel} ${segmentIndex + 1}`;
   const bySegment = new Map<number, NonNullable<typeof table>["rows"]>();
   for (const row of table?.rows ?? []) bySegment.set(row.segment, [...(bySegment.get(row.segment) ?? []), row]);
 
@@ -68,7 +72,7 @@ export function MotionDataTable({ title, unit, segments, formatCell, segmentLabe
             </caption>
             <thead>
               <tr className="border-b border-line">
-                <th scope="col" className="py-1 pr-3 font-semibold">{segmentLabel} · sample</th>
+                <th scope="col" className="py-1 pr-3 font-semibold">{segmentLabels ? "Attempt" : segmentLabel} · sample</th>
                 <th scope="col" className="py-1 pr-3 font-semibold">Time</th>
                 <th scope="col" className="py-1 font-semibold">{title} ({unit})</th>
               </tr>
@@ -78,7 +82,7 @@ export function MotionDataTable({ title, unit, segments, formatCell, segmentLabe
                 {rows.map((r) => (
                   <tr key={r.sample} className="border-b border-line last:border-b-0">
                     <th scope="row" className="py-1 pr-3 font-normal">
-                      {segmentLabel} {segment} · sample {r.sample}
+                      {nameOf(r.segmentIndex)} · sample {r.sample}
                     </th>
                     <td className="py-1 pr-3 font-mono">{formatMilliseconds(r.t)}</td>
                     <td className="py-1 font-mono">{formatCell(r.value)}</td>

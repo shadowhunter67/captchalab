@@ -4,7 +4,7 @@
 
 CaptchaLab is an educational, research-oriented web app for exploring how people interact with CAPTCHA challenges: the events a challenge produces, the behavioral features that can be measured from them, and a replay of your own attempt. Everything runs in your browser.
 
-> **Status: Alpha (`0.1.0-alpha`, not published).** Two CAPTCHAs are implemented (Slider, Checkbox). APIs may still change. See [Current status](#current-status).
+> **Status: Alpha (`0.1.0-alpha`, not published).** Three CAPTCHAs are implemented (Slider, Checkbox, Drag & Drop). APIs may still change. See [Current status](#current-status).
 
 ## What is CaptchaLab?
 
@@ -27,10 +27,16 @@ Any synthetic interaction added in the future may only target challenges created
 
 | | |
 |---|---|
-| **Implemented CAPTCHAs** | **Slider** (reference for drag/pointer-motion CAPTCHAs), **Checkbox** (reference for press/keyboard CAPTCHAs without a trajectory) |
-| Not implemented yet | Text, Image Grid, Drag & Drop, Image Rotation, Human-vs-Synthetic comparison, research data contribution |
+| **Implemented CAPTCHAs** | **Slider** (one drag, normalized geometry), **Checkbox** (press/keyboard, no trajectory), **Drag & Drop** (several draggables and drop targets, many attempts) |
+| Not implemented yet | Text, Image Grid, Image Rotation, Human-vs-Synthetic comparison, research data contribution |
 
-Only the two above exist today. The rest is [roadmap](#roadmap), not functionality.
+Only the three above exist today. The rest is [roadmap](#roadmap), not functionality.
+
+### What you can do with the Drag & Drop
+
+- **Try** it with a mouse, touch or pen: drag three shapes (circle, square, triangle) onto the matching dashed areas, then press Verify. A shape dropped away from any area goes back; one dropped on an occupied area sends the shape there back to its start; placed shapes can be dragged again. You keep your grab offset, so a shape does not jump under the pointer.
+- **Inspect**: pass/fail, an attempts table (outcome in words, duration, release error), metrics (reaction time, attempts, successful/failed/cancelled drops, durations, distances, release error, direction changes, time to all correct), trajectories (one numbered path per attempt), velocity and acceleration charts with one numbered line per attempt and accessible data tables labelled "Circle · attempt 2", an event timeline and inspector, and a replay in which the shapes move, snap onto areas or return.
+- **Accessibility limitation**: this challenge needs a pointer. There is **no keyboard alternative yet**, so it is not accessible to keyboard-only users; the page says so. It is on the backlog.
 
 ### What you can do with the Checkbox
 
@@ -54,7 +60,7 @@ Only the two above exist today. The rest is [roadmap](#roadmap), not functionali
 
 ```text
 apps/web                     Next.js app (UI, DOM adapters, Inspect composition)
-packages/captcha-plugins     CAPTCHA plugins + the typed registry (Slider, Checkbox)
+packages/captcha-plugins     CAPTCHA plugins + the typed registry (Slider, Checkbox, Drag & Drop)
 packages/captcha-core        Framework-independent logic: event schema, recorder, gestures,
                              motion features/series, replay timeline, plugin API
 packages/config              Shared TypeScript + ESLint configuration
@@ -75,7 +81,7 @@ Requirements: Node.js ≥ 22 (CI uses the version in [.nvmrc](.nvmrc)) with Core
 
 ```bash
 corepack pnpm install
-corepack pnpm --filter web dev      # http://localhost:3000  (/playground/slider, /playground/checkbox)
+corepack pnpm --filter web dev      # http://localhost:3000  (/playground/slider, /playground/checkbox, /playground/drag-drop)
 ```
 
 ## Scripts
@@ -98,7 +104,7 @@ A future research-contribution feature, if added, will be opt-in with explicit c
 
 ## Roadmap
 
-Planned, **not implemented**: Text, Image Grid, Drag & Drop and Image Rotation CAPTCHAs; Human-vs-Synthetic comparison (CaptchaLab-controlled challenges only); explicit opt-in anonymous data contribution; Learn pages; more accessibility and performance work.
+Planned, **not implemented**: Text, Image Grid and Image Rotation CAPTCHAs; a keyboard alternative for Drag & Drop; Human-vs-Synthetic comparison (CaptchaLab-controlled challenges only); explicit opt-in anonymous data contribution; Learn pages; more accessibility and performance work.
 
 ## Contributing
 

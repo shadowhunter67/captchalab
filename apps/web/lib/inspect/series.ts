@@ -22,6 +22,15 @@ export function countValidSegments(segments: Segments): number {
   return n;
 }
 
+/** Original indexes of the segments that have at least one valid sample, in order. */
+export function validSegmentIndexes(segments: Segments): number[] {
+  const out: number[] = [];
+  segments.forEach((seg, i) => {
+    if (seg.some(isValidSample)) out.push(i);
+  });
+  return out;
+}
+
 /** Number of valid samples across all segments, without allocating. */
 export function countValidSamples(segments: Segments): number {
   let n = 0;

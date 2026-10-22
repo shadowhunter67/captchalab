@@ -1,7 +1,7 @@
 "use client";
 
 import type { KeyboardEvent } from "react";
-import { binContainsTime, type TimelineAnnotation, type TimelineKind, type TimelineModel } from "@/lib/inspect/events";
+import { TIMELINE_LEGEND, binContainsTime, type TimelineAnnotation, type TimelineKind, type TimelineModel } from "@/lib/inspect/events";
 
 interface Props {
   model: TimelineModel;
@@ -69,7 +69,7 @@ export function EventTimeline({ model, annotations = [], selectedIsMove, selecte
     <div className="min-w-0">
       <svg
         role="group"
-        aria-label={`Event timeline with ${model.eventCount} events. Markers are press, release, cancel and key events; bars summarize pointer movement.`}
+        aria-label={`Event timeline with ${model.eventCount} events. Markers are press, release, cancel, key and click events; bars summarize pointer movement.`}
         viewBox={`0 0 ${W} ${H}`}
         className="w-full rounded-md bg-bg ring-1 ring-line"
         data-testid="event-timeline"
@@ -141,7 +141,7 @@ export function EventTimeline({ model, annotations = [], selectedIsMove, selecte
         </text>
       </svg>
       <p className="mt-1 text-xs text-muted">
-        ● press · ○ release · ✕ cancel · ■ key down · □ key up · bars: pointer-move density. Focus a marker and press
+        {TIMELINE_LEGEND.map((l) => `${l.glyph} ${l.label}`).join(" · ")} · bars: pointer-move density. Focus a marker and press
         Enter, or use the buttons below.
       </p>
     </div>

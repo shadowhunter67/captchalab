@@ -17,6 +17,8 @@ interface CaptchaPlugin<TId extends string, TChallenge, TAnswer, TFeatures exten
 - `verify` = challenge correctness only. Behavioral features never decide pass/fail. The answer is final state only; trajectory stays in `InteractionSession`.
 - `extractFeatures` now takes the **challenge** (features like release error are challenge-relative) and a plugin-specific **context** (rendered geometry in px). Challenges/answers use UI-size-independent (normalized) coordinates; the context is what maps pointer pixels to them.
 - Returns a versioned `FeatureSet` (see ADR 0004).
+- **Context argument (amended with Drag & Drop):** the trailing `context` is typed `...context: FeatureContextArgs<TFeatureContext>`: no argument when `TFeatureContext` is `undefined` (the default), exactly one required argument otherwise. `checkbox.extractFeatures(challenge, session)` therefore needs no ceremonial `undefined`, while `slider`/`drag-drop` still require their geometry at compile time. `void` behaves like "no context" and `Ctx | undefined` still takes one argument; `FeatureContextOf` reads the parameter tuple. Alternative considered and rejected: separate context-free / contextual plugin interfaces with overloads (more API surface for the same call-site result).
+- **Registry constraint (amended):** `PluginMap` requires only a branded plugin with a string `id`. The previous `AnyCaptchaPlugin` (all generics widened to `unknown`, callable through method bivariance) is removed: nothing may call a plugin through a type that has forgotten its contexts and challenges.
 - `defineCaptchaPlugin` is an identity helper that keeps the literal `id` and all generics.
 
 ### Registry: compile-time generic map
@@ -24,7 +26,7 @@ interface CaptchaPlugin<TId extends string, TChallenge, TAnswer, TFeatures exten
 - `get` takes only known ids (unknown id = compile error; throws for untyped JS callers).
 - `find(id: string)` is for untrusted strings (URL params) and returns the union of plugins, narrowable by `.id`.
 - Helper types `ChallengeOf / AnswerOf / FeaturesOf / FeatureContextOf` extract per-plugin types.
-- `AnyCaptchaPlugin` (all params widened to `unknown`) is used **only as the constraint** on the map. Method-style members keep parameter bivariance so concrete plugins satisfy it. It is never what a consumer receives.
+- The map constraint is `PluginBrand & { id: string }` (no widened callable supertype; see the amendment above). Coherence of generics across `generate`/`verify`/`extractFeatures` is enforced at the definition site by `defineCaptchaPlugin`.
 - The concrete registry lives in `captcha-plugins` (`registry.ts`); `captcha-core` only provides the generic factory. Dependency direction: `captcha-plugins -> captcha-core`; the web app depends on `captcha-plugins`; core never imports plugins.
 
 ## Alternatives considered

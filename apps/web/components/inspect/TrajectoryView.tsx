@@ -35,6 +35,12 @@ export function TrajectoryView({ geometry, label, selectedPoint, underlay, overl
       {geometry.paths.map((d, i) => (
         <path key={i} d={d} fill="none" stroke="var(--fg)" strokeWidth={1.5} strokeLinejoin="round" />
       ))}
+      {geometry.trackStarts.length > 1 &&
+        geometry.trackStarts.map((p) => (
+          <text key={`n${p.index}`} x={p.x + 7} y={p.y - 7} fontSize={12} fontWeight={600} fill="var(--fg)" aria-hidden="true">
+            {p.index + 1}
+          </text>
+        ))}
       {geometry.start && (
         <circle cx={geometry.start.x} cy={geometry.start.y} r={5} fill="var(--bg)" stroke="var(--fg)" strokeWidth={2} />
       )}

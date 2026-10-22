@@ -9,9 +9,10 @@ import {
   type FeaturesOf,
   type InteractionSession,
 } from "@captchalab/captcha-core";
-import { checkboxPlugin, registry, sliderPlugin } from "../index";
+import { checkboxPlugin, dragDropPlugin, registry, sliderPlugin } from "../index";
 import type { SliderAnswer, SliderChallenge, SliderFeatureContext, SliderFeatures } from "../slider";
 import type { CheckboxAnswer, CheckboxChallenge, CheckboxFeatures } from "../checkbox";
+import type { DragDropAnswer, DragDropChallenge, DragDropFeatureContext, DragDropFeatures } from "../drag-drop";
 
 const emptySession: InteractionSession = {
   schemaVersion: 2,
@@ -41,7 +42,7 @@ const twoPlugins = createPluginRegistry({ slider: sliderPlugin, text: textPlugin
 describe("typed registry (runtime)", () => {
   it("returns the plugin for a known id and lists ids", () => {
     expect(registry.get("slider")).toBe(sliderPlugin);
-    expect(registry.ids).toEqual(["slider", "checkbox"]);
+    expect(registry.ids).toEqual(["slider", "checkbox", "drag-drop"]);
     expect(twoPlugins.ids).toEqual(["slider", "text"]);
   });
 
@@ -92,6 +93,39 @@ describe("typed registry (compile time)", () => {
     expectTypeOf(twoPlugins.find("x")).toEqualTypeOf<typeof sliderPlugin | typeof textPlugin | undefined>();
   });
 
+  it("defineCaptchaPlugin infers the context requirement from the implementation", () => {
+    const needsCtx = defineCaptchaPlugin({
+      id: "needs-ctx",
+      name: "",
+      version: "",
+      generate: () => ({ n: 1 }),
+      verify: (_c: { n: number }, _a: { ok: boolean }, _i: InteractionSession) => ({ passed: true, reason: "" }),
+      extractFeatures: (_c: { n: number }, i: InteractionSession, context: { width: number }) => ({
+        schemaVersion: "",
+        extractorVersion: "",
+        features: { completionTime: i.durationMs + context.width, eventCount: 0 },
+      }),
+    });
+    expectTypeOf(needsCtx.extractFeatures).parameters.toEqualTypeOf<[{ n: number }, InteractionSession, { width: number }]>();
+    const free = defineCaptchaPlugin({
+      id: "free",
+      name: "",
+      version: "",
+      generate: () => ({ n: 1 }),
+      verify: (_c: { n: number }, _a: { ok: boolean }, _i: InteractionSession) => ({ passed: true, reason: "" }),
+      extractFeatures: (_c: { n: number }, i: InteractionSession) => ({
+        schemaVersion: "",
+        extractorVersion: "",
+        features: { completionTime: i.durationMs, eventCount: 0 },
+      }),
+    });
+    expectTypeOf(free.extractFeatures).parameters.toEqualTypeOf<[{ n: number }, InteractionSession]>();
+    const reg = createPluginRegistry({ "needs-ctx": needsCtx, free });
+    expect(reg.ids).toEqual(["needs-ctx", "free"]);
+    expect(reg.get("free").extractFeatures({ n: 1 }, emptySession).features.completionTime).toBe(0);
+    expect(reg.get("needs-ctx").extractFeatures({ n: 1 }, emptySession, { width: 5 }).features.completionTime).toBe(5);
+  });
+
   it("checkbox keeps its own exact types (second plugin, different generics)", () => {
     const checkbox = registry.get("checkbox");
     expectTypeOf(checkbox).toEqualTypeOf<typeof checkboxPlugin>();
@@ -100,7 +134,21 @@ describe("typed registry (compile time)", () => {
     expectTypeOf<AnswerOf<typeof checkbox>>().toEqualTypeOf<CheckboxAnswer>();
     expectTypeOf<FeaturesOf<typeof checkbox>>().toEqualTypeOf<CheckboxFeatures>();
     expectTypeOf<FeatureContextOf<typeof checkbox>>().toEqualTypeOf<undefined>();
-    expectTypeOf(registry.find("x")).toEqualTypeOf<typeof sliderPlugin | typeof checkboxPlugin | undefined>();
+    // Context-free plugins are called without a context; plugins that need one still require it.
+    expectTypeOf(checkbox.extractFeatures).parameters.toEqualTypeOf<[CheckboxChallenge, InteractionSession]>();
+    expectTypeOf(registry.get("slider").extractFeatures).parameters.toEqualTypeOf<
+      [SliderChallenge, InteractionSession, SliderFeatureContext]
+    >();
+    expectTypeOf(registry.find("x")).toEqualTypeOf<
+      typeof sliderPlugin | typeof checkboxPlugin | typeof dragDropPlugin | undefined
+    >();
+    const dd = registry.get("drag-drop");
+    expectTypeOf(dd).toEqualTypeOf<typeof dragDropPlugin>();
+    expectTypeOf(dd.id).toEqualTypeOf<"drag-drop">();
+    expectTypeOf<ChallengeOf<typeof dd>>().toEqualTypeOf<DragDropChallenge>();
+    expectTypeOf<AnswerOf<typeof dd>>().toEqualTypeOf<DragDropAnswer>();
+    expectTypeOf<FeaturesOf<typeof dd>>().toEqualTypeOf<DragDropFeatures>();
+    expectTypeOf<FeatureContextOf<typeof dd>>().toEqualTypeOf<DragDropFeatureContext>();
   });
 
   it("rejects misuse (checked by tsc; never executed)", () => {
@@ -122,6 +170,8 @@ describe("typed registry (compile time)", () => {
       slider.verify(challenge, { typed: "x" }, emptySession);
       // @ts-expect-error layout context is required for slider features
       slider.extractFeatures(challenge, emptySession);
+      // @ts-expect-error a context-free plugin takes no context argument
+      registry.get("checkbox").extractFeatures({ id: "x", expectedChecked: true }, emptySession, undefined);
       // @ts-expect-error hand-written plugins (even with matching shape) are not registrable
       createPluginRegistry({ broken: { id: "broken", name: "", version: "", generate: () => ({}), verify: () => ({ passed: true, reason: "" }), extractFeatures: () => ({ schemaVersion: "", extractorVersion: "", features: { completionTime: 0, eventCount: 0 } }) } });
       defineCaptchaPlugin({
