@@ -28,7 +28,8 @@ Any synthetic interaction added in the future may only target challenges created
 | | |
 |---|---|
 | **Implemented CAPTCHAs** | **Slider** (one drag, normalized geometry), **Checkbox** (press/keyboard, no trajectory), **Drag & Drop** (several draggables and drop targets, many attempts), **Image Rotation** (turn an object upright by dragging or with the arrow keys), **Text** (read distorted characters and type them; the recording stores only key classes, never which letter), **Image Grid** (select every generated SVG tile that shows the requested shape; toggle buttons with arrow-key navigation) |
-| Not implemented yet | Human-vs-Synthetic comparison, research data contribution |
+| Also implemented | `/playground` and `/learn` indexes; `/compare` (your Slider drag next to a generated Linear / Eased / Noisy session; descriptive differences only, no bot score) |
+| Not implemented yet | research data contribution |
 
 Only the five above exist today. The rest is [roadmap](#roadmap), not functionality.
 
@@ -81,7 +82,7 @@ Requirements: Node.js ≥ 22 (CI uses the version in [.nvmrc](.nvmrc)) with Core
 
 ```bash
 corepack pnpm install
-corepack pnpm --filter web dev      # http://localhost:3000  (/playground/slider, /playground/checkbox, /playground/drag-drop, /playground/rotation, /playground/text, /playground/image-grid)
+corepack pnpm --filter web dev      # http://localhost:3000  (/playground/slider, /playground/checkbox, /playground/drag-drop, /playground/rotation, /playground/text, /playground/image-grid, /playground, /learn, /compare)
 ```
 
 ## Scripts
@@ -104,7 +105,7 @@ A future research-contribution feature, if added, will be opt-in with explicit c
 
 ## Roadmap
 
-Planned, **not implemented**: a keyboard alternative for Drag & Drop; Human-vs-Synthetic comparison (CaptchaLab-controlled challenges only); explicit opt-in anonymous data contribution; Learn pages; more accessibility and performance work.
+Planned, **not implemented**: a keyboard alternative for Drag & Drop; explicit opt-in anonymous data contribution; Learn pages; more accessibility and performance work.
 
 ## Contributing
 

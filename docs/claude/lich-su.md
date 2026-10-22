@@ -54,3 +54,7 @@ Plugin `text`, route `/playground/text`: SVG distorted text deterministic, verif
 ## Image Grid (Phase A3)
 - Plugin `image-grid` (3x3 SVG tiles, đáp án `{selected}`), route `/playground/image-grid`; toggle = pointer down+up trên cùng ô hoặc Space/Enter keydown; chọn theo click native.
 - Codex 1 lượt: sửa verifier (bắt đúng 3x3/shape/id, giới hạn độ dài), lọc ô lạ trong extractor, pointerup ngoài ô -> pointercancel, chặn Enter repeat. P2 -> technical-debt.
+
+## Sprint B
+- `/playground` + `/learn` (apps/web/lib/catalog.ts) và `/compare` (Slider người dùng vs session tổng hợp Linear/Eased/Noisy từ lib/synthetic/slider-synthetic.ts; chỉ khác biệt mô tả, không bot score).
+- Codex 1 lượt cho Compare: đổi nhãn Corrections -> Overshoot, xoá kết quả người khi Try again, ghi chú a11y.

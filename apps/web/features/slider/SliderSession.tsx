@@ -26,20 +26,35 @@ interface Completed {
   featureSet: FeatureSet<SliderFeatures>;
 }
 
+export interface SliderResult {
+  session: InteractionSession;
+  featureSet: FeatureSet<SliderFeatures>;
+  layout: SliderLayout;
+  verification: VerificationResult;
+}
+
 interface Props {
   challenge: SliderChallenge;
   onNewChallenge: () => void;
+  /** Called after each analyzed submission (used by Compare). */
+  onResult?: (result: SliderResult) => void;
+  /** Called when the shown result is discarded ("Try again"). */
+  onReset?: () => void;
+  /** Hide the Inspect panel (Compare shows its own view). Default true. */
+  showInspect?: boolean;
 }
 
 /**
  * One challenge = one session. The parent keys this component by challenge, so a new challenge
  * remounts it and drops the recorder, controller, result and replay with it: nothing carries over.
  */
-export function SliderSession({ challenge: initialChallenge, onNewChallenge }: Props) {
+export function SliderSession({ challenge: initialChallenge, onNewChallenge, onResult, onReset, showInspect = true }: Props) {
   // Pinned at mount: what is drawn, verified and analyzed is always the same challenge, even if a
   // parent forgot to remount with a new key.
   const [challenge] = useState(initialChallenge);
   const slider = registry.get("slider");
+  const onResultRef = useRef(onResult);
+  onResultRef.current = onResult; // the controller below is created once; it must see the latest callback
   const applyPositionRef = useRef<(position: number) => void>(() => {});
   const [phase, setPhase] = useState<SliderPhase>("disabled");
   const [completed, setCompleted] = useState<Completed | null>(null);
@@ -73,6 +88,7 @@ export function SliderSession({ challenge: initialChallenge, onNewChallenge }: P
             featureSet,
           });
           setError(null);
+          onResultRef.current?.({ session, featureSet, layout, verification });
         } catch (err) {
           console.error("Slider submission failed", err instanceof Error ? err.message : "unknown error");
           setError("Could not analyze this attempt. Start a new challenge.");
@@ -87,6 +103,7 @@ export function SliderSession({ challenge: initialChallenge, onNewChallenge }: P
     markersRef.current.push({ type: "attempt-reset", t: recorder.elapsedMs(), position: 0 });
     setCompleted(null);
     setError(null);
+    onReset?.();
     controller.tryAgain();
   };
 
@@ -142,7 +159,7 @@ export function SliderSession({ challenge: initialChallenge, onNewChallenge }: P
         </p>
       )}
 
-      {completed && (
+      {showInspect && completed && (
         <SliderInspect
           key={completed.submission}
           verification={completed.verification}

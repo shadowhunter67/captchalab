@@ -49,6 +49,12 @@ export default function HomePage() {
           All playgrounds
         </Link>
         <Link
+          href="/compare"
+          className="inline-block rounded-md border border-line bg-panel px-4 py-2.5 font-medium hover:bg-track"
+        >
+          Compare
+        </Link>
+        <Link
           href="/learn"
           className="inline-block rounded-md border border-line bg-panel px-4 py-2.5 font-medium hover:bg-track"
         >
