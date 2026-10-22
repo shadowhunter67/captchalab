@@ -21,7 +21,10 @@ Plugin `checkbox` (challenge `{id, expectedChecked}`, answer `{checked}`, 7 feat
 ## 2026-10-23 — Phase 2B (Drag & Drop CAPTCHA)
 Cleanup: legend `click` cho timeline (`TIMELINE_LEGEND` dùng chung), `extractFeatures` không cần `undefined` (`FeatureContextArgs`, bỏ `AnyCaptchaPlugin`, registry constraint = brand+id). Plugin `drag-drop`: 3 hình + 3 vùng (toạ độ chuẩn hoá theo tâm, kích thước theo min(w,h)), luật thả hình học, bump occupant, grab offset thật, verifier chịu input độc hại (own-data, hasOwn, try/catch), feature riêng (13, `drag-drop@1;motion@1`), attempts. Web: controller thuần + surface (pointer capture), session (Verify), Inspect dùng lại toàn bộ primitive + bảng attempts, chart/table/trajectory nhiều attempt có nhãn, replay vật thể di chuyển/snap/trả về, Learn (ghi rõ không có bàn phím). 130+ unit web, 98 plugin, 40 E2E (có cảm ứng CDP). Codex x4: sửa nearest-free (rồi thay bằng bump), verifier prototype keys, overlapped/open attempts, dispose nhả capture, đánh số segment gốc, grab-offset dùng chung từ plugin; hoãn: origin lệch khi bề mặt dịch không đổi size, role=img cho draggable (chờ phương án bàn phím).
 
-## Nợ kỹ thuật
+## 2026-10-23 — Phase 2C (Image Rotation) — MVP Fast-Track
+Plugin `rotation` (góc độ, verifier chịu wrap 359↔0, 9 feature, `angles.ts` mô phỏng dùng chung), route `/playground/rotation` (role=slider: kéo + ←/→), Inspect dùng lại primitive + chart vận tốc góc + replay, Learn. Thêm đơn vị `deg`, `deg/s`. Codex 1 lượt: P1 phím trong lúc kéo + replay bỏ cancelled drag → đã sửa. Nợ kỹ thuật chuyển sang `docs/technical-debt.md`.
+
+## Nợ kỹ thuật (cũ; bản hiện hành: docs/technical-debt.md)
 - Drag & Drop: KHÔNG có phương án bàn phím (chọn shape → chọn vùng → đặt) — cần thiết kế riêng; draggable đang `role=img` (trung thực nhưng chưa tương tác được bằng AT).
 - Drag & Drop: một session ↔ một layout; resize sau khi đã có input chỉ cảnh báo, không chuẩn hoá lại toạ độ cũ. Bề mặt bị CSS transform/dịch ngang giữa lúc kéo vẫn lệch toạ độ (như Slider).
 - Replay Drag & Drop: vật thể về/snap tức thời (không hoạt ảnh); attempts chồng lấn (chỉ từ session nhập) bị coi là cancelled.

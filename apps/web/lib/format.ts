@@ -23,6 +23,16 @@ export function formatAcceleration(pxPerSecond2: number | null, digits = 0): str
   return `${pxPerSecond2.toFixed(digits)} px/s²`;
 }
 
+export function formatDegrees(deg: number | null): string {
+  if (deg === null || !Number.isFinite(deg)) return NO_VALUE;
+  return `${deg.toFixed(1)}°`;
+}
+
+export function formatAngularVelocity(degPerSecond: number | null): string {
+  if (degPerSecond === null || !Number.isFinite(degPerSecond)) return NO_VALUE;
+  return `${Math.round(degPerSecond)} °/s`;
+}
+
 export function formatCount(n: number | null): string {
   if (n === null || !Number.isFinite(n)) return NO_VALUE;
   return String(Math.round(n));

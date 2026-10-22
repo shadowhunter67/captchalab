@@ -9,7 +9,7 @@ import {
   type FeaturesOf,
   type InteractionSession,
 } from "@captchalab/captcha-core";
-import { checkboxPlugin, dragDropPlugin, registry, sliderPlugin } from "../index";
+import { checkboxPlugin, dragDropPlugin, registry, rotationPlugin, sliderPlugin } from "../index";
 import type { SliderAnswer, SliderChallenge, SliderFeatureContext, SliderFeatures } from "../slider";
 import type { CheckboxAnswer, CheckboxChallenge, CheckboxFeatures } from "../checkbox";
 import type { DragDropAnswer, DragDropChallenge, DragDropFeatureContext, DragDropFeatures } from "../drag-drop";
@@ -42,7 +42,7 @@ const twoPlugins = createPluginRegistry({ slider: sliderPlugin, text: textPlugin
 describe("typed registry (runtime)", () => {
   it("returns the plugin for a known id and lists ids", () => {
     expect(registry.get("slider")).toBe(sliderPlugin);
-    expect(registry.ids).toEqual(["slider", "checkbox", "drag-drop"]);
+    expect(registry.ids).toEqual(["slider", "checkbox", "drag-drop", "rotation"]);
     expect(twoPlugins.ids).toEqual(["slider", "text"]);
   });
 
@@ -140,7 +140,7 @@ describe("typed registry (compile time)", () => {
       [SliderChallenge, InteractionSession, SliderFeatureContext]
     >();
     expectTypeOf(registry.find("x")).toEqualTypeOf<
-      typeof sliderPlugin | typeof checkboxPlugin | typeof dragDropPlugin | undefined
+      typeof sliderPlugin | typeof checkboxPlugin | typeof dragDropPlugin | typeof rotationPlugin | undefined
     >();
     const dd = registry.get("drag-drop");
     expectTypeOf(dd).toEqualTypeOf<typeof dragDropPlugin>();

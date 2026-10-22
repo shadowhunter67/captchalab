@@ -1,6 +1,8 @@
 import type { BaseCaptchaFeatures, MotionFeatures } from "@captchalab/captcha-core";
 import {
   NO_VALUE,
+  formatAngularVelocity,
+  formatDegrees,
   formatAcceleration,
   formatCount,
   formatMilliseconds,
@@ -8,7 +10,7 @@ import {
   formatVelocity,
 } from "@/lib/format";
 
-export type MetricUnit = "ms" | "px" | "px/s" | "px/s²" | "count";
+export type MetricUnit = "ms" | "px" | "px/s" | "px/s²" | "deg" | "deg/s" | "count";
 
 interface MetricBase {
   id: string;
@@ -44,6 +46,8 @@ const FORMATTERS: Record<MetricUnit, (v: number | null) => string> = {
   px: formatPixels,
   "px/s": formatVelocity,
   "px/s²": formatAcceleration,
+  deg: formatDegrees,
+  "deg/s": formatAngularVelocity,
   count: formatCount,
 };
 
