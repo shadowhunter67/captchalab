@@ -50,3 +50,7 @@ Plugin `text`, route `/playground/text`: SVG distorted text deterministic, verif
 - Hai họ sự kiện (pointer*/touch*) không được khử trùng; adapter chỉ phát một họ.
 - Privacy: coarsen `startedAt`, xem lại thu `code` phím, export schema riêng.
 - Chưa có: apps/web, eslint, CI, turbo chạy được (cần pnpm trong PATH).
+
+## Image Grid (Phase A3)
+- Plugin `image-grid` (3x3 SVG tiles, đáp án `{selected}`), route `/playground/image-grid`; toggle = pointer down+up trên cùng ô hoặc Space/Enter keydown; chọn theo click native.
+- Codex 1 lượt: sửa verifier (bắt đúng 3x3/shape/id, giới hạn độ dài), lọc ô lạ trong extractor, pointerup ngoài ô -> pointercancel, chặn Enter repeat. P2 -> technical-debt.

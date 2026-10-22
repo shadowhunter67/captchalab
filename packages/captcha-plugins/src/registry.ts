@@ -1,6 +1,7 @@
 import { createPluginRegistry } from "@captchalab/captcha-core";
 import { checkboxPlugin } from "./checkbox";
 import { dragDropPlugin } from "./drag-drop";
+import { imageGridPlugin } from "./image-grid";
 import { rotationPlugin } from "./rotation";
 import { sliderPlugin } from "./slider";
 import { textPlugin } from "./text";
@@ -12,6 +13,7 @@ export const registry = createPluginRegistry({
   "drag-drop": dragDropPlugin,
   rotation: rotationPlugin,
   text: textPlugin,
+  "image-grid": imageGridPlugin,
 });
 
 export type CaptchaRegistry = typeof registry;

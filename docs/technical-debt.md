@@ -32,3 +32,8 @@ Not release blockers unless stated. Format: issue · impact · affected CAPTCHA 
 ## Image Rotation
 - Object centre is the value at Verify time; a resize mid-session is not tracked · angular features off after a resize · Rotation · later
 - Keyboard turns have no angular velocity (instant steps) · by design; chart shows pointer drags only · Rotation · later
+
+## Image Grid
+- Click-only activation (assistive tech, voice control) toggles a tile without pointer/key events, so it is not recorded · features undercount · Image Grid · later
+- Space is recorded at keydown, but a native button activates on keyup; an aborted press (focus lost between) can be recorded without a toggle · timing slightly early · Image Grid · later
+- Tile labels name the shape (non-visual alternative) so software can read them trivially · demo only, stated on the page · Image Grid · later
