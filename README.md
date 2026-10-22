@@ -95,7 +95,7 @@ corepack pnpm --filter web dev      # http://localhost:3000  (/playground/slider
 | `corepack pnpm --filter web build` | Production build of the web app |
 | `corepack pnpm --filter web test:e2e` | Playwright E2E. Locally it uses your installed Chrome and the dev server. In CI (`CI=true`) it uses Playwright's Chromium (`corepack pnpm --filter web exec playwright install chromium`) against the production build, so run `build` first |
 
-The same commands run in [CI](.github/workflows/ci.yml).
+Deployment notes: [docs/deployment.md](docs/deployment.md). The same commands run in [CI](.github/workflows/ci.yml).
 
 ## Privacy
 
@@ -105,7 +105,7 @@ A future research-contribution feature, if added, will be opt-in with explicit c
 
 ## Roadmap
 
-Planned, **not implemented**: a keyboard alternative for Drag & Drop; explicit opt-in anonymous data contribution; Learn pages; more accessibility and performance work.
+Planned, **not implemented**: a keyboard alternative for Drag & Drop; explicit opt-in anonymous data contribution; more accessibility and performance work.
 
 ## Contributing
 
