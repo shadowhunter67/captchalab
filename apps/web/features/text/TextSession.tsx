@@ -1,0 +1,119 @@
+"use client";
+
+import { useRef, useState, type FormEvent, type KeyboardEvent } from "react";
+import { createEventRecorder, type FeatureSet, type InteractionSession, type VerificationResult } from "@captchalab/captcha-core";
+import { TEXT_TARGET, registry, toTextKeyCode, type TextChallenge, type TextFeatures } from "@captchalab/captcha-plugins";
+import { TextImage } from "./TextImage";
+import { TextInspect } from "./TextInspect";
+
+interface Completed {
+  submission: number;
+  session: InteractionSession;
+  verification: VerificationResult;
+  featureSet: FeatureSet<TextFeatures>;
+}
+
+interface Props {
+  challenge: TextChallenge;
+  onNewChallenge: () => void;
+}
+
+/**
+ * One challenge = one session (the parent keys it by challenge). The typed text lives only in the input
+ * element and is read once, when verifying: it is not kept in React state, storage or the recording.
+ * Key events are stored with coarsened codes (letters -> "Letter", digits -> "Digit").
+ */
+export function TextSession({ challenge: initialChallenge, onNewChallenge }: Props) {
+  const [challenge] = useState(initialChallenge);
+  const plugin = registry.get("text");
+  const inputRef = useRef<HTMLInputElement>(null);
+  const submissionsRef = useRef(0);
+  const [recorder] = useState(() => createEventRecorder({ captchaId: plugin.id }));
+  const [completed, setCompleted] = useState<Completed | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  const record = (type: "keydown" | "keyup", e: KeyboardEvent<HTMLInputElement>): void => {
+    if (e.nativeEvent.isComposing) return; // IME composition: individual keys are not meaningful
+    recorder.record({ type, code: toTextKeyCode(e.code), target: TEXT_TARGET });
+  };
+
+  const onSubmit = (e: FormEvent): void => {
+    e.preventDefault();
+    try {
+      const session = recorder.snapshot();
+      const verification = plugin.verify(challenge, { text: inputRef.current?.value ?? "" }, session);
+      const featureSet = plugin.extractFeatures(challenge, session);
+      submissionsRef.current += 1;
+      setCompleted({ submission: submissionsRef.current, session, verification, featureSet });
+      setError(null);
+      // The text is only needed to verify: once the challenge is passed, do not leave it in the field.
+      if (verification.passed && inputRef.current) inputRef.current.value = "";
+    } catch (err) {
+      console.error("Text submission failed", err instanceof Error ? err.message : "unknown error");
+      setError("Could not analyze this attempt. Start a new challenge.");
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      <section aria-labelledby="try-h" className="rounded-lg border border-line bg-panel p-4">
+        <h2 id="try-h" className="mb-1 text-base font-semibold">
+          Try
+        </h2>
+        <p className="mb-4 text-sm text-muted">Type the characters you see (case does not matter), then press Verify or Enter.</p>
+        <form onSubmit={onSubmit} className="space-y-3">
+          <TextImage challenge={challenge} />
+          <div>
+            <label htmlFor="text-answer" className="mb-1 block text-sm font-medium">
+              Characters in the image
+            </label>
+            <input
+              id="text-answer"
+              ref={inputRef}
+              data-testid="text-answer"
+              type="text"
+              autoComplete="off"
+              autoCapitalize="off"
+              autoCorrect="off"
+              spellCheck={false}
+              maxLength={12}
+              // Any change of the content (typing, paste, drop, speech, IME) makes a shown result stale.
+              onChange={() => {
+                setCompleted(null);
+                setError(null);
+              }}
+              onKeyDown={(e) => record("keydown", e)}
+              onKeyUp={(e) => record("keyup", e)}
+              className="w-full max-w-xs rounded-md border border-line bg-bg px-3 py-2 font-mono text-lg tracking-widest"
+            />
+          </div>
+          <div className="flex flex-wrap gap-3">
+            <button type="submit" data-testid="verify" className="rounded-md bg-accent px-3 py-1.5 text-sm font-medium text-bg hover:opacity-90">
+              Verify
+            </button>
+            <button
+              type="button"
+              onClick={onNewChallenge}
+              className="rounded-md border border-line bg-panel px-3 py-1.5 text-sm font-medium hover:bg-track"
+            >
+              New challenge
+            </button>
+          </div>
+        </form>
+        <p className="mt-3 text-xs text-muted">
+          Accessibility: a labelled text field you can reach and use with the keyboard. The task is to read an image, and
+          this demo has no text or audio alternative, so it is not accessible to people who cannot see the image. It is
+          a demonstration, not a production CAPTCHA.
+        </p>
+      </section>
+      {error && (
+        <p role="alert" className="text-sm text-bad">
+          {error}
+        </p>
+      )}
+      {completed && (
+        <TextInspect key={completed.submission} verification={completed.verification} featureSet={completed.featureSet} session={completed.session} />
+      )}
+    </div>
+  );
+}

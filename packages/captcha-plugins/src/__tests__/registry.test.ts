@@ -9,7 +9,7 @@ import {
   type FeaturesOf,
   type InteractionSession,
 } from "@captchalab/captcha-core";
-import { checkboxPlugin, dragDropPlugin, registry, rotationPlugin, sliderPlugin } from "../index";
+import { checkboxPlugin, dragDropPlugin, registry, rotationPlugin, sliderPlugin, textPlugin } from "../index";
 import type { SliderAnswer, SliderChallenge, SliderFeatureContext, SliderFeatures } from "../slider";
 import type { CheckboxAnswer, CheckboxChallenge, CheckboxFeatures } from "../checkbox";
 import type { DragDropAnswer, DragDropChallenge, DragDropFeatureContext, DragDropFeatures } from "../drag-drop";
@@ -25,8 +25,8 @@ const emptySession: InteractionSession = {
 };
 
 // A second plugin with different types, to prove the map holds heterogeneous generics.
-const textPlugin = defineCaptchaPlugin({
-  id: "text",
+const fakeTextPlugin = defineCaptchaPlugin({
+  id: "fake-text",
   name: "Text",
   version: "0",
   generate: (): { text: string } => ({ text: "abc" }),
@@ -37,13 +37,13 @@ const textPlugin = defineCaptchaPlugin({
     features: { completionTime: i.durationMs, eventCount: 0, typedLength: 0 },
   }),
 });
-const twoPlugins = createPluginRegistry({ slider: sliderPlugin, text: textPlugin });
+const twoPlugins = createPluginRegistry({ slider: sliderPlugin, "fake-text": fakeTextPlugin });
 
 describe("typed registry (runtime)", () => {
   it("returns the plugin for a known id and lists ids", () => {
     expect(registry.get("slider")).toBe(sliderPlugin);
-    expect(registry.ids).toEqual(["slider", "checkbox", "drag-drop", "rotation"]);
-    expect(twoPlugins.ids).toEqual(["slider", "text"]);
+    expect(registry.ids).toEqual(["slider", "checkbox", "drag-drop", "rotation", "text"]);
+    expect(twoPlugins.ids).toEqual(["slider", "fake-text"]);
   });
 
   it("find() handles untrusted strings; get() throws for untyped callers", () => {
@@ -89,8 +89,8 @@ describe("typed registry (compile time)", () => {
     expectTypeOf<FeatureContextOf<typeof slider>>().toEqualTypeOf<SliderFeatureContext>();
     expectTypeOf(slider.id).toEqualTypeOf<"slider">();
     // Heterogeneous map keeps both.
-    expectTypeOf<AnswerOf<ReturnType<typeof twoPlugins.get<"text">>>>().toEqualTypeOf<{ typed: string }>();
-    expectTypeOf(twoPlugins.find("x")).toEqualTypeOf<typeof sliderPlugin | typeof textPlugin | undefined>();
+    expectTypeOf<AnswerOf<ReturnType<typeof twoPlugins.get<"fake-text">>>>().toEqualTypeOf<{ typed: string }>();
+    expectTypeOf(twoPlugins.find("x")).toEqualTypeOf<typeof sliderPlugin | typeof fakeTextPlugin | undefined>();
   });
 
   it("defineCaptchaPlugin infers the context requirement from the implementation", () => {
@@ -140,7 +140,7 @@ describe("typed registry (compile time)", () => {
       [SliderChallenge, InteractionSession, SliderFeatureContext]
     >();
     expectTypeOf(registry.find("x")).toEqualTypeOf<
-      typeof sliderPlugin | typeof checkboxPlugin | typeof dragDropPlugin | typeof rotationPlugin | undefined
+      typeof sliderPlugin | typeof checkboxPlugin | typeof dragDropPlugin | typeof rotationPlugin | typeof textPlugin | undefined
     >();
     const dd = registry.get("drag-drop");
     expectTypeOf(dd).toEqualTypeOf<typeof dragDropPlugin>();
@@ -154,7 +154,7 @@ describe("typed registry (compile time)", () => {
   it("rejects misuse (checked by tsc; never executed)", () => {
     const misuse = () => {
       const slider = registry.get("slider");
-      const text = twoPlugins.get("text");
+      const text = twoPlugins.get("fake-text");
       const challenge = slider.generate({ rng: Math.random });
       // @ts-expect-error unknown captcha id
       registry.get("nope");

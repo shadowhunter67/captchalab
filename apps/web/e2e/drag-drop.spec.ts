@@ -220,8 +220,11 @@ test("replay: shapes move, snap on a correct drop and return after a miss; no DO
 
   const seen = new Set<string>();
   let lifted = false;
-  for (let i = 0; i <= 40; i++) {
-    await scrubTo(range, Number(await range.getAttribute("min")) + ((Number(await range.getAttribute("max")) - Number(await range.getAttribute("min"))) * i) / 40);
+  const min = Number(await range.getAttribute("min"));
+  const max = Number(await range.getAttribute("max"));
+  const N = 150; // dense: the "returned" caption lasts only until the next drag starts
+  for (let i = 0; i <= N; i++) {
+    await scrubTo(range, min + ((max - min) * i) / N);
     seen.add((await caption.textContent()) ?? "");
     if ((await page.getByTestId(`replay-item-${A}`).getAttribute("data-lifted")) === "true") lifted = true;
   }

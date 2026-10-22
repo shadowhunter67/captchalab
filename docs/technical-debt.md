@@ -11,6 +11,11 @@ Not release blockers unless stated. Format: issue · impact · affected CAPTCHA 
 - CI has never run on GitHub (no remote yet); no cache · first run may need small fixes · all · before release
 - No issue/PR templates, no `examples/custom-captcha-plugin`, no LICENSE (owner decision) · release prep · all · before release (LICENSE)
 
+## Text
+- No non-visual alternative (audio or text) · blocks users who cannot read the image; documented on the page · Text · next accessibility pass
+- Every Backspace/Delete after the first character counts as a correction, including no-op deletes · slightly inflated corrections · Text · later
+- Characters are plain SVG text (trivial to read by software) · demo only, stated in Learn · Text · later
+
 ## Slider
 - Off-centre grab adds an offset to release error (UI centres the handle) · slightly skewed features · Slider · later
 - Replay cannot show the handle reset caused by "Try again" except through its marker · minor · Slider · later

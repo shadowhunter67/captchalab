@@ -36,6 +36,12 @@ export default function HomePage() {
         >
           Open Rotation Playground
         </Link>
+        <Link
+          href="/playground/text"
+          className="inline-block rounded-md border border-line bg-panel px-4 py-2.5 font-medium hover:bg-track"
+        >
+          Open Text Playground
+        </Link>
       </div>
     </main>
   );

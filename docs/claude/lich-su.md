@@ -24,6 +24,9 @@ Cleanup: legend `click` cho timeline (`TIMELINE_LEGEND` dùng chung), `extractFe
 ## 2026-10-23 — Phase 2C (Image Rotation) — MVP Fast-Track
 Plugin `rotation` (góc độ, verifier chịu wrap 359↔0, 9 feature, `angles.ts` mô phỏng dùng chung), route `/playground/rotation` (role=slider: kéo + ←/→), Inspect dùng lại primitive + chart vận tốc góc + replay, Learn. Thêm đơn vị `deg`, `deg/s`. Codex 1 lượt: P1 phím trong lúc kéo + replay bỏ cancelled drag → đã sửa. Nợ kỹ thuật chuyển sang `docs/technical-debt.md`.
 
+## 2026-10-23 — Phase 2D (Text CAPTCHA)
+Plugin `text`, route `/playground/text`: SVG distorted text deterministic, verify trim + không phân biệt hoa/thường, 8 feature, key codes gộp (Letter/Digit/Other) để không lộ chữ gõ, text xoá khỏi ô khi đạt, kết quả huỷ khi nội dung đổi (paste cũng tính). Codex 1 lượt: 3 P1 đã sửa; thiếu phương án phi thị giác → nợ kỹ thuật.
+
 ## Nợ kỹ thuật (cũ; bản hiện hành: docs/technical-debt.md)
 - Drag & Drop: KHÔNG có phương án bàn phím (chọn shape → chọn vùng → đặt) — cần thiết kế riêng; draggable đang `role=img` (trung thực nhưng chưa tương tác được bằng AT).
 - Drag & Drop: một session ↔ một layout; resize sau khi đã có input chỉ cảnh báo, không chuẩn hoá lại toạ độ cũ. Bề mặt bị CSS transform/dịch ngang giữa lúc kéo vẫn lệch toạ độ (như Slider).

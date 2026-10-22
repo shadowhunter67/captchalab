@@ -4,7 +4,7 @@
 
 CaptchaLab is an educational, research-oriented web app for exploring how people interact with CAPTCHA challenges: the events a challenge produces, the behavioral features that can be measured from them, and a replay of your own attempt. Everything runs in your browser.
 
-> **Status: Alpha (`0.1.0-alpha`, not published).** Four CAPTCHAs are implemented (Slider, Checkbox, Drag & Drop, Image Rotation). APIs may still change. See [Current status](#current-status).
+> **Status: Alpha (`0.1.0-alpha`, not published).** Five CAPTCHAs are implemented (Slider, Checkbox, Drag & Drop, Image Rotation, Text). APIs may still change. See [Current status](#current-status).
 
 ## What is CaptchaLab?
 
@@ -27,10 +27,10 @@ Any synthetic interaction added in the future may only target challenges created
 
 | | |
 |---|---|
-| **Implemented CAPTCHAs** | **Slider** (one drag, normalized geometry), **Checkbox** (press/keyboard, no trajectory), **Drag & Drop** (several draggables and drop targets, many attempts), **Image Rotation** (turn an object upright by dragging or with the arrow keys) |
-| Not implemented yet | Text, Image Grid, Human-vs-Synthetic comparison, research data contribution |
+| **Implemented CAPTCHAs** | **Slider** (one drag, normalized geometry), **Checkbox** (press/keyboard, no trajectory), **Drag & Drop** (several draggables and drop targets, many attempts), **Image Rotation** (turn an object upright by dragging or with the arrow keys), **Text** (read distorted characters and type them; the recording stores only key classes, never which letter) |
+| Not implemented yet | Image Grid, Human-vs-Synthetic comparison, research data contribution |
 
-Only the four above exist today. The rest is [roadmap](#roadmap), not functionality.
+Only the five above exist today. The rest is [roadmap](#roadmap), not functionality.
 
 ### What you can do with the Drag & Drop
 
@@ -60,7 +60,7 @@ Only the four above exist today. The rest is [roadmap](#roadmap), not functional
 
 ```text
 apps/web                     Next.js app (UI, DOM adapters, Inspect composition)
-packages/captcha-plugins     CAPTCHA plugins + the typed registry (Slider, Checkbox, Drag & Drop, Rotation)
+packages/captcha-plugins     CAPTCHA plugins + the typed registry (Slider, Checkbox, Drag & Drop, Rotation, Text)
 packages/captcha-core        Framework-independent logic: event schema, recorder, gestures,
                              motion features/series, replay timeline, plugin API
 packages/config              Shared TypeScript + ESLint configuration
@@ -81,7 +81,7 @@ Requirements: Node.js ≥ 22 (CI uses the version in [.nvmrc](.nvmrc)) with Core
 
 ```bash
 corepack pnpm install
-corepack pnpm --filter web dev      # http://localhost:3000  (/playground/slider, /playground/checkbox, /playground/drag-drop, /playground/rotation)
+corepack pnpm --filter web dev      # http://localhost:3000  (/playground/slider, /playground/checkbox, /playground/drag-drop, /playground/rotation, /playground/text)
 ```
 
 ## Scripts
@@ -104,7 +104,7 @@ A future research-contribution feature, if added, will be opt-in with explicit c
 
 ## Roadmap
 
-Planned, **not implemented**: Text and Image Grid CAPTCHAs; a keyboard alternative for Drag & Drop; Human-vs-Synthetic comparison (CaptchaLab-controlled challenges only); explicit opt-in anonymous data contribution; Learn pages; more accessibility and performance work.
+Planned, **not implemented**: Image Grid CAPTCHA; a keyboard alternative for Drag & Drop; Human-vs-Synthetic comparison (CaptchaLab-controlled challenges only); explicit opt-in anonymous data contribution; Learn pages; more accessibility and performance work.
 
 ## Contributing
 
