@@ -27,7 +27,7 @@ export function createPointerTimeline(session: InteractionSession): PointerTimel
   for (const e of session.events) {
     if (!isPointerEvent(e)) continue;
     if (e.type === "pointerdown" || e.type === "touchstart") down = true;
-    else if (e.type === "pointerup" || e.type === "touchend") down = false;
+    else if (e.type === "pointerup" || e.type === "touchend" || e.type === "pointercancel") down = false;
     samples.push({ t: e.t, x: e.x, y: e.y, down });
   }
 

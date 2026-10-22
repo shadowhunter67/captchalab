@@ -31,7 +31,7 @@ export interface EventRecorder {
 }
 
 function isFiniteEvent(e: DistributiveOmit<InteractionEvent, "t">): boolean {
-  if ("x" in e && !(Number.isFinite(e.x) && Number.isFinite(e.y))) return false;
+  if ("x" in e && !(Number.isFinite(e.x) && Number.isFinite(e.y) && Number.isFinite(e.pointerId))) return false;
   if ("pressure" in e && e.pressure !== undefined && !Number.isFinite(e.pressure)) return false;
   return true;
 }

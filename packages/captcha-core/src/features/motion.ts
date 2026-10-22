@@ -1,9 +1,15 @@
 import { countDirectionChanges, pathLength, type TimedPoint } from "../geometry";
+import { contactKey } from "../events/gestures";
 import { max, mean, variance } from "../timing";
 import { isPointerEvent, type InteractionSession } from "../types/events";
 
-/** Bump when any feature definition below changes meaning. Never change silently. */
-export const FEATURE_DEFINITIONS_VERSION = 1 as const;
+/**
+ * Identify the shape/meaning of MotionFeatures. Bump the number when a definition below
+ * changes meaning (schema), or the extractor id when only the algorithm changes (see FeatureSet).
+ * Golden tests fail on any silent change.
+ */
+export const MOTION_FEATURES_SCHEMA = "motion@1";
+export const MOTION_EXTRACTOR = "motion@1";
 
 export interface BaseCaptchaFeatures {
   /** ms from session start to completion. */
@@ -42,28 +48,42 @@ export interface MotionFeatures {
 }
 
 /**
- * Contact-bounded movement tracks. A track ends at pointerup/touchend, so separate
- * gestures (e.g. a slider retry) are never joined by a fabricated segment. Synthetic
- * `click` events are excluded (they duplicate the preceding pointerup position).
- * Samples sharing a timestamp collapse to the last one, so distance, speed and
- * mean velocity are all computed from the same positive-dt segments.
+ * Per-contact movement tracks. Hover movement before a press is deliberately part of the
+ * track (approach motion is signal; mouse hover is continuous). A track ends at pointerup/touchend/pointercancel of that
+ * contact (see contactKey) or at a new press without one, so separate gestures (e.g. a slider retry) are never joined by a fabricated
+ * segment and concurrent pointers are never interleaved. Synthetic `click` events are
+ * excluded (they duplicate the preceding pointerup position). Samples sharing a timestamp
+ * collapse to the last one, so distance, speed and mean velocity use the same positive-dt
+ * segments. Tracks are ordered by start time.
  */
 export function pointerTracks(session: InteractionSession): TimedPoint[][] {
-  const tracks: TimedPoint[][] = [];
-  let cur: TimedPoint[] = [];
-  const flush = () => {
-    if (cur.length > 0) tracks.push(cur);
-    cur = [];
-  };
+  const open = new Map<string, { points: TimedPoint[]; down: boolean }>();
+  const done: TimedPoint[][] = [];
   for (const e of session.events) {
     if (!isPointerEvent(e) || e.type === "click") continue;
-    const last = cur[cur.length - 1];
-    if (last && last.t === e.t) cur[cur.length - 1] = { t: e.t, x: e.x, y: e.y };
-    else cur.push({ t: e.t, x: e.x, y: e.y });
-    if (e.type === "pointerup" || e.type === "touchend") flush();
+    const key = contactKey(e);
+    const isDown = e.type === "pointerdown" || e.type === "touchstart";
+    let cur = open.get(key);
+    if (cur && isDown && cur.down) {
+      // New press without an up/cancel for the previous one: do not join the two attempts.
+      done.push(cur.points);
+      cur = undefined;
+    }
+    if (!cur) {
+      cur = { points: [], down: false };
+      open.set(key, cur);
+    }
+    if (isDown) cur.down = true;
+    const last = cur.points[cur.points.length - 1];
+    if (last && last.t === e.t) cur.points[cur.points.length - 1] = { t: e.t, x: e.x, y: e.y };
+    else cur.points.push({ t: e.t, x: e.x, y: e.y });
+    if (e.type === "pointerup" || e.type === "touchend" || e.type === "pointercancel") {
+      done.push(cur.points);
+      open.delete(key);
+    }
   }
-  flush();
-  return tracks;
+  for (const tr of open.values()) done.push(tr.points);
+  return done.sort((p, q) => (p[0] as TimedPoint).t - (q[0] as TimedPoint).t);
 }
 
 export interface SpeedSample {

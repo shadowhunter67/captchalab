@@ -4,7 +4,7 @@ import {
   accelerations,
   countDirectionChanges,
   createEventRecorder,
-  createPluginRegistry,
+  extractGestures,
   createPointerTimeline,
   createRng,
   extractBaseFeatures,
@@ -34,7 +34,7 @@ const move = (t: number, x: number, y: number): InteractionEvent => ({
   type: "pointermove",
   x,
   y,
-  pointerType: "mouse",
+  pointerId: 1, pointerType: "mouse",
 });
 
 describe("geometry", () => {
@@ -113,7 +113,7 @@ describe("extractMotionFeatures", () => {
   });
 
   it("measures click timing and inter-click gaps from pointerdown", () => {
-    const down = (t: number): InteractionEvent => ({ t, type: "pointerdown", x: 0, y: 0, pointerType: "touch" });
+    const down = (t: number): InteractionEvent => ({ t, type: "pointerdown", x: 0, y: 0, pointerId: 1, pointerType: "touch" });
     const f = extractMotionFeatures(session([move(10, 0, 0), down(100), down(300), down(700)]));
     expect(f.timeToFirstClick).toBe(100);
     expect(f.interClickTime).toBe(300);
@@ -121,7 +121,7 @@ describe("extractMotionFeatures", () => {
 
   it("does not join separate gestures or count click as movement", () => {
     const e = (t: number, type: "pointerdown" | "pointerup" | "click", x: number): InteractionEvent => ({
-      t, type, x, y: 0, pointerType: "mouse",
+      t, type, x, y: 0, pointerId: 1, pointerType: "mouse",
     });
     const events = [e(0, "pointerdown", 0), e(100, "pointerup", 10), e(110, "click", 10), e(5000, "pointerdown", 500), e(5100, "pointerup", 510)];
     expect(pointerTracks(session(events))).toHaveLength(2);
@@ -158,8 +158,8 @@ describe("recorder", () => {
 
   it("stamps relative monotonic time and finishes into a versioned session", () => {
     const r = createEventRecorder({ captchaId: "slider", now: clock([1000, 1010, 1050, 1100]), idFactory: () => "id1" });
-    r.record({ type: "pointerdown", x: 1, y: 2, pointerType: "mouse" });
-    r.record({ type: "pointerup", x: 3, y: 4, pointerType: "mouse" });
+    r.record({ type: "pointerdown", x: 1, y: 2, pointerId: 1, pointerType: "mouse" });
+    r.record({ type: "pointerup", x: 3, y: 4, pointerId: 1, pointerType: "mouse" });
     const s = r.finish();
     expect(s.events.map((e) => e.t)).toEqual([10, 50]);
     expect(s.durationMs).toBe(100);
@@ -171,16 +171,16 @@ describe("recorder", () => {
   it("throttles moves, caps the buffer and counts drops", () => {
     const times = [0, 1, 2, 3, 20, 21, 22, 23, 24];
     const r = createEventRecorder({ captchaId: "x", now: clock(times), minMoveIntervalMs: 10, maxEvents: 2 });
-    for (let i = 0; i < 6; i++) r.record({ type: "pointermove", x: i, y: 0, pointerType: "mouse" });
+    for (let i = 0; i < 6; i++) r.record({ type: "pointermove", x: i, y: 0, pointerId: 1, pointerType: "mouse" });
     expect(r.size).toBe(2);
     expect(r.dropped).toBe(4);
   });
 
   it("clamps a backwards clock, rejects non-finite input, and empty session is none", () => {
     const r = createEventRecorder({ captchaId: "x", now: clock([100, 150, 120, 130, 200]) });
-    r.record({ type: "pointermove", x: 0, y: 0, pointerType: "mouse" });
-    r.record({ type: "pointermove", x: 1, y: 0, pointerType: "mouse" });
-    r.record({ type: "pointermove", x: Number.NaN, y: 0, pointerType: "mouse" });
+    r.record({ type: "pointermove", x: 0, y: 0, pointerId: 1, pointerType: "mouse" });
+    r.record({ type: "pointermove", x: 1, y: 0, pointerId: 1, pointerType: "mouse" });
+    r.record({ type: "pointermove", x: Number.NaN, y: 0, pointerId: 1, pointerType: "mouse" });
     const s = r.finish();
     expect(s.events.map((e) => e.t)).toEqual([50, 50]);
     expect(r.dropped).toBe(1);
@@ -189,7 +189,7 @@ describe("recorder", () => {
 
   it("ignores events after finish and reports mixed modality", () => {
     const r = createEventRecorder({ captchaId: "x", now: clock([0, 1, 2, 3, 4]) });
-    r.record({ type: "pointerdown", x: 0, y: 0, pointerType: "mouse" });
+    r.record({ type: "pointerdown", x: 0, y: 0, pointerId: 1, pointerType: "mouse" });
     r.record({ type: "keydown", code: "Tab" });
     const s = r.finish();
     r.record({ type: "keyup", code: "Tab" });
@@ -200,9 +200,9 @@ describe("recorder", () => {
 
 describe("pointer timeline", () => {
   const s = session([
-    { t: 0, type: "pointerdown", x: 0, y: 0, pointerType: "mouse" },
+    { t: 0, type: "pointerdown", x: 0, y: 0, pointerId: 1, pointerType: "mouse" },
     move(100, 100, 0),
-    { t: 200, type: "pointerup", x: 100, y: 50, pointerType: "mouse" },
+    { t: 200, type: "pointerup", x: 100, y: 50, pointerId: 1, pointerType: "mouse" },
   ]);
   const tl = createPointerTimeline(s);
 
@@ -221,29 +221,71 @@ describe("pointer timeline", () => {
   });
 });
 
-describe("registry and rng", () => {
-  const plugin = {
-    id: "p",
-    name: "P",
-    version: "1",
-    generate: () => ({}),
-    verify: () => ({ passed: true }),
-    extractFeatures: (i: InteractionSession) => extractBaseFeatures(i),
-  };
-
-  it("registers, retrieves and rejects duplicates", () => {
-    const reg = createPluginRegistry();
-    reg.register(plugin);
-    expect(reg.get("p")?.name).toBe("P");
-    expect(reg.list()).toHaveLength(1);
-    expect(() => reg.register(plugin)).toThrow(/already registered/);
-  });
-
-  it("rng is deterministic and in [0,1)", () => {
+describe("rng", () => {
+  it("is deterministic and in [0,1)", () => {
     const a = createRng(42);
     const b = createRng(42);
     const seq = Array.from({ length: 5 }, () => a());
     expect(seq).toEqual(Array.from({ length: 5 }, () => b()));
     expect(seq.every((v) => v >= 0 && v < 1)).toBe(true);
+  });
+});
+
+describe("gestures and pointer identity", () => {
+  const ev = (
+    t: number, type: "pointerdown" | "pointermove" | "pointerup" | "pointercancel",
+    pointerId: number, x: number, target?: string,
+  ): InteractionEvent => ({ t, type, x, y: 0, pointerId, pointerType: "touch", ...(target ? { target } : {}) });
+
+  it("keeps interleaved pointers separate", () => {
+    const events = [
+      ev(0, "pointerdown", 1, 0, "a"), ev(10, "pointerdown", 2, 500, "b"),
+      ev(20, "pointermove", 1, 10), ev(30, "pointerup", 2, 500), ev(40, "pointerup", 1, 20),
+    ];
+    const g = extractGestures(session(events));
+    expect(g.map((x) => [x.pointerId, x.target, x.endedBy, x.startT, x.endT])).toEqual([
+      [1, "a", "up", 0, 40],
+      [2, "b", "up", 10, 30],
+    ]);
+    // pointer 2's up must not end pointer 1: distance 20, not mixed with pointer 2's 500.
+    expect(extractMotionFeatures(session(events)).pointerDistance).toBe(20);
+  });
+
+  it("handles cancel, interrupted, open, and ignores hover before down", () => {
+    const events = [
+      ev(0, "pointermove", 1, 99), // hover: not a gesture
+      ev(5, "pointerdown", 1, 0), ev(15, "pointercancel", 1, 3),
+      ev(20, "pointerdown", 1, 0), ev(30, "pointerdown", 1, 7), // 2nd down w/o up
+    ];
+    const g = extractGestures(session(events));
+    expect(g.map((x) => x.endedBy)).toEqual(["cancel", "interrupted", "open"]);
+  });
+
+  it("a new press without an up does not join attempts in motion tracks", () => {
+    const events = [
+      ev(0, "pointerdown", 1, 0), ev(10, "pointermove", 1, 5),
+      ev(20, "pointerdown", 1, 100), ev(30, "pointerup", 1, 110),
+    ];
+    const tracks = pointerTracks(session(events));
+    expect(tracks).toHaveLength(2);
+    const f = extractMotionFeatures(session(events));
+    expect(f.pointerDistance).toBe(15);
+    expect(f.movementDuration).toBe(20);
+  });
+
+  it("does not mix touch-family and pointer-family ids or different pointer types", () => {
+    const mk = (t: number, type: "pointerdown" | "touchstart", pointerType: "mouse" | "touch"): InteractionEvent => ({
+      t, type, x: t, y: 0, pointerId: 1, pointerType,
+    });
+    const g = extractGestures(session([mk(0, "pointerdown", "mouse"), mk(10, "touchstart", "touch"), mk(20, "pointerdown", "touch")]));
+    expect(g).toHaveLength(3);
+    expect(g.every((x) => x.endedBy === "open")).toBe(true);
+  });
+
+  it("includes hover approach in the track (documented behavior)", () => {
+    const events = [ev(0, "pointermove", 1, 0), ev(100, "pointerdown", 1, 100), ev(200, "pointerup", 1, 110)];
+    const f = extractMotionFeatures(session(events));
+    expect(f.pointerDistance).toBe(110);
+    expect(f.movementDuration).toBe(200);
   });
 });

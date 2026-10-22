@@ -1,5 +1,5 @@
 /** Bump when the shape or meaning of InteractionEvent / InteractionSession changes. */
-export const SCHEMA_VERSION = 1 as const;
+export const SCHEMA_VERSION = 2 as const;
 
 export type PointerType = "mouse" | "touch" | "pen";
 
@@ -7,6 +7,7 @@ export type PointerEventKind =
   | "pointermove"
   | "pointerdown"
   | "pointerup"
+  | "pointercancel"
   | "click"
   | "touchstart"
   | "touchmove"
@@ -27,6 +28,8 @@ export interface PointerInteractionEvent extends EventBase {
   x: number;
   y: number;
   pointerType: PointerType;
+  /** Identity of the pointer/contact (PointerEvent.pointerId; touch identifier for touch*). Mouse is constant. */
+  pointerId: number;
   /** 0..1 when the device reports it. */
   pressure?: number;
 }

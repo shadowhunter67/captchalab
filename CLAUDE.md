@@ -24,14 +24,18 @@ corepack pnpm -r run test
 
 ## Kiến trúc (tóm tắt)
 
-- `packages/captcha-core` — types/events (schema v1), events/recorder, geometry, timing, features/motion, replay/timeline, plugin (types + registry + rng).
+- `packages/captcha-core` — types/events (schema v2: pointerId, pointercancel), events (recorder, gestures), geometry, timing, features (motion, FeatureSet envelope), replay/timeline, plugin (types, defineCaptchaPlugin brand, typed registry factory, rng).
+- `packages/captcha-plugins` — registry.ts (compile-time map; thêm CAPTCHA mới = thêm vào object này) + `slider/` (tham chiếu: types=định nghĩa toán học, generator, verifier, feature-extractor, plugin).
 - `packages/config` — tsconfig.base.json.
-- Chưa có: apps/web (Next.js), captcha-plugins (slider), visualization, synthetic, database, ui.
-- ADR: `docs/adr/` (0001, 0003, 0004; 0002 plugin API viết cùng lát Slider).
+- Chưa có: apps/web (Next.js), visualization, synthetic, database, ui.
+- ADR: `docs/adr/` (0001–0004).
 
 ## Bẫy đã biết
 
 - Motion features tính theo "track" ngắt sau pointerup, bỏ `click`, gộp timestamp trùng (xem `pointerTracks`).
+- Plugin phải tạo bằng `defineCaptchaPlugin` (đóng dấu + freeze); registry từ chối plugin viết tay. `extractFeatures(challenge, interaction, context)` — context là hình học UI (px).
+- Slider giả định handle căn GIỮA dưới con trỏ (u = x − trackLeft − handleWidth/2); UI phải theo mapping này.
+- Test compile-time = `@ts-expect-error` trong test, tsc kiểm tra; `pnpm -r typecheck` phải chạy cùng test.
 - Codex qua openai-bridge: model mặc định lỗi; dùng `model: "gpt-5.6-sol"`, read-only (cập nhật 2026-10-22).
 
 ## Tài liệu chi tiết — đọc khi cần

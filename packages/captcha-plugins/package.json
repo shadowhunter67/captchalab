@@ -1,0 +1,21 @@
+{
+  "name": "@captchalab/captcha-plugins",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": { ".": "./src/index.ts" },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@captchalab/captcha-core": "workspace:*"
+  },
+  "devDependencies": {
+    "@captchalab/config": "workspace:*",
+    "typescript": "^5.8.0",
+    "vitest": "^3.2.0"
+  }
+}
