@@ -16,15 +16,16 @@ const ptr = (t: number, type: "pointerdown" | "pointermove" | "pointerup" | "poi
 
 describe("metric descriptors", () => {
   it("formats values by unit and shows a dash for null/undefined/NaN", () => {
-    expect(formatMetricValue({ value: 1280, unit: "ms" })).toBe("1.28 s");
-    expect(formatMetricValue({ value: 2.44, unit: "px" })).toBe("2.4 px");
-    expect(formatMetricValue({ value: 247.6, unit: "px/s" })).toBe("248 px/s");
-    expect(formatMetricValue({ value: -2000, unit: "px/s²" })).toBe("-2000 px/s²");
-    expect(formatMetricValue({ value: 3, unit: "count" })).toBe("3");
-    expect(formatMetricValue({ value: null, unit: "px" })).toBe("—");
-    expect(formatMetricValue({ value: undefined, unit: "ms" })).toBe("—");
-    expect(formatMetricValue({ value: Number.NaN, unit: "count" })).toBe("—");
-    expect(formatMetricValue({ value: 0.256, unit: "count", format: (v) => `${(v * 100).toFixed(0)}%` })).toBe("26%");
+    expect(formatMetricValue({ id: "m", label: "m", value: 1280, unit: "ms" })).toBe("1.28 s");
+    expect(formatMetricValue({ id: "m", label: "m", value: 2.44, unit: "px" })).toBe("2.4 px");
+    expect(formatMetricValue({ id: "m", label: "m", value: 247.6, unit: "px/s" })).toBe("248 px/s");
+    expect(formatMetricValue({ id: "m", label: "m", value: -2000, unit: "px/s²" })).toBe("-2000 px/s²");
+    expect(formatMetricValue({ id: "m", label: "m", value: 3, unit: "count" })).toBe("3");
+    expect(formatMetricValue({ id: "m", label: "m", value: null, unit: "px" })).toBe("—");
+    expect(formatMetricValue({ id: "m", label: "m", value: undefined, unit: "ms" })).toBe("—");
+    expect(formatMetricValue({ id: "m", label: "m", value: Number.NaN, unit: "count" })).toBe("—");
+    expect(formatMetricValue({ id: "m", label: "m", text: "keyboard" })).toBe("keyboard");
+    expect(formatMetricValue({ id: "m", label: "m", value: 0.256, unit: "count", format: (v) => `${(v * 100).toFixed(0)}%` })).toBe("26%");
   });
 
   it("interaction metrics tolerate missing features without defaulting to zero", () => {

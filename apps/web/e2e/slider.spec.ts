@@ -1,6 +1,7 @@
-import { expect, test, type Locator, type Page } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
 import { createRng } from "@captchalab/captcha-core";
 import { watchPrivacy } from "./privacy";
+import { scrubTo } from "./replay";
 import { registry } from "@captchalab/captcha-plugins";
 
 const SEED = 12345;
@@ -45,15 +46,6 @@ async function slowDrag(page: Page, toPosition: number) {
 const replay = (page: Page) => page.getByTestId("replay");
 const replayTime = async (page: Page) => Number(await replay(page).getAttribute("data-replay-time"));
 const replayStatus = (page: Page) => replay(page).getAttribute("data-replay-status");
-
-async function scrubTo(range: Locator, time: number) {
-  // Browsers normalise range values to ~15 significant digits, and Playwright rejects a value that
-  // changes when set ("Malformed value"). So: clamp to the control's bounds, then use 3 decimals.
-  const min = Math.ceil(Number(await range.getAttribute("min")) * 1000) / 1000;
-  const max = Math.floor(Number(await range.getAttribute("max")) * 1000) / 1000;
-  // String(Number(..)) drops trailing zeros: the exact text the browser reports back for that value.
-  await range.fill(String(Number(Math.min(max, Math.max(min, time)).toFixed(3))));
-}
 
 test.beforeEach(async ({ page }) => {
   await page.goto(`/playground/slider?seed=${SEED}`);

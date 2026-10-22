@@ -9,8 +9,9 @@ import {
   type FeaturesOf,
   type InteractionSession,
 } from "@captchalab/captcha-core";
-import { registry, sliderPlugin } from "../index";
+import { checkboxPlugin, registry, sliderPlugin } from "../index";
 import type { SliderAnswer, SliderChallenge, SliderFeatureContext, SliderFeatures } from "../slider";
+import type { CheckboxAnswer, CheckboxChallenge, CheckboxFeatures } from "../checkbox";
 
 const emptySession: InteractionSession = {
   schemaVersion: 2,
@@ -40,7 +41,7 @@ const twoPlugins = createPluginRegistry({ slider: sliderPlugin, text: textPlugin
 describe("typed registry (runtime)", () => {
   it("returns the plugin for a known id and lists ids", () => {
     expect(registry.get("slider")).toBe(sliderPlugin);
-    expect(registry.ids).toEqual(["slider"]);
+    expect(registry.ids).toEqual(["slider", "checkbox"]);
     expect(twoPlugins.ids).toEqual(["slider", "text"]);
   });
 
@@ -91,6 +92,17 @@ describe("typed registry (compile time)", () => {
     expectTypeOf(twoPlugins.find("x")).toEqualTypeOf<typeof sliderPlugin | typeof textPlugin | undefined>();
   });
 
+  it("checkbox keeps its own exact types (second plugin, different generics)", () => {
+    const checkbox = registry.get("checkbox");
+    expectTypeOf(checkbox).toEqualTypeOf<typeof checkboxPlugin>();
+    expectTypeOf(checkbox.id).toEqualTypeOf<"checkbox">();
+    expectTypeOf<ChallengeOf<typeof checkbox>>().toEqualTypeOf<CheckboxChallenge>();
+    expectTypeOf<AnswerOf<typeof checkbox>>().toEqualTypeOf<CheckboxAnswer>();
+    expectTypeOf<FeaturesOf<typeof checkbox>>().toEqualTypeOf<CheckboxFeatures>();
+    expectTypeOf<FeatureContextOf<typeof checkbox>>().toEqualTypeOf<undefined>();
+    expectTypeOf(registry.find("x")).toEqualTypeOf<typeof sliderPlugin | typeof checkboxPlugin | undefined>();
+  });
+
   it("rejects misuse (checked by tsc; never executed)", () => {
     const misuse = () => {
       const slider = registry.get("slider");
@@ -98,6 +110,10 @@ describe("typed registry (compile time)", () => {
       const challenge = slider.generate({ rng: Math.random });
       // @ts-expect-error unknown captcha id
       registry.get("nope");
+      // @ts-expect-error a slider answer is not a checkbox answer
+      registry.get("checkbox").verify({ id: "x", expectedChecked: true }, { position: 0.5 } satisfies SliderAnswer, emptySession);
+      // @ts-expect-error a checkbox challenge is not a slider challenge
+      slider.verify({ id: "x", expectedChecked: true }, { position: 0.5 }, emptySession);
       // @ts-expect-error SliderAnswer is not a text answer
       text.verify({ text: "x" }, { position: 0.5 } satisfies SliderAnswer, emptySession);
       // @ts-expect-error text challenge is not a slider challenge

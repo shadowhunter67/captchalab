@@ -15,7 +15,7 @@ import {
   type SliderLayout,
 } from "@captchalab/captcha-plugins";
 import { buildTrajectoryGeometry, type Rect, type TrajectoryGeometry } from "@/lib/inspect/trajectory";
-import type { InspectMetric } from "@/lib/inspect/metrics";
+import type { NumericMetric } from "@/lib/inspect/metrics";
 
 /**
  * Slider-specific selectors: they decide WHICH data the generic Inspect primitives show.
@@ -66,7 +66,7 @@ export function sliderDragDomain(session: InteractionSession): [number, number] 
 }
 
 /** The Slider's own features, as table rows. The table renders them without knowing the math. */
-export function sliderAttemptMetrics(f: SliderFeatures): InspectMetric[] {
+export function sliderAttemptMetrics(f: SliderFeatures): NumericMetric[] {
   return [
     {
       id: "dragDuration",

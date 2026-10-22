@@ -71,6 +71,7 @@ describe("slider metric descriptors", () => {
     const rows = sliderAttemptMetrics(f);
     expect(rows.map((r) => r.id)).toEqual(["dragDuration", "releaseError", "overshoot", "numberOfAttempts"]);
     expect(rows.map(formatMetricValue)).toEqual(["—", "2.4 px", "0.0 px", "2"]);
-    expect(rows[1]?.value).toBe(2.44); // not rounded in the descriptor
+    const second = rows[1];
+    expect(second && "value" in second ? second.value : undefined).toBe(2.44); // not rounded in the descriptor
   });
 });

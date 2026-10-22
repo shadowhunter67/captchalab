@@ -31,9 +31,10 @@ corepack pnpm --filter web test:e2e   # Playwright dùng Chrome cài sẵn (chan
 ## Kiến trúc (tóm tắt)
 
 - `packages/captcha-core` — types/events (schema v2: pointerId, pointercancel), events (recorder, gestures), geometry, timing, features (motion, FeatureSet envelope), replay/timeline, plugin (types, defineCaptchaPlugin brand, typed registry factory, rng).
-- `packages/captcha-plugins` — registry.ts (compile-time map; thêm CAPTCHA mới = thêm vào object này) + `slider/` (tham chiếu: types=định nghĩa toán học, generator, verifier, feature-extractor, plugin).
+- `packages/captcha-plugins` — registry.ts (compile-time map; thêm CAPTCHA mới = thêm vào object này) + `slider/` (tham chiếu CAPTCHA kéo/chuyển động: types=định nghĩa toán học, generator, verifier, feature-extractor, plugin) + `checkbox/` (tham chiếu CAPTCHA nhấn/phím, không trajectory: `activations.ts` = định nghĩa "activation" DUY NHẤT dùng cho feature và replay).
 - `packages/config` — tsconfig.base.json.
 - `apps/web` — Next.js 16 + Tailwind 4 (App Router). `/` và `/playground/slider`. `features/slider/`: `slider-controller.ts` (state machine thuần, không DOM, có test), `SliderSurface` (DOM/pointer capture/ResizeObserver), `SliderSession` (1 challenge = 1 session, remount theo key), `SliderInspect` (ghép primitive), `SliderReplay`; selector/dữ liệu riêng Slider: `slider-view-data.ts`, `replay-state.ts` (handle replay từ gesture + marker). `lib/pointer-adapter.ts` = biên DOM→event chuẩn hoá. `components/inspect/` + `lib/inspect/` = primitive CHUNG (Card, VerificationSummary, MetricTable, TrajectoryView, MotionChart, EventTimeline, EventInspector, ReplayControls) — không được biết Slider. `lib/replay/` = replay-clock (state machine thuần), replay-driver (RAF), markers. Math slider KHÔNG nằm ở web (dùng `slider/geometry.ts` của plugin).
+- `apps/web/features/checkbox/` — native `<input type="checkbox">` là nguồn sự thật; `checkbox-controller.ts` (ghi input ≠ chuyển trạng thái; submit trong onChange SAU pointerup/keyup), `CheckboxReplay` + `checkbox-replay-state.ts`, `CheckboxLearn`. KHÔNG có trajectory/chart (cố ý). Chung mới rút ra: `lib/useSeededChallenge.ts`, `lib/inspect/useEventSelection.ts`, `lib/replay/useReplayPanel.ts`, `components/inspect/EventExplorer.tsx`; `InspectMetric` = Numeric | Text.
 - Chưa có: visualization package, synthetic, database, ui package.
 - ADR: `docs/adr/` (0001–0005). Bảng dữ liệu thay thế cho chart: `MotionDataTable` + `lib/inspect/series.ts` (định nghĩa mẫu hợp lệ DUY NHẤT cho chart/summary/table).
 
@@ -50,6 +51,8 @@ corepack pnpm --filter web test:e2e   # Playwright dùng Chrome cài sẵn (chan
 - Privacy E2E dùng helper `apps/web/e2e/privacy.ts` (`watchPrivacy`): bắt request, console, ghi storage/IndexedDB/cookie; route CAPTCHA mới phải có kịch bản riêng.
 - Tài liệu cộng đồng: README, CONTRIBUTING, SECURITY, CODE_OF_CONDUCT, `docs/adding-a-captcha.md` (guide thêm CAPTCHA). CHƯA có LICENSE (chủ repo chưa chọn; không tự chọn).
 - `apps/web/next-env.d.ts` và `AGENTS.md` do Next sinh → gitignore, không track.
+- Checkbox: Space (không phải Enter) kích hoạt; keydown lặp không ghi; mouse thả ngoài control → không có pointerup → press "open", không tính activation; KHÔNG suy "thả ngoài" từ hình học (touch có implicit capture). Feature "successful" suy từ parity của event, KHÔNG phải đáp án đã verify (kích hoạt bằng assistive tech không có event → replay rỗng).
+- E2E: scrubber `fill` không chạm đúng biên → dùng `scrubToEdge` (Home/End); `ReplayControls` snap giá trị gần biên (trình duyệt làm tròn 15 chữ số).
 - Playwright: SVG `line` rộng/cao 0 không bao giờ "visible" → dùng `toHaveCount`; `input[type=range]` cần `step="any"` nếu min lẻ.
 - Web: một bộ handler trên track (event từ handle nổi bọt lên) → mỗi event ghi đúng 1 lần. Resize giữa lúc kéo = huỷ attempt (ghi pointercancel, nhả capture, bỏ qua phần còn lại của con trỏ đó). Không setState theo pointermove (handle dịch bằng ref/transform).
 - Web giả định track không border, không CSS transform; track dịch ngang không đổi kích thước giữa lúc kéo sẽ lệch toạ độ (backlog).

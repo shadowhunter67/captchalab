@@ -1,36 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
 import { createRng } from "@captchalab/captcha-core";
-import { registry, type SliderChallenge } from "@captchalab/captcha-plugins";
-import { parseSeed, randomSeed } from "@/lib/seed";
+import { registry } from "@captchalab/captcha-plugins";
+import { useSeededChallenge } from "@/lib/useSeededChallenge";
 import { SliderSession } from "./SliderSession";
 
+const generateSlider = (seed: number) => registry.get("slider").generate({ rng: createRng(seed) });
+
 export function SliderPlayground() {
-  // Generated on the client only: no hydration mismatch from random challenges.
-  const [seed, setSeed] = useState<number | null>(null);
-  const [round, setRound] = useState(0);
-
-  useEffect(() => {
-    // `?seed=123` makes the challenge deterministic (E2E tests, reproducing a challenge).
-    setSeed(parseSeed(window.location.search) ?? randomSeed());
-  }, []);
-
-  const generated = useMemo<{ challenge: SliderChallenge | null; failed: boolean }>(() => {
-    if (seed === null) return { challenge: null, failed: false };
-    try {
-      return { challenge: registry.get("slider").generate({ rng: createRng(seed) }), failed: false };
-    } catch (err) {
-      console.error("Challenge generation failed", err instanceof Error ? err.message : "unknown error");
-      return { challenge: null, failed: true };
-    }
-  }, [seed]);
-
-  const newChallenge = (): void => {
-    setSeed(randomSeed());
-    setRound((r) => r + 1);
-  };
+  const { challenge, failed, round, newChallenge } = useSeededChallenge(generateSlider);
 
   return (
     <main className="mx-auto max-w-3xl space-y-6 px-4 py-8 sm:px-6">
@@ -45,16 +24,16 @@ export function SliderPlayground() {
         </p>
       </header>
 
-      {generated.failed && (
+      {failed && (
         <p role="alert" className="text-sm text-bad">
           Could not generate a challenge. Reload the page.
         </p>
       )}
-      {generated.challenge === null && !generated.failed && <p className="text-sm text-muted">Loading…</p>}
-      {generated.challenge && (
+      {challenge === null && !failed && <p className="text-sm text-muted">Loading…</p>}
+      {challenge && (
         <SliderSession
-          key={`${generated.challenge.id}:${round}`}
-          challenge={generated.challenge}
+          key={`${challenge.id}:${round}`}
+          challenge={challenge}
           onNewChallenge={newChallenge}
         />
       )}

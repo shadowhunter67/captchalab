@@ -1,15 +1,15 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { isPointerEvent, type FeatureSet, type InteractionSession, type VerificationResult } from "@captchalab/captcha-core";
 import type { SliderChallenge, SliderFeatures, SliderLayout } from "@captchalab/captcha-plugins";
 import { Card } from "@/components/inspect/Card";
-import { EventInspector } from "@/components/inspect/EventInspector";
-import { EventTimeline } from "@/components/inspect/EventTimeline";
+import { EventExplorer } from "@/components/inspect/EventExplorer";
 import { MetricTable } from "@/components/inspect/MetricTable";
 import { MotionChart } from "@/components/inspect/MotionChart";
 import { VerificationSummary } from "@/components/inspect/VerificationSummary";
-import { buildTimelineModel, stepSelection, timelineKind, type TimelineAnnotation } from "@/lib/inspect/events";
+import type { TimelineAnnotation } from "@/lib/inspect/events";
+import { useEventSelection } from "@/lib/inspect/useEventSelection";
 import { formatAcceleration, formatVelocity } from "@/lib/format";
 import { interactionMetrics } from "@/lib/inspect/metrics";
 import type { SessionMarker } from "@/lib/replay/markers";
@@ -34,19 +34,13 @@ const CHART_SCOPE = "Handle drags only: hover is excluded and each attempt is a 
 /**
  * Slider's Inspect page, composed from generic primitives. Slider-specific choices live in
  * slider-view-data.ts (which data to show); presentation lives in components/inspect.
- * `selectedIndex` (an index into session.events) is the single source of truth for selection:
+ * `selection.index` (an index into session.events) is the single source of truth for selection:
  * the timeline, the event inspector, the trajectory marker and the chart crosshairs all derive from it.
  */
 export function SliderInspect({ verification, featureSet, session, markers, layout, challenge, via }: Props) {
   const f = featureSet.features;
   const noDrag = f.numberOfAttempts === 0;
-  // Selection is bound to the session snapshot it was made on: a different session starts unselected.
-  const [selection, setSelection] = useState<{ session: InteractionSession; index: number } | null>(null);
-  const selectedIndex = selection && selection.session === session ? selection.index : null;
-  const setSelectedIndex = (next: number | null | ((i: number | null) => number | null)): void => {
-    const value = typeof next === "function" ? next(selectedIndex) : next;
-    setSelection(value === null ? null : { session, index: value });
-  };
+  const selection = useEventSelection(session);
 
   const series = useMemo(() => sliderMotionSeries(session), [session]);
   const velocitySegments = useMemo(() => series.segments.map((s) => s.velocity), [series]);
@@ -56,13 +50,11 @@ export function SliderInspect({ verification, featureSet, session, markers, layo
     () => markers.map((m) => ({ t: m.t, label: "try again" })),
     [markers],
   );
-  const timeline = useMemo(() => buildTimelineModel(session, 48, annotations.map((a) => a.t)), [session, annotations]);
   const attemptMetrics = useMemo(() => sliderAttemptMetrics(f), [f]);
   const sessionMetrics = useMemo(() => interactionMetrics(f), [f]);
-  const selectedEvent = selectedIndex === null ? null : (session.events[selectedIndex] ?? null);
+  const selectedEvent = selection.event;
   const selectedT = selectedEvent?.t ?? null;
   const selectedPoint = selectedEvent && isPointerEvent(selectedEvent) ? { x: selectedEvent.x, y: selectedEvent.y } : null;
-  const total = session.events.length;
 
   return (
     <section aria-labelledby="inspect-h" className="space-y-4" data-testid="inspect">
@@ -138,24 +130,7 @@ export function SliderInspect({ verification, featureSet, session, markers, layo
       </Card>
 
       <Card id="events-h" title="Event timeline">
-        <EventTimeline
-          model={timeline}
-          annotations={annotations}
-          selectedIsMove={selectedEvent !== null && timelineKind(selectedEvent) === "move"}
-          selectedT={selectedT}
-          selectedIndex={selectedIndex}
-          onSelect={setSelectedIndex}
-        />
-        <div className="mt-3">
-          <EventInspector
-            event={selectedEvent}
-            index={selectedIndex}
-            total={total}
-            onPrevious={() => setSelectedIndex((i) => stepSelection(i, -1, total))}
-            onNext={() => setSelectedIndex((i) => stepSelection(i, 1, total))}
-            onClear={() => setSelectedIndex(null)}
-          />
-        </div>
+        <EventExplorer session={session} selection={selection} annotations={annotations} />
       </Card>
     </section>
   );

@@ -5,8 +5,7 @@ import { createPointerTimeline, type InteractionSession } from "@captchalab/capt
 import { SLIDER_TARGETS, type SliderChallenge, type SliderLayout } from "@captchalab/captcha-plugins";
 import { ReplayControls } from "@/components/inspect/ReplayControls";
 import { TrajectoryView } from "@/components/inspect/TrajectoryView";
-import { useReplayDriver } from "@/lib/replay/useReplayDriver";
-import type { ReplayClockState } from "@/lib/replay/replay-clock";
+import { useReplayPanel } from "@/lib/replay/useReplayPanel";
 import type { SessionMarker } from "@/lib/replay/markers";
 import { TRACK_HEIGHT_PX } from "./SliderSurface";
 import { createHandleReplay } from "./replay-state";
@@ -37,21 +36,16 @@ export function SliderReplay({ session, markers, layout, challenge, selectedPoin
     [session, timeline, layout, markers],
   );
 
-  const svgHostRef = useRef<HTMLDivElement>(null);
   const cursorRef = useRef<SVGCircleElement>(null);
   const handleRef = useRef<SVGRectElement>(null);
-  const rangeRef = useRef<HTMLInputElement>(null);
-  const labelRef = useRef<HTMLSpanElement>(null);
 
   const span = view.geometry.span;
   // The replay also covers trailing markers (a "Try again" after the last pointer sample) and never
-  // collapses to zero length, so equal timestamps still replay in recorded order.
+  // collapses to zero length.
   const lastMarkerT = markers.reduce((m, x) => Math.max(m, x.t), Number.NEGATIVE_INFINITY);
-  const range = span
-    ? ([span.startT, Math.max(span.endT, lastMarkerT, span.startT + 1)] as const)
-    : null;
+  const range = span ? ([span.startT, Math.max(span.endT, lastMarkerT, span.startT + 1)] as const) : null;
 
-  const applyFrame = (s: ReplayClockState): void => {
+  const { hostRef, controlsProps } = useReplayPanel(range, session, (s) => {
     const t = s.currentTime;
     const p = timeline.at(t);
     cursorRef.current?.setAttribute("cx", String(p?.x ?? 0));
@@ -59,19 +53,7 @@ export function SliderReplay({ session, markers, layout, challenge, selectedPoin
     // A pressed pointer is drawn larger, so state is not conveyed by color alone.
     cursorRef.current?.setAttribute("r", p?.down ? "9" : "5");
     handleRef.current?.setAttribute("x", String(layout.trackLeft + handleAt(t)));
-    if (rangeRef.current) rangeRef.current.value = String(t);
-    if (labelRef.current) {
-      const total = s.endTime - s.startTime;
-      labelRef.current.textContent = `${((t - s.startTime) / 1000).toFixed(2)} s / ${(total / 1000).toFixed(2)} s`;
-    }
-    const host = svgHostRef.current;
-    if (host) {
-      host.dataset.replayTime = String(Math.round(t));
-      host.dataset.replayStatus = s.status;
-    }
-  };
-
-  const { driver, status, speed } = useReplayDriver(range, session, applyFrame);
+  });
 
   if (!span) {
     return (
@@ -82,7 +64,7 @@ export function SliderReplay({ session, markers, layout, challenge, selectedPoin
   }
 
   return (
-    <div ref={svgHostRef} data-testid="replay">
+    <div ref={hostRef} data-testid="replay">
       <TrajectoryView
         geometry={view.geometry}
         testId="trajectory-svg"
@@ -113,19 +95,7 @@ export function SliderReplay({ session, markers, layout, challenge, selectedPoin
         }
         overlay={<circle ref={cursorRef} cx={0} cy={0} r={5} fill="var(--accent)" stroke="var(--bg)" strokeWidth={1.5} />}
       />
-      <ReplayControls
-        status={status}
-        speed={speed}
-        startTime={range ? range[0] : span.startT}
-        endTime={range ? range[1] : span.endT}
-        disabled={driver === null}
-        onPlayPause={() => (status === "playing" ? driver?.pause() : driver?.play())}
-        onRestart={() => driver?.restart()}
-        onSpeed={(s) => driver?.setSpeed(s)}
-        onSeek={(t) => driver?.seek(t)}
-        rangeRef={rangeRef}
-        labelRef={labelRef}
-      />
+      <ReplayControls {...controlsProps} />
       <p className="mt-2 text-xs text-muted">
         Circle: start. Square: end. Dashed band: accepted release region. The replay is a drawing of your recorded
         events; it does not control the slider. The pale block is where the handle was; hovering never moves it, and

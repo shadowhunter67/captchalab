@@ -11,12 +11,18 @@ export default function HomePage() {
         the measured features and a replay of your own attempt. Everything runs in your browser;
         raw interaction data is not uploaded.
       </p>
-      <div>
+      <div className="flex flex-wrap gap-3">
         <Link
           href="/playground/slider"
           className="inline-block rounded-md bg-accent px-4 py-2.5 font-medium text-bg hover:opacity-90"
         >
           Open Slider Playground
+        </Link>
+        <Link
+          href="/playground/checkbox"
+          className="inline-block rounded-md border border-line bg-panel px-4 py-2.5 font-medium hover:bg-track"
+        >
+          Open Checkbox Playground
         </Link>
       </div>
     </main>

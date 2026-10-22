@@ -10,23 +10,34 @@ import {
 
 export type MetricUnit = "ms" | "px" | "px/s" | "px/s²" | "count";
 
-/**
- * What the feature table renders. A CAPTCHA decides which features to show and how to label them;
- * the table knows nothing about the math. Raw values stay raw: formatting happens only on display.
- */
-export interface InspectMetric {
+interface MetricBase {
   id: string;
   label: string;
-  /** Raw feature value; null/undefined = not available for this interaction. */
-  value: number | null | undefined;
-  unit: MetricUnit;
   /** Short qualifier shown next to the label, e.g. "along handle travel". */
   hint?: string;
   /** Longer explanation, exposed as a tooltip and to assistive tech. */
   description?: string;
+}
+
+/** A measured number. Raw value stays raw; formatting happens only on display. */
+export interface NumericMetric extends MetricBase {
+  /** null/undefined = not available for this interaction (shown as a dash, never as 0). */
+  value: number | null | undefined;
+  unit: MetricUnit;
   /** Overrides the unit formatter (e.g. for a percentage a later CAPTCHA needs). */
   format?: (value: number) => string;
 }
+
+/** A non-numeric feature (e.g. input modality) shown as-is. */
+export interface TextMetric extends MetricBase {
+  text: string;
+}
+
+/**
+ * What the feature table renders. A CAPTCHA decides which features to show and how to label them;
+ * the table knows nothing about the math.
+ */
+export type InspectMetric = NumericMetric | TextMetric;
 
 const FORMATTERS: Record<MetricUnit, (v: number | null) => string> = {
   ms: formatMilliseconds,
@@ -36,7 +47,8 @@ const FORMATTERS: Record<MetricUnit, (v: number | null) => string> = {
   count: formatCount,
 };
 
-export function formatMetricValue(m: Pick<InspectMetric, "value" | "unit" | "format">): string {
+export function formatMetricValue(m: InspectMetric): string {
+  if ("text" in m) return m.text;
   if (m.value === null || m.value === undefined || !Number.isFinite(m.value)) return NO_VALUE;
   return m.format ? m.format(m.value) : FORMATTERS[m.unit](m.value);
 }
@@ -47,7 +59,7 @@ type InteractionFeatures = Partial<BaseCaptchaFeatures & MotionFeatures>;
  * Generic whole-session summary any pointer-driven CAPTCHA can show. Missing features become
  * "not available" rows instead of being skipped or defaulted to 0.
  */
-export function interactionMetrics(f: InteractionFeatures): InspectMetric[] {
+export function interactionMetrics(f: InteractionFeatures): NumericMetric[] {
   return [
     { id: "eventCount", label: "Event count", value: f.eventCount, unit: "count" },
     {

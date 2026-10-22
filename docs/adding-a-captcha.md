@@ -1,6 +1,6 @@
 # Adding a CAPTCHA to CaptchaLab
 
-This guide takes you from nothing to a new CAPTCHA that can be tried, inspected and tested. The **Slider** is the reference implementation: when this guide says "see the Slider", read the named file. You do not need to read the whole repository first.
+This guide takes you from nothing to a new CAPTCHA that can be tried, inspected and tested. There are two reference implementations: the **Slider** (drag, pointer motion, charts) and the **Checkbox** (press/keyboard activation, no trajectory, native control). When this guide says "see the Slider" or "see the Checkbox", read the named file; pick the one whose interaction is closest to yours. You do not need to read the whole repository first.
 
 > **Reuse abstractions by behavior, not by file-name imitation.** A checkbox has no drag, so it needs no drag controller. Take the parts whose *job* you need.
 
@@ -25,7 +25,7 @@ apps/web  ──►  packages/captcha-plugins  ──►  packages/captcha-core
 - Anything a second CAPTCHA could reuse and that is not CAPTCHA-specific has a home already; don't duplicate it in your plugin or page:
   - pure analysis math → `captcha-core`;
   - presentation primitives → `apps/web/components/inspect` and `apps/web/lib/inspect`;
-  - CAPTCHA-agnostic browser/lifecycle utilities → `apps/web/lib` (e.g. `pointer-adapter.ts`, `seed.ts` for `?seed=` and random seeds, `replay/` for the replay clock, driver and `useReplayDriver`, `format.ts`). Reuse `parseSeed`/`randomSeed` instead of copying seed handling.
+  - CAPTCHA-agnostic browser/lifecycle utilities → `apps/web/lib` (e.g. `pointer-adapter.ts`, `seed.ts` + `useSeededChallenge.ts` for `?seed=` and New challenge, `inspect/useEventSelection.ts` for event selection, `replay/` for the replay clock, driver, `useReplayDriver` and `useReplayPanel`, `format.ts`). Don't copy seed or selection handling into a new page.
 
 ## 2. The plugin (`packages/captcha-plugins/src/<id>/`)
 
@@ -53,7 +53,7 @@ Write the **mathematical definition of every feature in a comment next to its ty
 
 ### 2.4 Feature extractor (`feature-extractor.ts`)
 
-`extractFeatures(challenge, interaction, context)` returns a **`FeatureSet`**:
+`extractFeatures(challenge, interaction, context)` returns a **`FeatureSet`** (a CAPTCHA with no UI geometry, like the Checkbox, uses the default `undefined` context and callers pass `undefined`):
 
 ```ts
 createFeatureSet(
@@ -96,7 +96,8 @@ The registry is **typed at compile time**: `registry.get("my-id")` is exactly `t
 - Time `t` is relative and monotonic (ms since session start); the recorder stamps it. Do not use wall-clock time in analysis.
 - Prefer **Pointer Events** for pointer UI, and emit **one family only**: never both touch and pointer events for the same contact.
 - Record activation from **`pointerdown`/`pointerup`**, not from the native `click` event: `click` carries no honest pointer identity for keyboard activation, and core ignores `click` when building tracks and gestures. Keyboard activation (e.g. Space on a checkbox) is recorded as `keydown`/`keyup` with the physical `code`, directly, so you never fabricate pointer fields and never double-record `keydown` plus `click`. No schema change is needed for this (see how `slider-controller.ts` records keys).
-- Keep **`pointerId`** and `pointerType`. Handle **`pointercancel`**: it ends a contact but is not a completed attempt and must not submit an answer.
+- Keep **`pointerId`** and `pointerType`. Separate *recording input* from *state transition*: with a native control, the browser toggles it as the default action of the click that follows pointerup (or the keyup of Space), so your submit handler runs after the release is already recorded. Do not infer or flip state from events; read it from the native change event.
+- Do not guess what the browser will do from geometry (e.g. "released outside, so cancel"): touch/pen have implicit capture and click anyway. Record what is delivered; let the extractor decide what counts as an activation. Handle **`pointercancel`**: it ends a contact but is not a completed attempt and must not submit an answer.
 - Use **semantic target ids** (constants), not selectors.
 - No arbitrary metadata on events. Keyboard events record only the physical `code`, never typed characters (`SCHEMA_VERSION` in `captcha-core/src/types/events.ts`).
 - If a new kind of event is truly needed, change the schema in core, bump `SCHEMA_VERSION`, and update ADR 0003.
@@ -107,13 +108,14 @@ The Slider's roles, so you can decide which you need:
 
 | Role | Slider file | Needed when |
 |---|---|---|
-| Interaction state machine (DOM-free, unit-tested) | `slider-controller.ts` | the interaction has non-trivial states (drag, cancel, resize) |
-| DOM surface (events → controller, pointer capture, layout measurement) | `SliderSurface.tsx` | always, but only as much as your UI needs |
-| Session (one challenge = one recorder + controller + result; remounted per challenge) | `SliderSession.tsx` | always |
-| Page / challenge lifecycle (`?seed=`, "New challenge") | `SliderPlayground.tsx`, `app/playground/slider/page.tsx` | always (add a route) |
-| Inspect view-data (which data to show) | `slider-view-data.ts` | always |
-| Inspect composition | `SliderInspect.tsx` | always |
-| Replay specifics | `SliderReplay.tsx`, `replay-state.ts` | only if you replay UI state beyond the pointer |
+| Interaction recorder/state machine (DOM-free, unit-tested) | `slider/slider-controller.ts`, `checkbox/checkbox-controller.ts` | always: it is where "record input" and "state transition" stay separate |
+| DOM surface (events → controller, layout measurement) | `SliderSurface.tsx`, `CheckboxSurface.tsx` | always, but only as much as your UI needs. The Checkbox uses a **native** input as the source of truth and needs no pointer capture or geometry |
+| Session (one challenge = one recorder + controller + result; remounted per challenge) | `SliderSession.tsx`, `CheckboxSession.tsx` | always |
+| Page / challenge lifecycle | `SliderPlayground.tsx`, `CheckboxPlayground.tsx` + `app/playground/<id>/page.tsx` | always (add a route); use `useSeededChallenge` for `?seed=` / New challenge |
+| Inspect view-data (which data to show) | `slider-view-data.ts`, `checkbox-view-data.ts` | always |
+| Inspect composition | `SliderInspect.tsx`, `CheckboxInspect.tsx` | always |
+| Replay specifics (derived state model + the SVG that paints it) | `slider/replay-state.ts` + `SliderReplay.tsx`, `checkbox-replay-state.ts` + `CheckboxReplay.tsx` | when you replay; reuse `useReplayPanel` for the clock/scrubber glue |
+| Learn content | `CheckboxLearn.tsx` | when the CAPTCHA page is added (the Slider's is still a short details block) |
 
 Rules that keep the slice correct:
 
@@ -133,8 +135,10 @@ Generic building blocks live in `apps/web/components/inspect` and `apps/web/lib/
 | `MetricTable` over `InspectMetric[]` | any feature list; `null` shows "—"; units and formatting handled; per-metric `format` override |
 | `TrajectoryView` over `buildTrajectoryGeometry(tracks, bounds)` | pointer paths with start/end markers; your CAPTCHA supplies tracks, `underlay`/`overlay` |
 | `MotionChart` (+ its data table) over `MotionSeries` segments | velocity/acceleration; only for pointer-motion CAPTCHAs |
-| `EventTimeline` + `EventInspector` | any session; selection is one event index |
-| `ReplayControls` + `lib/replay` (`ReplayDriver`, `useReplayDriver`) | play/pause/speed/scrub for a derived replay model |
+| `EventExplorer` (= `EventTimeline` + `EventInspector`) with `useEventSelection(session)` | any session; selection is one event index bound to the session snapshot |
+| `ReplayControls` + `useReplayPanel` (over `ReplayDriver`) | play/pause/speed/scrub for a derived replay model; you supply only `drawFrame` |
+
+A CAPTCHA without a meaningful path (the Checkbox) **should not** render the trajectory or motion charts. Inspect is composed from what makes sense, not from everything that exists.
 
 **Pattern:** write a small *view-data* module in your feature (see `slider-view-data.ts`) that turns your plugin's output into the primitives' inputs: which tracks, which metrics and labels, which series. Primitives consume descriptors; the adapter owns the CAPTCHA vocabulary. A CAPTCHA that does not use pointer motion simply doesn't render the motion charts or trajectory.
 
@@ -187,6 +191,6 @@ Each CAPTCHA should eventually explain: what it is, how the challenge is generat
 
 ## 11. Finish
 
-- Add the route (`apps/web/app/playground/<id>/page.tsx`) and make it discoverable: link it from `apps/web/app/page.tsx`.
+- Add the route (`apps/web/app/playground/<id>/page.tsx`) and make it discoverable: link it from `apps/web/app/page.tsx`. Add an E2E spec for it (solve, keyboard, Inspect, replay, New challenge, privacy via `watchPrivacy`); the replay scrubber helpers are in `apps/web/e2e/replay.ts`.
 - Update the README **Current status** table (move the CAPTCHA from "not implemented" to "implemented") and the Roadmap, so the docs stay truthful.
 - Run the commands in [CONTRIBUTING.md](../CONTRIBUTING.md#before-you-open-a-pull-request), update docs/ADRs if you changed a definition or architecture, and open a pull request using its checklist.

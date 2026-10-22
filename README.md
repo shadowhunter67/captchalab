@@ -4,7 +4,7 @@
 
 CaptchaLab is an educational, research-oriented web app for exploring how people interact with CAPTCHA challenges: the events a challenge produces, the behavioral features that can be measured from them, and a replay of your own attempt. Everything runs in your browser.
 
-> **Status: Alpha (`0.1.0-alpha`, not published).** One CAPTCHA is implemented. APIs may still change. See [Current status](#current-status).
+> **Status: Alpha (`0.1.0-alpha`, not published).** Two CAPTCHAs are implemented (Slider, Checkbox). APIs may still change. See [Current status](#current-status).
 
 ## What is CaptchaLab?
 
@@ -27,10 +27,16 @@ Any synthetic interaction added in the future may only target challenges created
 
 | | |
 |---|---|
-| **Implemented CAPTCHA** | **Slider** (reference implementation) |
-| Not implemented yet | Text, Image Grid, Drag & Drop, Image Rotation, Checkbox, Human-vs-Synthetic comparison, research data contribution |
+| **Implemented CAPTCHAs** | **Slider** (reference for drag/pointer-motion CAPTCHAs), **Checkbox** (reference for press/keyboard CAPTCHAs without a trajectory) |
+| Not implemented yet | Text, Image Grid, Drag & Drop, Image Rotation, Human-vs-Synthetic comparison, research data contribution |
 
-Only the Slider exists today. The rest is [roadmap](#roadmap), not functionality.
+Only the two above exist today. The rest is [roadmap](#roadmap), not functionality.
+
+### What you can do with the Checkbox
+
+- **Try** it with a mouse, touch or pen, or with the keyboard (Tab to focus, Space to toggle). It is a native `<input type="checkbox">`, so it has an accessible name, a checked state and normal focus behavior.
+- **Inspect**: pass/fail, activation metrics (reaction time, time to first activation, press duration, activation count, successful activation index, time between activations, input modality), an event timeline and event inspector, and a replay of the press and the checked state. There is deliberately no trajectory or velocity/acceleration chart: one press has no meaningful path.
+- A short **Learn** section explains how it works, observable signals, strengths, weaknesses, accessibility and automation considerations, and the limits of the simulation.
 
 ### What you can do with the Slider
 
@@ -48,7 +54,7 @@ Only the Slider exists today. The rest is [roadmap](#roadmap), not functionality
 
 ```text
 apps/web                     Next.js app (UI, DOM adapters, Inspect composition)
-packages/captcha-plugins     CAPTCHA plugins + the typed registry (Slider today)
+packages/captcha-plugins     CAPTCHA plugins + the typed registry (Slider, Checkbox)
 packages/captcha-core        Framework-independent logic: event schema, recorder, gestures,
                              motion features/series, replay timeline, plugin API
 packages/config              Shared TypeScript + ESLint configuration
@@ -69,7 +75,7 @@ Requirements: Node.js ≥ 22 (CI uses the version in [.nvmrc](.nvmrc)) with Core
 
 ```bash
 corepack pnpm install
-corepack pnpm --filter web dev      # http://localhost:3000/playground/slider
+corepack pnpm --filter web dev      # http://localhost:3000  (/playground/slider, /playground/checkbox)
 ```
 
 ## Scripts
@@ -92,7 +98,7 @@ A future research-contribution feature, if added, will be opt-in with explicit c
 
 ## Roadmap
 
-Planned, **not implemented**: Checkbox, Text, Image Grid, Drag & Drop and Image Rotation CAPTCHAs; Human-vs-Synthetic comparison (CaptchaLab-controlled challenges only); explicit opt-in anonymous data contribution; Learn pages; more accessibility and performance work.
+Planned, **not implemented**: Text, Image Grid, Drag & Drop and Image Rotation CAPTCHAs; Human-vs-Synthetic comparison (CaptchaLab-controlled challenges only); explicit opt-in anonymous data contribution; Learn pages; more accessibility and performance work.
 
 ## Contributing
 

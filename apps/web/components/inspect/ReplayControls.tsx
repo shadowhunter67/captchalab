@@ -72,7 +72,12 @@ export function ReplayControls({
           step="any"
           defaultValue={startTime}
           disabled={disabled}
-          onInput={(e) => onSeek(Number(e.currentTarget.value))}
+          onInput={(e) => {
+            // Browsers round range values to ~15 significant digits, so a value at an end can land a hair
+            // inside it; snap to the exact bound so "scrub to the end" really finishes the replay.
+            const v = Number(e.currentTarget.value);
+            onSeek(Math.abs(v - endTime) < 1e-6 ? endTime : Math.abs(v - startTime) < 1e-6 ? startTime : v);
+          }}
           className="min-w-0 flex-1"
           data-testid="replay-scrubber"
         />
