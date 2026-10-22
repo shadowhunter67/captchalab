@@ -11,6 +11,9 @@ export function verifySliderAnswer(
   challenge: SliderChallenge,
   answer: SliderAnswer,
 ): VerificationResult {
+  if (typeof challenge !== "object" || challenge === null) {
+    return { passed: false, reason: "The challenge is missing or malformed." };
+  }
   const { target, tolerance } = challenge;
   if (
     !Number.isFinite(target) || target < 0 || target > 1 ||

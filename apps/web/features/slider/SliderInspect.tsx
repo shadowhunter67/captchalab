@@ -10,6 +10,7 @@ import { MetricTable } from "@/components/inspect/MetricTable";
 import { MotionChart } from "@/components/inspect/MotionChart";
 import { VerificationSummary } from "@/components/inspect/VerificationSummary";
 import { buildTimelineModel, stepSelection, timelineKind, type TimelineAnnotation } from "@/lib/inspect/events";
+import { formatAcceleration, formatVelocity } from "@/lib/format";
 import { interactionMetrics } from "@/lib/inspect/metrics";
 import type { SessionMarker } from "@/lib/replay/markers";
 import type { SubmitVia } from "./slider-controller";
@@ -113,6 +114,8 @@ export function SliderInspect({ verification, featureSet, session, markers, layo
           includeZero
           selectedT={selectedT}
           formatValue={axisNumber}
+          formatCell={(v) => formatVelocity(v, 1)}
+          segmentLabel="Drag"
           testId="chart-velocity"
           scopeNote={CHART_SCOPE}
         />
@@ -127,6 +130,8 @@ export function SliderInspect({ verification, featureSet, session, markers, layo
           includeZero
           selectedT={selectedT}
           formatValue={axisNumber}
+          formatCell={(v) => formatAcceleration(v, 1)}
+          segmentLabel="Drag"
           testId="chart-acceleration"
           scopeNote={`${CHART_SCOPE} Computed from the velocity samples (change in speed between consecutive segments).`}
         />

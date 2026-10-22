@@ -1,4 +1,5 @@
 import type { SeriesSample } from "@captchalab/captcha-core";
+import { countValidSegments, isValidSample, validSamples } from "./series";
 
 export interface ChartSize {
   width: number;
@@ -51,15 +52,15 @@ export function buildChartModel(
     top: size.margin.top,
     bottom: size.height - size.margin.bottom,
   };
-  let [x0, x1] = xDomainIn;
-  if (!(x1 > x0)) x1 = x0 + 1;
+  const x0 = xDomainIn[0];
+  const x1 = xDomainIn[1] > x0 ? xDomainIn[1] : x0 + 1; // widen a degenerate range
 
   let yMin = Number.POSITIVE_INFINITY;
   let yMax = Number.NEGATIVE_INFINITY;
   let sampleCount = 0;
   for (const seg of segments) {
     for (const s of seg) {
-      if (!Number.isFinite(s.t) || !Number.isFinite(s.value)) continue;
+      if (!isValidSample(s)) continue;
       sampleCount++;
       yMin = Math.min(yMin, s.value);
       yMax = Math.max(yMax, s.value);
@@ -86,7 +87,7 @@ export function buildChartModel(
   const paths: string[] = [];
   const dots: { x: number; y: number }[] = [];
   for (const seg of segments) {
-    const pts = seg.filter((s) => Number.isFinite(s.t) && Number.isFinite(s.value));
+    const pts = validSamples(seg);
     if (pts.length === 1) {
       const p = pts[0] as SeriesSample;
       dots.push({ x: scaleX(p.t), y: scaleY(p.value) });
@@ -109,11 +110,11 @@ export function describeSeries(
   segments: readonly (readonly SeriesSample[])[],
   format: (v: number) => string,
 ): string {
-  const samples = segments.flat().filter((s) => Number.isFinite(s.value) && Number.isFinite(s.t));
+  const samples = segments.flatMap(validSamples);
   if (samples.length === 0) return `Not enough motion samples to calculate ${name.toLowerCase()}.`;
   const lo = samples.reduce((m, s) => Math.min(m, s.value), Number.POSITIVE_INFINITY);
   const peak = samples.reduce((m, s) => (Math.abs(s.value) > Math.abs(m.value) ? s : m));
   const hi = samples.reduce((m, s) => Math.max(m, s.value), Number.NEGATIVE_INFINITY);
-  const drags = segments.filter((s) => s.length > 0).length;
+  const drags = countValidSegments(segments);
   return `${name} ranged from ${format(lo)} to ${format(hi)} ${unit} across ${drags} movement segment${drags === 1 ? "" : "s"}. Largest magnitude ${format(peak.value)} ${unit} at ${(peak.t / 1000).toFixed(2)} s.`;
 }

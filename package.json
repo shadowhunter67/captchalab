@@ -4,10 +4,15 @@
   "packageManager": "pnpm@12.14.0",
   "scripts": {
     "typecheck": "turbo run typecheck",
-    "test": "turbo run test"
+    "test": "turbo run test",
+    "lint": "corepack pnpm -r run lint",
+    "check:workspaces": "node scripts/check-workspaces.mjs"
   },
   "devDependencies": {
     "turbo": "^2.5.0",
     "typescript": "^5.8.0"
+  },
+  "engines": {
+    "node": ">=22"
   }
 }

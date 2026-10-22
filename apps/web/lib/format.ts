@@ -13,14 +13,14 @@ export function formatPixels(px: number | null): string {
   return `${px.toFixed(1)} px`;
 }
 
-export function formatVelocity(pxPerSecond: number | null): string {
+export function formatVelocity(pxPerSecond: number | null, digits = 0): string {
   if (pxPerSecond === null || !Number.isFinite(pxPerSecond)) return NO_VALUE;
-  return `${Math.round(pxPerSecond)} px/s`;
+  return `${pxPerSecond.toFixed(digits)} px/s`;
 }
 
-export function formatAcceleration(pxPerSecond2: number | null): string {
+export function formatAcceleration(pxPerSecond2: number | null, digits = 0): string {
   if (pxPerSecond2 === null || !Number.isFinite(pxPerSecond2)) return NO_VALUE;
-  return `${Math.round(pxPerSecond2)} px/s²`;
+  return `${pxPerSecond2.toFixed(digits)} px/s²`;
 }
 
 export function formatCount(n: number | null): string {

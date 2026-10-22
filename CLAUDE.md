@@ -20,6 +20,8 @@ Monorepo mã nguồn mở, mục đích giáo dục/nghiên cứu: thử nhiều
 corepack pnpm install
 corepack pnpm -r run typecheck
 corepack pnpm -r run test
+corepack pnpm run lint   # ESLint type-aware, --max-warnings 0; cấu hình chung ở packages/config/eslint.config.mjs
+node scripts/check-workspaces.mjs   # mọi package phải có script lint/typecheck/test (pnpm -r bỏ qua im lặng package thiếu script)
 corepack pnpm --filter web build
 corepack pnpm --filter web test:e2e   # Playwright dùng Chrome cài sẵn (channel chrome), tự dựng next dev cổng 3100 và tắt sau test
 ```
@@ -33,7 +35,7 @@ corepack pnpm --filter web test:e2e   # Playwright dùng Chrome cài sẵn (chan
 - `packages/config` — tsconfig.base.json.
 - `apps/web` — Next.js 16 + Tailwind 4 (App Router). `/` và `/playground/slider`. `features/slider/`: `slider-controller.ts` (state machine thuần, không DOM, có test), `SliderSurface` (DOM/pointer capture/ResizeObserver), `SliderSession` (1 challenge = 1 session, remount theo key), `SliderInspect` (ghép primitive), `SliderReplay`; selector/dữ liệu riêng Slider: `slider-view-data.ts`, `replay-state.ts` (handle replay từ gesture + marker). `lib/pointer-adapter.ts` = biên DOM→event chuẩn hoá. `components/inspect/` + `lib/inspect/` = primitive CHUNG (Card, VerificationSummary, MetricTable, TrajectoryView, MotionChart, EventTimeline, EventInspector, ReplayControls) — không được biết Slider. `lib/replay/` = replay-clock (state machine thuần), replay-driver (RAF), markers. Math slider KHÔNG nằm ở web (dùng `slider/geometry.ts` của plugin).
 - Chưa có: visualization package, synthetic, database, ui package.
-- ADR: `docs/adr/` (0001–0005).
+- ADR: `docs/adr/` (0001–0005). Bảng dữ liệu thay thế cho chart: `MotionDataTable` + `lib/inspect/series.ts` (định nghĩa mẫu hợp lệ DUY NHẤT cho chart/summary/table).
 
 ## Bẫy đã biết
 
@@ -43,6 +45,11 @@ corepack pnpm --filter web test:e2e   # Playwright dùng Chrome cài sẵn (chan
 - Test compile-time = `@ts-expect-error` trong test, tsc kiểm tra; `pnpm -r typecheck` phải chạy cùng test.
 - Replay: mọi thao tác đổi ánh xạ thời gian (pause/speed/seek/restart) phải `settle()` + rebase mốc RAF trước (bug thật đã gặp). Reset do "Try again" là `SessionMarker` (web), KHÔNG phải InteractionEvent.
 - Chart vận tốc/gia tốc của Slider = chỉ drag handle (không hover), mỗi attempt 1 đường riêng; series tính ở core (`motion-series.ts`) trùng định nghĩa aggregate.
+- CI: `.github/workflows/ci.yml` (Node từ `.nvmrc` = 24.16.0, corepack, `--frozen-lockfile`, lint→typecheck→test→build→E2E; E2E với `CI=true` dùng `next start` + Chromium của Playwright, local dùng Chrome cài sẵn + dev server). Chưa chạy trên GitHub thật (chưa có remote).
+- Lint: `no-console` cấm log (chỉ error/warn) = chốt chặn riêng tư; bộ rule React Compiler của react-hooks v7 CỐ Ý chưa bật (nhiễu), backlog.
+- Privacy E2E dùng helper `apps/web/e2e/privacy.ts` (`watchPrivacy`): bắt request, console, ghi storage/IndexedDB/cookie; route CAPTCHA mới phải có kịch bản riêng.
+- Tài liệu cộng đồng: README, CONTRIBUTING, SECURITY, CODE_OF_CONDUCT, `docs/adding-a-captcha.md` (guide thêm CAPTCHA). CHƯA có LICENSE (chủ repo chưa chọn; không tự chọn).
+- `apps/web/next-env.d.ts` và `AGENTS.md` do Next sinh → gitignore, không track.
 - Playwright: SVG `line` rộng/cao 0 không bao giờ "visible" → dùng `toHaveCount`; `input[type=range]` cần `step="any"` nếu min lẻ.
 - Web: một bộ handler trên track (event từ handle nổi bọt lên) → mỗi event ghi đúng 1 lần. Resize giữa lúc kéo = huỷ attempt (ghi pointercancel, nhả capture, bỏ qua phần còn lại của con trỏ đó). Không setState theo pointermove (handle dịch bằng ref/transform).
 - Web giả định track không border, không CSS transform; track dịch ngang không đổi kích thước giữa lúc kéo sẽ lệch toạ độ (backlog).

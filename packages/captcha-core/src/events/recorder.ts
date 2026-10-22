@@ -94,7 +94,7 @@ export function createEventRecorder(options: RecorderOptions): EventRecorder {
       }
       lastT = t;
       if (isMove) lastMoveT = t;
-      buffer.push({ ...event, t } as InteractionEvent);
+      buffer.push({ ...event, t });
     },
     get size() {
       return buffer.length;

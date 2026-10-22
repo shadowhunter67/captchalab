@@ -1,6 +1,7 @@
 import { memo, useId, useMemo } from "react";
 import type { SeriesSample } from "@captchalab/captcha-core";
 import { buildChartModel, describeSeries, type ChartSize } from "@/lib/inspect/chart";
+import { MotionDataTable } from "./MotionDataTable";
 
 interface Props {
   title: string;
@@ -14,6 +15,10 @@ interface Props {
   /** Vertical marker at the selected event's time. */
   selectedT?: number | null;
   formatValue: (v: number) => string;
+  /** Formats one value with its unit for the data table, e.g. "248.3 px/s". */
+  formatCell: (v: number) => string;
+  /** What one segment is called to a reader, e.g. "Drag". */
+  segmentLabel: string;
   testId: string;
   /** Short note under the chart about what data it shows. */
   scopeNote?: string;
@@ -26,7 +31,7 @@ const SIZE: ChartSize = { width: 400, height: 170, margin: { top: 10, right: 14,
  * Pure-SVG time-series chart. Segments are separate lines (never joined across gestures);
  * single samples are dots. Has a text alternative that states the value range.
  */
-function MotionChartImpl({ title, unit, segments, xDomain, includeZero, selectedT, formatValue, testId, scopeNote }: Props) {
+function MotionChartImpl({ title, unit, segments, xDomain, includeZero, selectedT, formatValue, formatCell, segmentLabel, testId, scopeNote }: Props) {
   const uid = useId();
   const lo = xDomain ? xDomain[0] : 0;
   const hi = xDomain ? xDomain[1] : 1;
@@ -102,6 +107,15 @@ function MotionChartImpl({ title, unit, segments, xDomain, includeZero, selected
           <p id={`${uid}-d`} className="mt-1 text-xs text-muted" data-testid={`${testId}-summary`}>
             {summary}
           </p>
+          {/* Same `segments` as the SVG above: one source, two representations. */}
+          <MotionDataTable
+            title={title}
+            unit={unit}
+            segments={segments}
+            formatCell={formatCell}
+            segmentLabel={segmentLabel}
+            testId={testId}
+          />
         </>
       )}
       {scopeNote && <p className="mt-1 text-xs text-muted">{scopeNote}</p>}

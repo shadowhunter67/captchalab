@@ -103,6 +103,13 @@ describe("verifier", () => {
     }
   });
 
+  it("a missing or non-object challenge fails instead of throwing", () => {
+    for (const bad of [undefined, null, 5, "x"]) {
+      const r = verifySliderAnswer(bad as never, { position: 0.5 });
+      expect(r.passed).toBe(false);
+    }
+  });
+
   it("rejects malformed or out-of-range answers without throwing", () => {
     for (const bad of [Number.NaN, Number.POSITIVE_INFINITY, -0.1, 1.1]) {
       expect(verifySliderAnswer(c, { position: bad }).passed).toBe(false);

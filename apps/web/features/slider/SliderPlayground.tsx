@@ -4,17 +4,8 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { createRng } from "@captchalab/captcha-core";
 import { registry, type SliderChallenge } from "@captchalab/captcha-plugins";
+import { parseSeed, randomSeed } from "@/lib/seed";
 import { SliderSession } from "./SliderSession";
-
-function randomSeed(): number {
-  return crypto.getRandomValues(new Uint32Array(1))[0] ?? Date.now() >>> 0;
-}
-
-/** `?seed=123` makes the challenge deterministic (used by E2E tests and for reproducing a challenge). */
-function seedFromUrl(): number | null {
-  const raw = new URLSearchParams(window.location.search).get("seed");
-  return raw !== null && /^\d{1,10}$/.test(raw) ? Number(raw) >>> 0 : null;
-}
 
 export function SliderPlayground() {
   // Generated on the client only: no hydration mismatch from random challenges.
@@ -22,7 +13,8 @@ export function SliderPlayground() {
   const [round, setRound] = useState(0);
 
   useEffect(() => {
-    setSeed(seedFromUrl() ?? randomSeed());
+    // `?seed=123` makes the challenge deterministic (E2E tests, reproducing a challenge).
+    setSeed(parseSeed(window.location.search) ?? randomSeed());
   }, []);
 
   const generated = useMemo<{ challenge: SliderChallenge | null; failed: boolean }>(() => {

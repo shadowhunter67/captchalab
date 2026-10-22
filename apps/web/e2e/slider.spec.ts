@@ -1,5 +1,6 @@
 import { expect, test, type Locator, type Page } from "@playwright/test";
 import { createRng } from "@captchalab/captcha-core";
+import { watchPrivacy } from "./privacy";
 import { registry } from "@captchalab/captcha-plugins";
 
 const SEED = 12345;
@@ -193,6 +194,45 @@ test("event timeline selection syncs inspector, trajectory and charts", async ({
   await expect(page.getByTestId("trajectory-selected")).toHaveCount(0);
 });
 
+test("charts have an accessible data table with the same samples, units and per-drag segments", async ({ page }) => {
+  await slowDrag(page, 0.7);
+  await expect(page.getByTestId("result")).toBeVisible();
+  await page.getByRole("button", { name: /Try again/ }).click();
+  await slowDrag(page, challenge.target);
+  await expect(page.getByTestId("metric-numberOfAttempts")).toHaveText("2");
+
+  for (const [id, unit, header] of [
+    ["chart-velocity", "px/s", "Velocity (px/s)"],
+    ["chart-acceleration", "px/s²", "Acceleration (px/s²)"],
+  ] as const) {
+    const details = page.getByTestId(`${id}-data`);
+    await expect(page.getByTestId(`${id}-table`)).toHaveCount(0); // collapsed: not rendered
+    await details.locator("summary").click();
+    const table = page.getByTestId(`${id}-table`);
+    await expect(table).toBeVisible();
+    await expect(table.getByRole("columnheader", { name: header })).toBeVisible();
+    await expect(table.getByRole("columnheader", { name: "Time" })).toBeVisible();
+    await expect(table.locator("caption")).toContainText("not connected");
+    await expect(page.getByTestId(`${id}-segment`)).toHaveCount(2); // one <tbody> per drag
+    await expect(table.locator("tbody tr").first().locator("td").last()).toContainText(unit);
+
+    // Same dataset as the chart: the row count equals the sample count announced in the summary.
+    const summary = (await details.locator("summary").textContent()) ?? "";
+    const announced = Number(/\((\d+) samples?\)/.exec(summary)?.[1]);
+    expect(announced).toBeGreaterThan(0);
+    await expect(table.locator("tbody tr")).toHaveCount(Math.min(announced, 100));
+  }
+});
+
+test("no data table when there is nothing to chart", async ({ page }) => {
+  await page.getByTestId("slider-handle").focus();
+  await page.keyboard.press("End");
+  await page.keyboard.press("Enter");
+  await expect(page.getByTestId("chart-velocity")).toContainText("Not enough motion samples");
+  await expect(page.getByTestId("chart-velocity-data")).toHaveCount(0);
+  await expect(page.getByTestId("chart-acceleration-data")).toHaveCount(0);
+});
+
 test("New challenge resets Inspect and replay completely", async ({ page }) => {
   await drag(page, challenge.target);
   await expect(page.getByTestId("result")).toBeVisible();
@@ -214,20 +254,14 @@ test("keyboard: arrows then Enter submits; charts explain there is no drag", asy
   await expect(page.getByTestId("trajectory-empty")).toBeVisible();
 });
 
-test("raw interaction data stays local: no requests, storage or console output while interacting", async ({ page }) => {
-  await page.waitForLoadState("networkidle");
-  const requests: string[] = [];
-  const logs: string[] = [];
-  page.on("request", (r) => requests.push(`${r.method()} ${r.url()}`));
-  page.on("console", (m) => logs.push(m.text()));
+test("raw interaction data stays local: no requests, storage writes or console output while interacting", async ({ page }) => {
+  const assertNoDataLeft = await watchPrivacy(page);
   await drag(page, challenge.target);
   await expect(page.getByTestId("result")).toBeVisible();
   await page.getByTestId("replay-play-pause").click();
   await page.getByTestId("replay-speed-2").click();
   await page.getByTestId("timeline-marker").first().click();
   await page.getByTestId("event-next").click();
-  expect(requests).toEqual([]);
-  expect(logs).toEqual([]);
-  const stored = await page.evaluate(() => localStorage.length + sessionStorage.length);
-  expect(stored).toBe(0);
+  await page.getByTestId("chart-velocity-data").locator("summary").click();
+  await assertNoDataLeft();
 });

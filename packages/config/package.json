@@ -1,1 +1,25 @@
-{ "name": "@captchalab/config", "private": true, "version": "0.0.0", "files": ["tsconfig.base.json"] }
+{
+  "name": "@captchalab/config",
+  "private": true,
+  "version": "0.0.0",
+  "files": [
+    "tsconfig.base.json",
+    "eslint.config.mjs"
+  ],
+  "type": "module",
+  "exports": {
+    "./eslint": "./eslint.config.mjs",
+    "./tsconfig.base.json": "./tsconfig.base.json"
+  },
+  "scripts": {
+    "lint": "eslint . --max-warnings 0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@next/eslint-plugin-next": "16.4.2",
+    "eslint": "^10.13.0",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "typescript": "^5.8.0",
+    "typescript-eslint": "^8.72.0"
+  }
+}

@@ -12,14 +12,19 @@ apps/web (Next 16, Tailwind 4), `/playground/slider`: generate→render→Pointe
 ## 2026-10-22 — Phase 1C (replay + Inspect primitives + biểu đồ)
 Core: `motion-series.ts` (velocity/acceleration theo track), `gestureTrack`, `recorder.elapsedMs()`; accel timestamp = tâm khoảng giữa 2 midpoint. Web: replay clock/driver (play/pause/restart/0.5-1-2x/scrub), marker reset, primitive Inspect chung, EventTimeline + EventInspector, chart SVG velocity/acceleration, selection đồng bộ (index trong session). Codex x3: sửa neo thời gian RAF (seek/speed/restart), marker ngoài miền replay/timeline, timestamp trùng → replay rỗng, closure cũ khi paused, bin highlight sai, nhãn "try again" cứng trong component chung, selection gắn theo session, memo; hoãn: bảng dữ liệu cho chart (text alt hiện có min/max/peak), MetricUnit đóng (có `format` override). 41+36+72 unit test, 10 E2E, build sạch, kiểm tra thị giác desktop/mobile (không tràn ngang).
 
+## 2026-10-22 — Phase 1D (public alpha hardening)
+ESLint chung (typescript-eslint recommendedTypeChecked + no-floating-promises + no-console + hooks cổ điển + Next), CI GitHub Actions, preflight workspace, bảng dữ liệu chart (MotionDataTable, trần 1000 dòng, "Showing first N of M"), helper privacy E2E, README/CONTRIBUTING/SECURITY/CODE_OF_CONDUCT, `docs/adding-a-captcha.md`, lib/seed.ts dùng chung. Lint tìm 2 lỗi nhỏ (prefer-const, cast thừa). Codex x3: nhận phần lớn (neo CI, Node pin, CI==="true", preflight, hooks/typed rules, table cap + focus, định nghĩa mẫu hợp lệ chung, verifier challenge null, privacy helper, guide: click/keyboard, marker Slider-only, vị trí util); bác dùng Turbo trong CI (cần pnpm PATH), giữ Chrome local mặc định.
+
 ## Nợ kỹ thuật
 - Web: toạ độ lệch nếu ancestor có CSS transform hoặc track dịch ngang không đổi kích thước giữa lúc kéo (cần đo lại origin theo frame hoặc dùng offset theo pointer).
 - Replay: reset handle do "Try again" không phải event nên không tái hiện; chưa có tốc độ/scrub nâng cao.
 - Không có test component (jsdom không hỗ trợ Pointer Events đầy đủ); logic nằm ở controller (unit) + E2E.
 - Chưa có Shift+Arrow bước lớn; screen reader chỉ nhận vị trí, không nhận vị trí target.
 - Chưa dùng `getCoalescedEvents` (mẫu thô bị giới hạn bởi tần số event).
-- ESLint/CI chưa thiết lập (Phase 1C bỏ qua vì phụ).
-- Chart: chưa có bảng dữ liệu thay thế; mô tả chữ chỉ có min/max/đỉnh. Timeline bin chỉ dùng chuột (bàn phím dùng Previous/Next).
+- Bộ rule React Compiler của eslint-plugin-react-hooks v7 chưa bật (flag setState-in-effect/refs ở vài chỗ cố ý); cân nhắc refactor rồi bật.
+- CI chưa từng chạy trên GitHub (chưa có remote); mọi bước đã chạy cục bộ kể cả chế độ CI=true.
+- Chưa có LICENSE (cần quyết định của chủ repo). Chưa có issue/PR template, `examples/custom-captcha-plugin`.
+- Timeline bin chỉ dùng chuột (bàn phím dùng Previous/Next).
 - Replay giả định 1 con trỏ thật; marker chỉ có `attempt-reset`.
 - Chưa test component React (jsdom) — logic đã tách thuần; hook `useReplayDriver` chỉ được phủ bởi E2E.
 - Grab offset: Slider giả định handle căn giữa con trỏ; thêm `grabOffset` vào SliderFeatureContext nếu UI không căn giữa.
