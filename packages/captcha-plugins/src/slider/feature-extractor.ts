@@ -17,8 +17,8 @@ import {
   type SliderChallenge,
   type SliderFeatureContext,
   type SliderFeatures,
-  type SliderLayout,
 } from "./types";
+import { pointerXToTravelPx, positionToTravelPx, sliderTravel } from "./geometry";
 
 /** See the definitions in ./types.ts. */
 export function selectFinalSliderAttempt(gestures: readonly PointerGesture[]): PointerGesture | null {
@@ -30,24 +30,14 @@ export function selectFinalSliderAttempt(gestures: readonly PointerGesture[]): P
   return best;
 }
 
-function travelOf(layout: SliderLayout): number {
-  const { trackLeft, trackWidth, handleWidth } = layout;
-  const travel = trackWidth - handleWidth;
-  if (![trackLeft, trackWidth, handleWidth].every(Number.isFinite) || handleWidth < 0 || travel <= 0) {
-    throw new RangeError("Invalid slider layout: need finite values and trackWidth > handleWidth >= 0.");
-  }
-  return travel;
-}
-
 export function extractSliderFeatures(
   challenge: SliderChallenge,
   session: InteractionSession,
   { layout }: SliderFeatureContext,
 ): FeatureSet<SliderFeatures> {
-  const travel = travelOf(layout);
-  const toTravelPx = (x: number): number =>
-    Math.min(travel, Math.max(0, x - layout.trackLeft - layout.handleWidth / 2));
-  const targetPx = challenge.target * travel;
+  sliderTravel(layout); // throws RangeError on an invalid layout
+  const toTravelPx = (x: number): number => pointerXToTravelPx(x, layout);
+  const targetPx = positionToTravelPx(challenge.target, layout);
 
   const gestures = extractGestures(session);
   const numberOfAttempts = gestures.filter((g) => g.target === SLIDER_TARGETS.handle).length;

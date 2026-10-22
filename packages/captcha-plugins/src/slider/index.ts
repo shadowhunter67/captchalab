@@ -1,4 +1,5 @@
 export * from "./types";
+export * from "./geometry";
 export * from "./generator";
 export * from "./verifier";
 export * from "./feature-extractor";

@@ -15,6 +15,7 @@ CAPTCHA modules, the Inspect workbench, replay and (later) synthetic comparison 
 - **`pointercancel`** is part of the schema: it ends a contact like `pointerup` but is not a "completed" attempt. No `touchcancel` kind: adapters map it to `pointercancel`; `touch*` kinds are legacy.
 - **Gestures** (`extractGestures`): `pointerdown -> moves -> up/cancel` per contact, with end reason `up | cancel | interrupted | open`. A second press on a live contact closes the previous one as `interrupted`. Hover before a press is not part of a gesture, but *is* part of motion tracks (approach movement is signal and mouse hover is continuous).
 - **Removed** the free-form `meta` field (privacy and unvalidated shape).
+- **`recorder.snapshot()`** returns a copy of the session so far without ending recording (the web layer verifies/inspects on every submit, and "Try again" continues the same session); `finish()` freezes it.
 - Precondition for analysis: event times are non-decreasing. The recorder guarantees it; sessions imported from elsewhere need a validator (open item).
 
 ## Alternatives considered

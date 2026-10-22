@@ -26,7 +26,9 @@ export interface EventRecorder {
   record(event: DistributiveOmit<InteractionEvent, "t">): void;
   readonly size: number;
   readonly dropped: number;
-  /** Freeze the buffer into a session. Later record() calls are ignored. */
+  /** Copy of the session so far; recording continues. For mid-session verify/inspect. */
+  snapshot(): InteractionSession;
+  /** Final session; later record() calls are ignored. */
   finish(): InteractionSession;
 }
 
@@ -56,6 +58,21 @@ export function createEventRecorder(options: RecorderOptions): EventRecorder {
   let dropped = 0;
   let finished = false;
 
+  const id = options.idFactory?.() ?? crypto.randomUUID();
+  const build = (events: InteractionEvent[]): InteractionSession => {
+    const last = events[events.length - 1];
+    return {
+      schemaVersion: SCHEMA_VERSION,
+      id,
+      captchaId: options.captchaId,
+      startedAt,
+      durationMs: Math.max(last?.t ?? 0, lastT, now() - t0),
+      events,
+      inputModality: inferModality(events),
+      ...(options.viewport ? { viewport: options.viewport } : {}),
+    };
+  };
+
   return {
     record(event) {
       if (finished) return;
@@ -80,19 +97,10 @@ export function createEventRecorder(options: RecorderOptions): EventRecorder {
     get dropped() {
       return dropped;
     },
+    snapshot: () => build(buffer.slice()),
     finish() {
       finished = true;
-      const last = buffer[buffer.length - 1];
-      return {
-        schemaVersion: SCHEMA_VERSION,
-        id: options.idFactory?.() ?? crypto.randomUUID(),
-        captchaId: options.captchaId,
-        startedAt,
-        durationMs: Math.max(last?.t ?? 0, lastT, now() - t0),
-        events: buffer,
-        inputModality: inferModality(buffer),
-        ...(options.viewport ? { viewport: options.viewport } : {}),
-      };
+      return build(buffer);
     },
   };
 }

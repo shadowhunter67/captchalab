@@ -187,6 +187,16 @@ describe("recorder", () => {
     expect(inferModality([])).toBe("none");
   });
 
+  it("snapshot copies the session and recording continues", () => {
+    const r = createEventRecorder({ captchaId: "x", now: clock([0, 5, 9, 20, 30]), idFactory: () => "i" });
+    r.record({ type: "keydown", code: "Tab" });
+    const snap = r.snapshot();
+    r.record({ type: "keyup", code: "Tab" });
+    expect(snap.events).toHaveLength(1);
+    expect(r.snapshot().events).toHaveLength(2);
+    expect(r.snapshot().id).toBe("i");
+  });
+
   it("ignores events after finish and reports mixed modality", () => {
     const r = createEventRecorder({ captchaId: "x", now: clock([0, 1, 2, 3, 4]) });
     r.record({ type: "pointerdown", x: 0, y: 0, pointerId: 1, pointerType: "mouse" });
