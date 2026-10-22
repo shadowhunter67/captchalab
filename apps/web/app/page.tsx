@@ -43,6 +43,18 @@ export default function HomePage() {
           Open Text Playground
         </Link>
         <Link
+          href="/playground"
+          className="inline-block rounded-md border border-line bg-panel px-4 py-2.5 font-medium hover:bg-track"
+        >
+          All playgrounds
+        </Link>
+        <Link
+          href="/learn"
+          className="inline-block rounded-md border border-line bg-panel px-4 py-2.5 font-medium hover:bg-track"
+        >
+          Learn
+        </Link>
+        <Link
           href="/playground/image-grid"
           className="inline-block rounded-md border border-line bg-panel px-4 py-2.5 font-medium hover:bg-track"
         >
