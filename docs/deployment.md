@@ -26,3 +26,6 @@ against the exported files before relying on it).
 ## Before the first public release
 
 - Push to GitHub and confirm the CI workflow passes once (it has only run locally in `CI=true` mode).
+
+## Live demo
+The demo is deployed to GitHub Pages by `.github/workflows/pages.yml` (static export, `PAGES_BASE_PATH=/captchalab`): https://shadowhunter67.github.io/captchalab/
