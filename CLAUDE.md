@@ -52,7 +52,7 @@ corepack pnpm --filter web test:e2e   # Playwright dùng Chrome cài sẵn (chan
 - CI: `.github/workflows/ci.yml` (Node từ `.nvmrc` = 24.16.0, corepack, `--frozen-lockfile`, lint→typecheck→test→build→E2E; E2E với `CI=true` dùng `next start` + Chromium của Playwright, local dùng Chrome cài sẵn + dev server). Chưa chạy trên GitHub thật (chưa có remote).
 - Lint: `no-console` cấm log (chỉ error/warn) = chốt chặn riêng tư; bộ rule React Compiler của react-hooks v7 CỐ Ý chưa bật (nhiễu), backlog.
 - Privacy E2E dùng helper `apps/web/e2e/privacy.ts` (`watchPrivacy`): bắt request, console, ghi storage/IndexedDB/cookie; route CAPTCHA mới phải có kịch bản riêng.
-- Tài liệu cộng đồng: README, CONTRIBUTING, SECURITY, CODE_OF_CONDUCT, `docs/adding-a-captcha.md` (guide thêm CAPTCHA). CHƯA có LICENSE (chủ repo chưa chọn; không tự chọn).
+- Tài liệu cộng đồng: README, CONTRIBUTING, SECURITY, CODE_OF_CONDUCT, `docs/adding-a-captcha.md` (guide thêm CAPTCHA). LICENSE = Apache-2.0 (chủ repo đã chọn 2026-10-23; không thêm điều khoản tuỳ chỉnh, giới hạn scope chỉ nằm trong README/docs).
 - `apps/web/next-env.d.ts` và `AGENTS.md` do Next sinh → gitignore, không track.
 - Checkbox: Space (không phải Enter) kích hoạt; keydown lặp không ghi; mouse thả ngoài control → không có pointerup → press "open", không tính activation; KHÔNG suy "thả ngoài" từ hình học (touch có implicit capture). Feature "successful" suy từ parity của event, KHÔNG phải đáp án đã verify (kích hoạt bằng assistive tech không có event → replay rỗng).
 - E2E: scrubber `fill` không chạm đúng biên → dùng `scrubToEdge` (Home/End); `ReplayControls` snap giá trị gần biên (trình duyệt làm tròn 15 chữ số).

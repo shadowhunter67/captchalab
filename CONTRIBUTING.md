@@ -58,4 +58,8 @@ Bugs and ideas: open an issue. Security-relevant reports: see [SECURITY.md](SECU
 
 ## License of contributions
 
-The repository does not have a license yet (see README). Please wait for the owner to choose one before relying on any assumption about how contributions are licensed.
+CaptchaLab is licensed under the [Apache License 2.0](LICENSE). By submitting a contribution (a pull request or patch) you agree that it is licensed to the project under Apache-2.0, as described in section 5 of that license.
+
+- Only contribute code and assets you have the right to license under Apache-2.0. Do not copy code from sources whose license is incompatible or unknown.
+- A new dependency or asset (font, image, dataset) must carry a license compatible with Apache-2.0; say which in the pull request.
+- There is no CLA or sign-off requirement.

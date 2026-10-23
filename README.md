@@ -4,7 +4,7 @@
 
 CaptchaLab is an educational, research-oriented web app for exploring how people interact with CAPTCHA challenges: the events a challenge produces, the behavioral features that can be measured from them, and a replay of your own attempt. Everything runs in your browser.
 
-> **Status: Alpha (`0.1.0-alpha`, not published).** Six CAPTCHAs are implemented (Slider, Checkbox, Drag & Drop, Image Rotation, Text, Image Grid). APIs may still change. See [Current status](#current-status).
+> **Status: Alpha (`0.1.0-alpha`).** Six CAPTCHAs are implemented (Slider, Checkbox, Drag & Drop, Image Rotation, Text, Image Grid). APIs may still change. See [Current status](#current-status).
 
 ## What is CaptchaLab?
 
@@ -31,7 +31,7 @@ Any synthetic interaction added in the future may only target challenges created
 | Also implemented | `/playground` and `/learn` indexes; `/compare` (your Slider drag next to a generated Linear / Eased / Noisy session; descriptive differences only, no bot score) |
 | Not implemented yet | research data contribution |
 
-Only the five above exist today. The rest is [roadmap](#roadmap), not functionality.
+Only the six above exist today. The rest is [roadmap](#roadmap), not functionality.
 
 ### What you can do with the Drag & Drop
 
@@ -99,7 +99,7 @@ Deployment notes: [docs/deployment.md](docs/deployment.md). The same commands ru
 
 ## Privacy
 
-Raw interaction data is processed locally in the browser and is not uploaded by the current implementation. The app makes no analytics calls and stores nothing in `localStorage`/`sessionStorage`. This is checked by an automated E2E test (no network requests, console output, `localStorage`/`sessionStorage` writes, IndexedDB opens or cookie writes while interacting, replaying and inspecting) and a lint rule that forbids `console.log`. Keyboard events record only the physical key code (e.g. `ArrowLeft`), never typed characters.
+Raw interaction data is processed locally in the browser and is not uploaded by the current implementation. The app makes no analytics calls and stores nothing in `localStorage`/`sessionStorage`. This is checked by an automated E2E test (no network requests, console output, `localStorage`/`sessionStorage` writes, IndexedDB opens or cookie writes while interacting, replaying and inspecting) and a lint rule that forbids `console.log`. Keyboard events record only the physical key code (e.g. `ArrowLeft`), never typed characters; in the Text CAPTCHA letters and digits are further reduced to the classes `Letter` and `Digit`, and the typed text is read from the input field only to verify: it is never recorded or stored (a failed answer simply stays in the field until you edit it or start a new challenge). The Compare page's synthetic sessions are generated in memory as plain data from CaptchaLab's own Slider challenge: no browser event is dispatched and nothing is sent anywhere. Interaction data is not persisted and is gone when the tab is closed.
 
 A future research-contribution feature, if added, will be opt-in with explicit consent.
 
@@ -113,4 +113,6 @@ See [CONTRIBUTING.md](CONTRIBUTING.md). To add a CAPTCHA, follow [docs/adding-a-
 
 ## License
 
-**No license has been chosen yet.** Until the repository owner adds a `LICENSE` file, no open-source license is granted: all rights are reserved by default, so do not assume you may reuse or redistribute the code.
+CaptchaLab is licensed under the Apache License 2.0. See [LICENSE](LICENSE) for details.
+
+The project's scope (an educational lab for its own challenges only, no third-party CAPTCHA bypass) is described in [Project scope and safety](#project-scope-and-safety); it is a statement of intent, not an extra license term.

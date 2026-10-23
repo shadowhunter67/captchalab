@@ -25,5 +25,4 @@ against the exported files before relying on it).
 
 ## Before the first public release
 
-- The repository owner must choose and add a `LICENSE` file (not chosen yet).
 - Push to GitHub and confirm the CI workflow passes once (it has only run locally in `CI=true` mode).

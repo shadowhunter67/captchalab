@@ -58,3 +58,6 @@ Plugin `text`, route `/playground/text`: SVG distorted text deterministic, verif
 ## Sprint B
 - `/playground` + `/learn` (apps/web/lib/catalog.ts) và `/compare` (Slider người dùng vs session tổng hợp Linear/Eased/Noisy từ lib/synthetic/slider-synthetic.ts; chỉ khác biệt mô tả, không bot score).
 - Codex 1 lượt cho Compare: đổi nhãn Corrections -> Overshoot, xoá kết quả người khi Try again, ghi chú a11y.
+
+## Release prep (2026-10-23)
+- LICENSE Apache-2.0 (chuẩn từ apache.org), package.json có license, branch master -> main khớp CI. Codex final: P0 LICENSE chưa track (đã add), P1 README "five" và wording typed text (đã sửa). Version package giữ 0.0.0 (private).

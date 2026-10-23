@@ -9,7 +9,7 @@ Not release blockers unless stated. Format: issue · impact · affected CAPTCHA 
 - `getCoalescedEvents` not used · motion fidelity limited by event rate · Slider, Drag & Drop, Rotation · post-MVP
 - React Compiler lint rules (eslint-plugin-react-hooks v7) not enabled · a few deliberate patterns would be flagged · web · later
 - CI has never run on GitHub (no remote yet); no cache · first run may need small fixes · all · before release
-- No `examples/custom-captcha-plugin`, no LICENSE (owner decision) · release prep · all · before release (LICENSE)
+- No `examples/custom-captcha-plugin` · contributor docs · all · post-alpha
 
 ## Text
 - No non-visual alternative (audio or text) · blocks users who cannot read the image; documented on the page · Text · next accessibility pass
