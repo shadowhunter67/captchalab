@@ -100,9 +100,6 @@ export default function HomePage() {
         <section aria-label={t(...current.name)} className="flex min-h-0 min-w-0 flex-col rounded-lg border border-line bg-panel">
           <div className="flex items-center justify-between gap-3 border-b border-line px-3 py-2 text-sm">
             <span className="font-medium">{t(...current.name)}</span>
-            <a href={`${current.path}?lang=${lang}`} target="_blank" rel="noopener" className="underline">
-              {t("Mở trong tab mới", "Open in a new tab")}
-            </a>
           </div>
           <iframe
             key={`${current.id}:${lang}`}
