@@ -58,3 +58,8 @@ body {
     scroll-behavior: auto !important;
   }
 }
+
+/* Inside the home page's frame the shell already shows the title: hide the playground's own header. */
+html[data-embed="1"] main > header:first-child {
+  display: none;
+}

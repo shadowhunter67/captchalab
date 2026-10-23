@@ -1,5 +1,6 @@
 "use client";
 
+import { useEmbedReport } from "@/lib/embed-report";
 import { useMemo } from "react";
 import type { FeatureSet, InteractionSession, Point, VerificationResult } from "@captchalab/captcha-core";
 import { deriveRotation, type RotationChallenge, type RotationFeatures } from "@captchalab/captcha-plugins";
@@ -24,6 +25,7 @@ interface Props {
 const axis = (v: number): string => String(Math.round(v));
 
 export function RotationInspect({ challenge, verification, featureSet, session, center }: Props) {
+  useEmbedReport(verification, session, featureSet);
   const t = useT();
   const f = featureSet.features;
   const selection = useEventSelection(session);

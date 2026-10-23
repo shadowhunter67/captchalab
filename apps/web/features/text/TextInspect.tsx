@@ -1,5 +1,6 @@
 "use client";
 
+import { useEmbedReport } from "@/lib/embed-report";
 import { useMemo } from "react";
 import type { FeatureSet, InteractionSession, VerificationResult } from "@captchalab/captcha-core";
 import type { TextFeatures } from "@captchalab/captcha-plugins";
@@ -19,6 +20,7 @@ interface Props {
 
 /** Text Inspect: result, metrics, timeline and inspector. No trajectory, chart or replay: typing has no path. */
 export function TextInspect({ verification, featureSet, session }: Props) {
+  useEmbedReport(verification, session, featureSet);
   const t = useT();
   const selection = useEventSelection(session);
   const metrics = useMemo(() => textMetrics(featureSet.features, t), [featureSet, t]);

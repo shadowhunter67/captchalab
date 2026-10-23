@@ -1,5 +1,6 @@
 "use client";
 
+import { useEmbedReport } from "@/lib/embed-report";
 import { useMemo } from "react";
 import type { FeatureSet, InteractionSession, VerificationResult } from "@captchalab/captcha-core";
 import type { ImageGridFeatures } from "@captchalab/captcha-plugins";
@@ -19,6 +20,7 @@ interface Props {
 
 /** Image Grid Inspect: result, metrics, timeline and inspector. No chart or replay: a selection has no path. */
 export function ImageGridInspect({ verification, featureSet, session }: Props) {
+  useEmbedReport(verification, session, featureSet);
   const t = useT();
   const selection = useEventSelection(session);
   const metrics = useMemo(() => imageGridMetrics(featureSet.features, t), [featureSet, t]);

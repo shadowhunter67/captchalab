@@ -1,5 +1,6 @@
 "use client";
 
+import { useEmbedReport } from "@/lib/embed-report";
 import { useMemo } from "react";
 import { isPointerEvent, type FeatureSet, type InteractionSession, type VerificationResult } from "@captchalab/captcha-core";
 import type { SliderChallenge, SliderFeatures, SliderLayout } from "@captchalab/captcha-plugins";
@@ -38,6 +39,7 @@ const axisNumber = (v: number): string => String(Math.round(v));
  * the timeline, the event inspector, the trajectory marker and the chart crosshairs all derive from it.
  */
 export function SliderInspect({ verification, featureSet, session, markers, layout, challenge, via }: Props) {
+  useEmbedReport(verification, session, featureSet);
   const t = useT();
   const chartScope = t(
     "Chỉ tính các lần kéo tay nắm: không tính di chuột qua, và mỗi lần thử là một đường riêng.",

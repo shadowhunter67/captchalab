@@ -1,5 +1,6 @@
 "use client";
 
+import { useEmbedReport } from "@/lib/embed-report";
 import { useMemo } from "react";
 import type { FeatureSet, InteractionSession, VerificationResult } from "@captchalab/captcha-core";
 import {
@@ -48,6 +49,7 @@ const axisNumber = (v: number): string => String(Math.round(v));
  * CAPTCHA-specific (which tracks, labels, metrics) comes from drag-drop-view-data.ts.
  */
 export function DragDropInspect({ challenge, verification, featureSet, session, layout, layoutChanged }: Props) {
+  useEmbedReport(verification, session, featureSet);
   const t = useT();
   const f = featureSet.features;
   const chartScope = t(

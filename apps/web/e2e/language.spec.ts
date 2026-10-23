@@ -30,10 +30,13 @@ test("home: Vietnamese by default, preview on the right follows the language, ba
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("CaptchaLab");
   await expect(page.getByTestId("pick-slider")).toContainText("Thanh trượt");
   const frame = page.frameLocator('[data-testid="preview"]');
-  await expect(frame.getByRole("heading", { level: 1 })).toHaveText("CAPTCHA thanh trượt");
+  await expect(page.getByTestId("shell-title")).toHaveText("CAPTCHA thanh trượt");
+  await expect(frame.getByTestId("slider-handle")).toBeVisible();
+  await expect(frame.getByRole("heading", { level: 2 }).first()).toHaveText("Thử");
   await page.getByTestId("lang-en").click();
   await expect(page.getByTestId("pick-slider")).toContainText("Slider");
-  await expect(frame.getByRole("heading", { level: 1 })).toHaveText("Slider CAPTCHA");
+  await expect(page.getByTestId("shell-title")).toHaveText("Slider CAPTCHA");
+  await expect(frame.getByRole("heading", { level: 2 }).first()).toHaveText("Try");
   // The switch is not drawn a second time inside the preview frame.
   await expect(frame.getByTestId("lang-en")).toHaveCount(0);
 });

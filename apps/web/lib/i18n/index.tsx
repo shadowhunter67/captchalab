@@ -30,7 +30,10 @@ export function LangProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     if (params.get("lang") === "en") setLangState("en");
-    if (params.get("embed") === "1") setEmbedded(true);
+    if (params.get("embed") === "1") {
+      setEmbedded(true);
+      document.documentElement.dataset.embed = "1"; // lets globals.css hide the page header inside the home page's frame
+    }
   }, []);
 
   useEffect(() => {

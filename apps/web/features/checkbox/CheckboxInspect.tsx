@@ -1,5 +1,6 @@
 "use client";
 
+import { useEmbedReport } from "@/lib/embed-report";
 import { useMemo } from "react";
 import type { FeatureSet, InteractionSession, VerificationResult } from "@captchalab/captcha-core";
 import type { CheckboxFeatures } from "@captchalab/captcha-plugins";
@@ -26,6 +27,7 @@ interface Props {
  * no velocity/acceleration charts: a single press has no path worth plotting.
  */
 export function CheckboxInspect({ verification, featureSet, session, size }: Props) {
+  useEmbedReport(verification, session, featureSet);
   const t = useT();
   const f = featureSet.features;
   const selection = useEventSelection(session);
