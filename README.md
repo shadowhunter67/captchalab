@@ -2,117 +2,68 @@
 
 **Explore. Interact. Understand.**
 
-CaptchaLab is an educational, research-oriented web app for exploring how people interact with CAPTCHA challenges: the events a challenge produces, the behavioral features that can be measured from them, and a replay of your own attempt. Everything runs in your browser.
+CaptchaLab is a small lab where you try different CAPTCHA challenges and then see what your own interaction looked like: the events, the speed and path of your mouse, and a replay of your attempt. It is made for learning and research. Everything runs in your browser.
 
-> **Status: Alpha (`0.1.0-alpha`).** Six CAPTCHAs are implemented (Slider, Checkbox, Drag & Drop, Image Rotation, Text, Image Grid). APIs may still change. See [Current status](#current-status).
+**Live demo: https://shadowhunter67.github.io/captchalab/**
 
-## What is CaptchaLab?
+> **Status: Alpha (`0.1.0-alpha`).** Things may still change.
 
-A controlled lab for **Human–Computer Interaction and behavioral-analysis education**. You try a challenge, then *inspect* the normalized interaction events, extracted features, trajectory, velocity and acceleration, and replay the attempt.
+## What you can try
 
-It illustrates signals that a CAPTCHA system may use. It does **not** claim to reproduce the complete internal mechanisms of commercial CAPTCHA systems, and no measurement shown here is a rule for telling people from software.
+Six challenges, each with its own page:
 
-## Project scope and safety
-
-CaptchaLab is an educational / research / HCI lab. It is **not** intended for, and will not accept contributions for:
-
-- bypassing CAPTCHAs on third-party websites,
-- solving commercial CAPTCHA services automatically,
-- interacting with challenges that belong to external services,
-- evading anti-bot systems.
-
-Any synthetic interaction added in the future may only target challenges created and controlled by CaptchaLab itself. The demo verifier runs in the browser and is **not** production anti-abuse protection (see [SECURITY.md](SECURITY.md)).
-
-## Current status
-
-| | |
+| Challenge | What you do |
 |---|---|
-| **Implemented CAPTCHAs** | **Slider** (one drag, normalized geometry), **Checkbox** (press/keyboard, no trajectory), **Drag & Drop** (several draggables and drop targets, many attempts), **Image Rotation** (turn an object upright by dragging or with the arrow keys), **Text** (read distorted characters and type them; the recording stores only key classes, never which letter), **Image Grid** (select every generated SVG tile that shows the requested shape; toggle buttons with arrow-key navigation) |
-| Also implemented | `/playground` and `/learn` indexes; `/compare` (your Slider drag next to a generated Linear / Eased / Noisy session; descriptive differences only, no bot score) |
-| Not implemented yet | research data contribution |
+| Slider | Drag a handle to a target |
+| Checkbox | Tick a checkbox |
+| Drag & Drop | Drop shapes onto matching spots |
+| Image Rotation | Turn an object until it is upright |
+| Text | Read distorted letters and type them |
+| Image Grid | Pick all the tiles that show a given shape |
 
-Only the six above exist today. The rest is [roadmap](#roadmap), not functionality.
+After each attempt you can look at:
 
-### What you can do with the Drag & Drop
+- the result and a few simple measurements (time, speed, corrections...),
+- a timeline of the events you produced,
+- the path your pointer took, where it applies,
+- a replay of your attempt.
 
-- **Try** it with a mouse, touch or pen: drag three shapes (circle, square, triangle) onto the matching dashed areas, then press Verify. A shape dropped away from any area goes back; one dropped on an occupied area sends the shape there back to its start; placed shapes can be dragged again. You keep your grab offset, so a shape does not jump under the pointer.
-- **Inspect**: pass/fail, an attempts table (outcome in words, duration, release error), metrics (reaction time, attempts, successful/failed/cancelled drops, durations, distances, release error, direction changes, time to all correct), trajectories (one numbered path per attempt), velocity and acceleration charts with one numbered line per attempt and accessible data tables labelled "Circle · attempt 2", an event timeline and inspector, and a replay in which the shapes move, snap onto areas or return.
-- **Accessibility limitation**: this challenge needs a pointer. There is **no keyboard alternative yet**, so it is not accessible to keyboard-only users; the page says so. It is on the backlog.
+There are two extra pages:
 
-### What you can do with the Checkbox
-
-- **Try** it with a mouse, touch or pen, or with the keyboard (Tab to focus, Space to toggle). It is a native `<input type="checkbox">`, so it has an accessible name, a checked state and normal focus behavior.
-- **Inspect**: pass/fail, activation metrics (reaction time, time to first activation, press duration, activation count, successful activation index, time between activations, input modality), an event timeline and event inspector, and a replay of the press and the checked state. There is deliberately no trajectory or velocity/acceleration chart: one press has no meaningful path.
-- A short **Learn** section explains how it works, observable signals, strengths, weaknesses, accessibility and automation considerations, and the limits of the simulation.
-
-### What you can do with the Slider
-
-- **Try** it with a mouse, touch or pen (Pointer Events), or with the keyboard (arrow keys, Home/End, Enter).
-- **Inspect** the result:
-  - pass/fail (challenge correctness only; behavioral metrics never affect it),
-  - slider metrics (drag duration, release error, overshoot, attempts) and whole-session motion metrics,
-  - trajectory with start/end markers and target region,
-  - velocity and acceleration charts, each with an accessible data table,
-  - an event timeline and an event inspector (selection syncs with the charts and trajectory).
-- **Replay** your interaction: play / pause / restart, 0.5×/1×/2×, scrubbing. Replay only draws recorded data; it never drives the real slider.
-- `?seed=12345` makes the challenge deterministic (used by tests; also handy for reproducing a challenge).
-
-## Architecture
-
-```text
-apps/web                     Next.js app (UI, DOM adapters, Inspect composition)
-packages/captcha-plugins     CAPTCHA plugins + the typed registry (Slider, Checkbox, Drag & Drop, Rotation, Text, Image Grid)
-packages/captcha-core        Framework-independent logic: event schema, recorder, gestures,
-                             motion features/series, replay timeline, plugin API
-packages/config              Shared TypeScript + ESLint configuration
-docs/                        ADRs and guides
-```
-
-Dependency direction is strictly `apps/web → captcha-plugins → captcha-core`. `captcha-core` has no React or DOM dependency.
-
-- Raw browser events are never stored; they are normalized into CaptchaLab's own event format (`captcha-core`), with relative monotonic timestamps.
-- A CAPTCHA is a **plugin**: `generate`, `verify` (correctness only), `extractFeatures` (behavior). A compile-time typed registry keeps each plugin's challenge/answer/feature types intact.
-- Feature output is versioned (`FeatureSet` with `schemaVersion` and `extractorVersion`).
-
-Design decisions are recorded in [docs/adr](docs/adr).
-
-## Getting started
-
-Requirements: Node.js ≥ 22 (CI uses the version in [.nvmrc](.nvmrc)) with Corepack, which provides the pinned pnpm version. No global pnpm is needed.
-
-```bash
-corepack pnpm install
-corepack pnpm --filter web dev      # http://localhost:3000  (/playground/slider, /playground/checkbox, /playground/drag-drop, /playground/rotation, /playground/text, /playground/image-grid, /playground, /learn, /compare)
-```
-
-## Scripts
-
-| Command | What it does |
-|---|---|
-| `corepack pnpm -r run lint` | ESLint on every workspace (type-aware, warnings are errors) |
-| `corepack pnpm -r run typecheck` | `tsc` on every workspace |
-| `corepack pnpm -r run test` | Unit tests (Vitest) |
-| `corepack pnpm --filter web build` | Production build of the web app |
-| `corepack pnpm --filter web test:e2e` | Playwright E2E. Locally it uses your installed Chrome and the dev server. In CI (`CI=true`) it uses Playwright's Chromium (`corepack pnpm --filter web exec playwright install chromium`) against the production build, so run `build` first |
-
-Deployment notes: [docs/deployment.md](docs/deployment.md). The same commands run in [CI](.github/workflows/ci.yml).
+- **Learn**: a short explanation of how each challenge works, its strengths and weaknesses.
+- **Compare**: your Slider drag next to a computer-generated one (Linear, Eased or Noisy), so you can see how they differ. It only describes differences. It does not give a "bot score".
 
 ## Privacy
 
-Raw interaction data is processed locally in the browser and is not uploaded by the current implementation. The app makes no analytics calls and stores nothing in `localStorage`/`sessionStorage`. This is checked by an automated E2E test (no network requests, console output, `localStorage`/`sessionStorage` writes, IndexedDB opens or cookie writes while interacting, replaying and inspecting) and a lint rule that forbids `console.log`. Keyboard events record only the physical key code (e.g. `ArrowLeft`), never typed characters; in the Text CAPTCHA letters and digits are further reduced to the classes `Letter` and `Digit`, and the typed text is read from the input field only to verify: it is never recorded or stored (a failed answer simply stays in the field until you edit it or start a new challenge). The Compare page's synthetic sessions are generated in memory as plain data from CaptchaLab's own Slider challenge: no browser event is dispatched and nothing is sent anywhere. Interaction data is not persisted and is gone when the tab is closed.
+Your interaction data stays in your browser tab. It is not uploaded, not saved, and there are no analytics. Typed letters are never recorded: for the Text challenge only the kind of key (letter, digit, backspace...) is kept. An automated test checks that no network requests or storage writes happen while you play.
 
-A future research-contribution feature, if added, will be opt-in with explicit consent.
+## What this is not
 
-## Roadmap
+CaptchaLab is only for learning and research on challenges that it creates itself. It is **not** a tool to bypass, solve or automate CAPTCHAs on other websites, and it will not accept contributions for that. Its demo checks run in the browser, so it is **not** real protection against abuse (see [SECURITY.md](SECURITY.md)).
 
-Planned, **not implemented**: a keyboard alternative for Drag & Drop; explicit opt-in anonymous data contribution; more accessibility and performance work.
+It also does not claim to copy how commercial CAPTCHA systems work, and none of its measurements can tell a person from a program.
+
+## Run it on your computer
+
+You need Node.js (version in [.nvmrc](.nvmrc)) with Corepack.
+
+```bash
+corepack pnpm install
+corepack pnpm --filter web dev      # open http://localhost:3000
+```
+
+To check the project: `corepack pnpm -r run lint`, `corepack pnpm -r run typecheck`, `corepack pnpm -r run test`, and `corepack pnpm --filter web test:e2e` for the browser tests. More in [docs/deployment.md](docs/deployment.md).
+
+## Known limitations
+
+- Drag & Drop has no keyboard alternative yet, and the Text challenge has no audio or text alternative.
+- Compare only uses the Slider.
+- The full list is in [docs/technical-debt.md](docs/technical-debt.md).
 
 ## Contributing
 
-See [CONTRIBUTING.md](CONTRIBUTING.md). To add a CAPTCHA, follow [docs/adding-a-captcha.md](docs/adding-a-captcha.md). Please read [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) and [SECURITY.md](SECURITY.md).
+See [CONTRIBUTING.md](CONTRIBUTING.md). To add a new challenge, follow [docs/adding-a-captcha.md](docs/adding-a-captcha.md). Please also read the [Code of Conduct](CODE_OF_CONDUCT.md). Design decisions are in [docs/adr](docs/adr).
 
 ## License
 
-CaptchaLab is licensed under the Apache License 2.0. See [LICENSE](LICENSE) for details.
-
-The project's scope (an educational lab for its own challenges only, no third-party CAPTCHA bypass) is described in [Project scope and safety](#project-scope-and-safety); it is a statement of intent, not an extra license term.
+Apache License 2.0. See [LICENSE](LICENSE).
