@@ -1,6 +1,7 @@
 "use client";
 
 import type { KeyboardEvent } from "react";
+import { useT } from "@/lib/i18n";
 import { TIMELINE_LEGEND, binContainsTime, type TimelineAnnotation, type TimelineKind, type TimelineModel } from "@/lib/inspect/events";
 
 interface Props {
@@ -21,13 +22,13 @@ const PAD_X = 14;
 const AXIS_Y = 58;
 const MAX_BAR = 34;
 
-const LABEL: Record<Exclude<TimelineKind, "move">, string> = {
-  down: "press",
-  up: "release",
-  cancel: "cancel",
-  keydown: "key down",
-  keyup: "key up",
-  click: "click",
+const LABEL: Record<Exclude<TimelineKind, "move">, readonly [string, string]> = {
+  down: ["nhấn", "press"],
+  up: ["thả", "release"],
+  cancel: ["hủy", "cancel"],
+  keydown: ["nhấn phím", "key down"],
+  keyup: ["nhả phím", "key up"],
+  click: ["nhấp", "click"],
 };
 
 function Glyph({ kind, x, y }: { kind: Exclude<TimelineKind, "move">; x: number; y: number }) {
@@ -54,6 +55,8 @@ function Glyph({ kind, x, y }: { kind: Exclude<TimelineKind, "move">; x: number;
  * first move). The full event list is never altered; selection is by event index.
  */
 export function EventTimeline({ model, annotations = [], selectedIsMove, selectedT, selectedIndex, onSelect }: Props) {
+  const t = useT();
+  const kindLabel = (kind: Exclude<TimelineKind, "move">): string => t(...LABEL[kind]);
   const span = model.endT - model.startT;
   const xAt = (t: number): number => PAD_X + ((t - model.startT) / span) * (W - 2 * PAD_X);
   const xFrac = (f: number): number => PAD_X + f * (W - 2 * PAD_X);
@@ -69,7 +72,10 @@ export function EventTimeline({ model, annotations = [], selectedIsMove, selecte
     <div className="min-w-0">
       <svg
         role="group"
-        aria-label={`Event timeline with ${model.eventCount} events. Markers are press, release, cancel, key and click events; bars summarize pointer movement.`}
+        aria-label={t(
+          `Dòng thời gian sự kiện gồm ${model.eventCount} sự kiện. Các mốc là sự kiện nhấn, thả, hủy, phím và nhấp; các cột tóm tắt chuyển động của con trỏ.`,
+          `Event timeline with ${model.eventCount} events. Markers are press, release, cancel, key and click events; bars summarize pointer movement.`,
+        )}
         viewBox={`0 0 ${W} ${H}`}
         className="w-full rounded-md bg-bg ring-1 ring-line"
         data-testid="event-timeline"
@@ -93,7 +99,7 @@ export function EventTimeline({ model, annotations = [], selectedIsMove, selecte
               data-testid="timeline-bin"
               onClick={() => onSelect(b.firstIndex)}
             >
-              <title>{`${b.count} pointer move${b.count === 1 ? "" : "s"}`}</title>
+              <title>{t(`${b.count} lần di chuyển con trỏ`, `${b.count} pointer move${b.count === 1 ? "" : "s"}`)}</title>
             </rect>
           );
         })}
@@ -110,7 +116,10 @@ export function EventTimeline({ model, annotations = [], selectedIsMove, selecte
             key={m.index}
             role="button"
             tabIndex={0}
-            aria-label={`Select event ${m.index + 1}: ${LABEL[m.kind]} at ${m.t.toFixed(0)} ms`}
+            aria-label={t(
+              `Chọn sự kiện ${m.index + 1}: ${kindLabel(m.kind)} tại ${m.t.toFixed(0)} ms`,
+              `Select event ${m.index + 1}: ${kindLabel(m.kind)} at ${m.t.toFixed(0)} ms`,
+            )}
             aria-pressed={selectedIndex === m.index}
             className="cursor-pointer"
             data-testid="timeline-marker"
@@ -141,8 +150,11 @@ export function EventTimeline({ model, annotations = [], selectedIsMove, selecte
         </text>
       </svg>
       <p className="mt-1 text-xs text-muted">
-        {TIMELINE_LEGEND.map((l) => `${l.glyph} ${l.label}`).join(" · ")} · bars: pointer-move density. Focus a marker and press
-        Enter, or use the buttons below.
+        {TIMELINE_LEGEND.map((l) => `${l.glyph} ${kindLabel(l.kind)}`).join(" · ")}
+        {t(
+          " · cột: mật độ di chuyển con trỏ. Chọn một mốc rồi nhấn Enter, hoặc dùng các nút bên dưới.",
+          " · bars: pointer-move density. Focus a marker and press Enter, or use the buttons below.",
+        )}
       </p>
     </div>
   );

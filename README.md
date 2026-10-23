@@ -4,9 +4,11 @@
 
 CaptchaLab is a small lab where you try different CAPTCHA challenges and then see what your own interaction looked like: the events, the speed and path of your mouse, and a replay of your attempt. It is made for learning and research. Everything runs in your browser.
 
-**Live demo: https://shadowhunter67.github.io/captchalab/**
+**Live demo: https://shadowhunter67.github.io/captchalab/** (pick a challenge on the left, try it on the right)
 
 > **Status: Alpha (`0.1.0-alpha`).** Things may still change.
+
+The site is in **Vietnamese by default**. Use the **VI / EN** button in the top-right corner to switch to English.
 
 ## What you can try
 

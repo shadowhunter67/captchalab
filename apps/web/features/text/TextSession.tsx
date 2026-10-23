@@ -3,6 +3,7 @@
 import { useRef, useState, type FormEvent, type KeyboardEvent } from "react";
 import { createEventRecorder, type FeatureSet, type InteractionSession, type VerificationResult } from "@captchalab/captcha-core";
 import { TEXT_TARGET, registry, toTextKeyCode, type TextChallenge, type TextFeatures } from "@captchalab/captcha-plugins";
+import { useT } from "@/lib/i18n";
 import { TextImage } from "./TextImage";
 import { TextInspect } from "./TextInspect";
 
@@ -24,6 +25,7 @@ interface Props {
  * Key events are stored with coarsened codes (letters -> "Letter", digits -> "Digit").
  */
 export function TextSession({ challenge: initialChallenge, onNewChallenge }: Props) {
+  const t = useT();
   const [challenge] = useState(initialChallenge);
   const plugin = registry.get("text");
   const inputRef = useRef<HTMLInputElement>(null);
@@ -50,7 +52,7 @@ export function TextSession({ challenge: initialChallenge, onNewChallenge }: Pro
       if (verification.passed && inputRef.current) inputRef.current.value = "";
     } catch (err) {
       console.error("Text submission failed", err instanceof Error ? err.message : "unknown error");
-      setError("Could not analyze this attempt. Start a new challenge.");
+      setError(t("Không phân tích được lần thử này. Hãy bắt đầu thử thách mới.", "Could not analyze this attempt. Start a new challenge."));
     }
   };
 
@@ -58,14 +60,19 @@ export function TextSession({ challenge: initialChallenge, onNewChallenge }: Pro
     <div className="space-y-6">
       <section aria-labelledby="try-h" className="rounded-lg border border-line bg-panel p-4">
         <h2 id="try-h" className="mb-1 text-base font-semibold">
-          Try
+          {t("Thử", "Try")}
         </h2>
-        <p className="mb-4 text-sm text-muted">Type the characters you see (case does not matter), then press Verify or Enter.</p>
+        <p className="mb-4 text-sm text-muted">
+          {t(
+            "Gõ các ký tự bạn thấy (không phân biệt hoa thường), rồi nhấn Xác minh hoặc Enter.",
+            "Type the characters you see (case does not matter), then press Verify or Enter.",
+          )}
+        </p>
         <form onSubmit={onSubmit} className="space-y-3">
           <TextImage challenge={challenge} />
           <div>
             <label htmlFor="text-answer" className="mb-1 block text-sm font-medium">
-              Characters in the image
+              {t("Các ký tự trong ảnh", "Characters in the image")}
             </label>
             <input
               id="text-answer"
@@ -89,21 +96,22 @@ export function TextSession({ challenge: initialChallenge, onNewChallenge }: Pro
           </div>
           <div className="flex flex-wrap gap-3">
             <button type="submit" data-testid="verify" className="rounded-md bg-accent px-3 py-1.5 text-sm font-medium text-bg hover:opacity-90">
-              Verify
+              {t("Xác minh", "Verify")}
             </button>
             <button
               type="button"
               onClick={onNewChallenge}
               className="rounded-md border border-line bg-panel px-3 py-1.5 text-sm font-medium hover:bg-track"
             >
-              New challenge
+              {t("Thử thách mới", "New challenge")}
             </button>
           </div>
         </form>
         <p className="mt-3 text-xs text-muted">
-          Accessibility: a labelled text field you can reach and use with the keyboard. The task is to read an image, and
-          this demo has no text or audio alternative, so it is not accessible to people who cannot see the image. It is
-          a demonstration, not a production CAPTCHA.
+          {t(
+            "Khả năng tiếp cận: một ô nhập có nhãn, có thể chọn và dùng bằng bàn phím. Nhiệm vụ là đọc một hình ảnh, và bản demo này không có lựa chọn thay thế bằng văn bản hay âm thanh, nên người không nhìn thấy ảnh sẽ không dùng được. Đây chỉ là bản minh họa, không phải CAPTCHA dùng cho thực tế.",
+            "Accessibility: a labelled text field you can reach and use with the keyboard. The task is to read an image, and this demo has no text or audio alternative, so it is not accessible to people who cannot see the image. It is a demonstration, not a production CAPTCHA.",
+          )}
         </p>
       </section>
       {error && (

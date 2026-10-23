@@ -3,6 +3,7 @@
 import { useMemo, useRef } from "react";
 import { createPointerTimeline, type InteractionSession } from "@captchalab/captcha-core";
 import { SLIDER_TARGETS, type SliderChallenge, type SliderLayout } from "@captchalab/captcha-plugins";
+import { useT } from "@/lib/i18n";
 import { ReplayControls } from "@/components/inspect/ReplayControls";
 import { TrajectoryView } from "@/components/inspect/TrajectoryView";
 import { useReplayPanel } from "@/lib/replay/useReplayPanel";
@@ -26,6 +27,7 @@ interface Props {
  * No DOM events are dispatched.
  */
 export function SliderReplay({ session, markers, layout, challenge, selectedPoint }: Props) {
+  const t = useT();
   const view = useMemo(
     () => buildSliderTrajectory(session, layout, challenge, TRACK_HEIGHT_PX),
     [session, layout, challenge],
@@ -58,7 +60,10 @@ export function SliderReplay({ session, markers, layout, challenge, selectedPoin
   if (!span) {
     return (
       <p className="text-sm text-muted" data-testid="trajectory-empty">
-        No pointer samples were recorded (keyboard-only interaction), so there is no trajectory or replay.
+        {t(
+          "Không ghi được mẫu con trỏ nào (chỉ dùng bàn phím), nên không có đường đi hay phần phát lại.",
+          "No pointer samples were recorded (keyboard-only interaction), so there is no trajectory or replay.",
+        )}
       </p>
     );
   }
@@ -69,7 +74,10 @@ export function SliderReplay({ session, markers, layout, challenge, selectedPoin
         geometry={view.geometry}
         testId="trajectory-svg"
         selectedPoint={selectedPoint}
-        label={`Pointer trajectory across ${view.geometry.paths.length} movement track(s). Start is a circle, end is a square; the dashed band is the accepted release region.`}
+        label={t(
+          `Đường đi của con trỏ qua ${view.geometry.paths.length} đoạn di chuyển. Điểm đầu là hình tròn, điểm cuối là hình vuông; dải nét đứt là vùng thả được chấp nhận.`,
+          `Pointer trajectory across ${view.geometry.paths.length} movement track(s). Start is a circle, end is a square; the dashed band is the accepted release region.`,
+        )}
         underlay={
           <>
             <rect {...view.track} fill="var(--track)" />
@@ -97,10 +105,10 @@ export function SliderReplay({ session, markers, layout, challenge, selectedPoin
       />
       <ReplayControls {...controlsProps} />
       <p className="mt-2 text-xs text-muted">
-        Circle: start. Square: end. Dashed band: accepted release region. The replay is a drawing of your recorded
-        events; it does not control the slider. The pale block is where the handle was; hovering never moves it, and
-        &quot;Try again&quot; snaps it back. With reduced motion enabled, Play jumps to the end; use the position
-        control to step through.
+        {t(
+          "Hình tròn: điểm đầu. Hình vuông: điểm cuối. Dải nét đứt: vùng thả được chấp nhận. Phần phát lại chỉ là hình vẽ từ các sự kiện bạn đã ghi, không điều khiển thanh trượt. Khối mờ là vị trí của tay nắm; di chuột qua không làm nó dịch chuyển, còn \"Thử lại\" sẽ đưa nó về chỗ cũ. Khi bật giảm chuyển động, nút Phát sẽ nhảy thẳng tới cuối; hãy dùng thanh vị trí để xem từng bước.",
+          "Circle: start. Square: end. Dashed band: accepted release region. The replay is a drawing of your recorded events; it does not control the slider. The pale block is where the handle was; hovering never moves it, and \"Try again\" snaps it back. With reduced motion enabled, Play jumps to the end; use the position control to step through.",
+        )}
       </p>
     </div>
   );

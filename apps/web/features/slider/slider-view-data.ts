@@ -14,6 +14,7 @@ import {
   type SliderFeatures,
   type SliderLayout,
 } from "@captchalab/captcha-plugins";
+import { EN, type Translate } from "@/lib/i18n";
 import { buildTrajectoryGeometry, type Rect, type TrajectoryGeometry } from "@/lib/inspect/trajectory";
 import type { NumericMetric } from "@/lib/inspect/metrics";
 
@@ -66,32 +67,40 @@ export function sliderDragDomain(session: InteractionSession): [number, number] 
 }
 
 /** The Slider's own features, as table rows. The table renders them without knowing the math. */
-export function sliderAttemptMetrics(f: SliderFeatures): NumericMetric[] {
+export function sliderAttemptMetrics(f: SliderFeatures, t: Translate = EN): NumericMetric[] {
   return [
     {
       id: "dragDuration",
-      label: "Drag duration",
+      label: t("Thời gian kéo", "Drag duration"),
       value: f.dragDuration,
       unit: "ms",
-      description: "Time from pointerdown to pointerup of the final completed handle drag.",
+      description: t(
+        "Thời gian từ lúc nhấn xuống đến lúc nhả ra của lần kéo tay nắm hoàn tất cuối cùng.",
+        "Time from pointerdown to pointerup of the final completed handle drag.",
+      ),
     },
     {
       id: "releaseError",
-      label: "Release error",
+      label: t("Sai lệch khi thả", "Release error"),
       value: f.releaseError,
       unit: "px",
-      hint: "along handle travel",
-      description: "Distance between the release position and the target, in px along the handle's travel.",
+      hint: t("dọc theo đường đi của tay nắm", "along handle travel"),
+      description: t(
+        "Khoảng cách giữa vị trí thả và đích, tính bằng px dọc theo đường đi của tay nắm.",
+        "Distance between the release position and the target, in px along the handle's travel.",
+      ),
     },
     {
       id: "overshoot",
-      label: "Overshoot",
+      label: t("Vượt quá đích", "Overshoot"),
       value: f.overshoot,
       unit: "px",
-      hint: "past the target",
-      description:
+      hint: t("quá đích", "past the target"),
+      description: t(
+        "Điểm con trỏ đi xa nhất quá đích, theo hướng từ vị trí xuất phát tới đích.",
         "Farthest the pointer went past the target, in the direction from the starting position toward it.",
+      ),
     },
-    { id: "numberOfAttempts", label: "Number of attempts", value: f.numberOfAttempts, unit: "count" },
+    { id: "numberOfAttempts", label: t("Số lần thử", "Number of attempts"), value: f.numberOfAttempts, unit: "count" },
   ];
 }

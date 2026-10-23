@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
+import { LangProvider, LanguageSwitch } from "@/lib/i18n";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -9,8 +10,14 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en">
-      <body className="min-h-screen antialiased">{children}</body>
+    <html lang="vi">
+      <body className="min-h-screen antialiased">
+        <LangProvider>
+          {children}
+          {/* After the page in DOM order so it does not take the first Tab stop; it is fixed-position visually. */}
+          <LanguageSwitch />
+        </LangProvider>
+      </body>
     </html>
   );
 }

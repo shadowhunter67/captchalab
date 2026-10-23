@@ -2,6 +2,7 @@
 
 import { useMemo, useRef, useState } from "react";
 import type { SeriesSample } from "@captchalab/captcha-core";
+import { useT } from "@/lib/i18n";
 import { formatMilliseconds } from "@/lib/format";
 import { countValidSamples } from "@/lib/inspect/series";
 import { DEFAULT_TABLE_ROWS, MAX_TABLE_ROWS, projectSeriesTable } from "@/lib/inspect/series-table";
@@ -31,6 +32,7 @@ interface Props {
  *    with the movement it belongs to. Each segment is its own <tbody>.
  */
 export function MotionDataTable({ title, unit, segments, formatCell, segmentLabel, segmentLabels, testId }: Props) {
+  const t = useT();
   const [open, setOpen] = useState(false);
   // `showAllFor` remembers which dataset was expanded; a different `segments` shows the default view again.
   const [showAllFor, setShowAllFor] = useState<typeof segments | null>(null);
@@ -61,19 +63,24 @@ export function MotionDataTable({ title, unit, segments, formatCell, segmentLabe
       onToggle={(e) => setOpen(e.currentTarget.open)}
     >
       <summary className="cursor-pointer font-medium">
-        Show {title.toLowerCase()} data table ({total} sample{total === 1 ? "" : "s"})
+        {t(
+          `Xem bảng dữ liệu ${title.toLowerCase()} (${total} mẫu)`,
+          `Show ${title.toLowerCase()} data table (${total} sample${total === 1 ? "" : "s"})`,
+        )}
       </summary>
       {table && (
         <div className="mt-2 overflow-x-auto">
           <table className="w-full border-collapse text-left" data-testid={`${testId}-table`}>
             <caption className="mb-1 text-left text-xs text-muted">
-              {title} samples shown in the chart above, one row per sample. Each {segmentLabel.toLowerCase()} is a
-              separate movement; values are not connected from one {segmentLabel.toLowerCase()} to the next.
+              {t(
+                `Các mẫu ${title.toLowerCase()} trong biểu đồ phía trên, mỗi mẫu một dòng. Mỗi ${segmentLabel.toLowerCase()} là một chuyển động riêng; giá trị không được nối từ ${segmentLabel.toLowerCase()} này sang ${segmentLabel.toLowerCase()} kế tiếp.`,
+                `${title} samples shown in the chart above, one row per sample. Each ${segmentLabel.toLowerCase()} is a separate movement; values are not connected from one ${segmentLabel.toLowerCase()} to the next.`,
+              )}
             </caption>
             <thead>
               <tr className="border-b border-line">
-                <th scope="col" className="py-1 pr-3 font-semibold">{segmentLabels ? "Attempt" : segmentLabel} · sample</th>
-                <th scope="col" className="py-1 pr-3 font-semibold">Time</th>
+                <th scope="col" className="py-1 pr-3 font-semibold">{segmentLabels ? t("Lần thử", "Attempt") : segmentLabel} · {t("mẫu", "sample")}</th>
+                <th scope="col" className="py-1 pr-3 font-semibold">{t("Thời gian", "Time")}</th>
                 <th scope="col" className="py-1 font-semibold">{title} ({unit})</th>
               </tr>
             </thead>
@@ -82,7 +89,7 @@ export function MotionDataTable({ title, unit, segments, formatCell, segmentLabe
                 {rows.map((r) => (
                   <tr key={r.sample} className="border-b border-line last:border-b-0">
                     <th scope="row" className="py-1 pr-3 font-normal">
-                      {nameOf(r.segmentIndex)} · sample {r.sample}
+                      {nameOf(r.segmentIndex)} · {t("mẫu", "sample")} {r.sample}
                     </th>
                     <td className="py-1 pr-3 font-mono">{formatMilliseconds(r.t)}</td>
                     <td className="py-1 font-mono">{formatCell(r.value)}</td>
@@ -100,21 +107,24 @@ export function MotionDataTable({ title, unit, segments, formatCell, segmentLabe
           >
             {table.shown < table.total ? (
               <>
-                Showing first {table.shown} of {table.total} samples.{" "}
+                {t(
+                  `Đang hiện ${table.shown} mẫu đầu trong ${table.total} mẫu.`,
+                  `Showing first ${table.shown} of ${table.total} samples.`,
+                )}{" "}
                 {!showAll && table.total <= MAX_TABLE_ROWS ? (
                   <button type="button" className="underline" onClick={expand}>
-                    Show all {table.total} samples
+                    {t(`Hiện cả ${table.total} mẫu`, `Show all ${table.total} samples`)}
                   </button>
                 ) : !showAll ? (
                   <button type="button" className="underline" onClick={expand}>
-                    Show up to {MAX_TABLE_ROWS} samples
+                    {t(`Hiện tối đa ${MAX_TABLE_ROWS} mẫu`, `Show up to ${MAX_TABLE_ROWS} samples`)}
                   </button>
                 ) : (
-                  `The table is limited to ${MAX_TABLE_ROWS} rows.`
+                  t(`Bảng chỉ hiện tối đa ${MAX_TABLE_ROWS} dòng.`, `The table is limited to ${MAX_TABLE_ROWS} rows.`)
                 )}
               </>
             ) : (
-              `All ${table.total} samples shown.`
+              t(`Đã hiện cả ${table.total} mẫu.`, `All ${table.total} samples shown.`)
             )}
           </p>
         </div>

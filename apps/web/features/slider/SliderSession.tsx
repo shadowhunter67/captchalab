@@ -9,6 +9,7 @@ import {
   type SliderFeatures,
   type SliderLayout,
 } from "@captchalab/captcha-plugins";
+import { useT } from "@/lib/i18n";
 import { SliderController, type SliderPhase, type SubmitVia } from "./slider-controller";
 import { SliderSurface } from "./SliderSurface";
 import { SliderInspect } from "./SliderInspect";
@@ -51,6 +52,9 @@ interface Props {
 export function SliderSession({ challenge: initialChallenge, onNewChallenge, onResult, onReset, showInspect = true }: Props) {
   // Pinned at mount: what is drawn, verified and analyzed is always the same challenge, even if a
   // parent forgot to remount with a new key.
+  const t = useT();
+  const tRef = useRef(t);
+  tRef.current = t;
   const [challenge] = useState(initialChallenge);
   const slider = registry.get("slider");
   const onResultRef = useRef(onResult);
@@ -91,7 +95,7 @@ export function SliderSession({ challenge: initialChallenge, onNewChallenge, onR
           onResultRef.current?.({ session, featureSet, layout, verification });
         } catch (err) {
           console.error("Slider submission failed", err instanceof Error ? err.message : "unknown error");
-          setError("Could not analyze this attempt. Start a new challenge.");
+          setError(tRef.current("Không phân tích được lần thử này. Hãy bắt đầu thử thách mới.", "Could not analyze this attempt. Start a new challenge."));
         }
       },
     });
@@ -111,11 +115,13 @@ export function SliderSession({ challenge: initialChallenge, onNewChallenge, onR
     <div className="space-y-6">
       <section aria-labelledby="try-h" className="rounded-lg border border-line bg-panel p-4">
         <h2 id="try-h" className="mb-1 text-base font-semibold">
-          Try
+          {t("Thử", "Try")}
         </h2>
         <p className="mb-4 text-sm text-muted">
-          Drag the handle so it lands on the dashed outline, then release. Keyboard: Arrow keys move the handle,
-          Enter submits.
+          {t(
+            "Kéo tay nắm cho khớp với khung nét đứt rồi thả ra. Bàn phím: phím mũi tên di chuyển tay nắm, Enter để gửi.",
+            "Drag the handle so it lands on the dashed outline, then release. Keyboard: Arrow keys move the handle, Enter submits.",
+          )}
         </p>
         <SliderSurface
           controller={controller}
@@ -125,7 +131,10 @@ export function SliderSession({ challenge: initialChallenge, onNewChallenge, onR
         />
         {phase === "disabled" && (
           <p role="alert" className="mt-3 text-sm text-bad">
-            The slider cannot be measured at this size, so interaction is disabled. Widen the window.
+            {t(
+              "Không đo được thanh trượt ở kích thước này nên đã tắt tương tác. Hãy mở rộng cửa sổ.",
+              "The slider cannot be measured at this size, so interaction is disabled. Widen the window.",
+            )}
           </p>
         )}
         <div className="mt-4 flex flex-wrap gap-3">
@@ -134,7 +143,7 @@ export function SliderSession({ challenge: initialChallenge, onNewChallenge, onR
             onClick={onNewChallenge}
             className="rounded-md bg-accent px-3 py-1.5 text-sm font-medium text-bg hover:opacity-90"
           >
-            New challenge
+            {t("Thử thách mới", "New challenge")}
           </button>
           {phase === "submitted" && (
             <button
@@ -142,14 +151,15 @@ export function SliderSession({ challenge: initialChallenge, onNewChallenge, onR
               onClick={tryAgain}
               className="rounded-md border border-line bg-panel px-3 py-1.5 text-sm font-medium hover:bg-track"
             >
-              Try again (same challenge)
+              {t("Thử lại (cùng thử thách)", "Try again (same challenge)")}
             </button>
           )}
         </div>
         <p className="mt-3 text-xs text-muted">
-          Accessibility: pointer and basic keyboard control are supported. Screen-reader support is limited:
-          the target is conveyed visually, and the handle exposes only its position. This is a demonstration
-          challenge and is not a substitute for an accessible production CAPTCHA.
+          {t(
+            "Khả năng tiếp cận: hỗ trợ con trỏ và điều khiển bàn phím cơ bản. Hỗ trợ trình đọc màn hình còn hạn chế: đích chỉ được thể hiện bằng hình ảnh, và tay nắm chỉ cho biết vị trí của nó. Đây là thử thách minh hoạ, không thay thế được một CAPTCHA thực tế có khả năng tiếp cận tốt.",
+            "Accessibility: pointer and basic keyboard control are supported. Screen-reader support is limited: the target is conveyed visually, and the handle exposes only its position. This is a demonstration challenge and is not a substitute for an accessible production CAPTCHA.",
+          )}
         </p>
       </section>
 

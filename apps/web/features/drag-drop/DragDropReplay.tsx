@@ -9,6 +9,7 @@ import {
   type DragDropChallenge,
   type DragDropLayout,
 } from "@captchalab/captcha-plugins";
+import { useT } from "@/lib/i18n";
 import { ReplayControls } from "@/components/inspect/ReplayControls";
 import { useReplayPanel } from "@/lib/replay/useReplayPanel";
 import { createDragDropReplay } from "./drag-drop-replay-state";
@@ -26,7 +27,8 @@ interface Props {
  * pressed pointer. It never dispatches DOM events or touches the real surface.
  */
 export function DragDropReplay({ challenge, layout, session }: Props) {
-  const model = useMemo(() => createDragDropReplay(challenge, layout, session), [challenge, layout, session]);
+  const t = useT();
+  const model = useMemo(() => createDragDropReplay(challenge, layout, session, t), [challenge, layout, session, t]);
   const size = itemSizePx(challenge, layout);
   const radius = hitRadiusPx(challenge, layout);
 
@@ -59,7 +61,7 @@ export function DragDropReplay({ challenge, layout, session }: Props) {
   if (!model.range) {
     return (
       <p className="text-sm text-muted" data-testid="replay-empty">
-        No drag was recorded, so there is nothing to replay.
+        {t("Chưa ghi nhận lần kéo nào nên không có gì để phát lại.", "No drag was recorded, so there is nothing to replay.")}
       </p>
     );
   }
@@ -69,7 +71,10 @@ export function DragDropReplay({ challenge, layout, session }: Props) {
     <div ref={hostRef} data-testid="replay">
       <svg
         role="img"
-        aria-label="Replay of the drag and drop: a virtual pointer carries each shape to a drop area; it snaps into place on a correct or wrong target and returns after a miss or a cancel."
+        aria-label={t(
+          "Phát lại thao tác kéo thả: một con trỏ ảo đưa từng hình đến một vùng thả; hình khớp vào chỗ khi thả đúng hoặc nhầm đích, và quay về sau khi thả trượt hoặc bị hủy.",
+          "Replay of the drag and drop: a virtual pointer carries each shape to a drop area; it snaps into place on a correct or wrong target and returns after a miss or a cancel.",
+        )}
         viewBox={`0 0 ${layout.width} ${layout.height}`}
         className="w-full max-w-[560px] rounded-lg bg-bg ring-1 ring-line"
         style={{ aspectRatio: `${layout.width} / ${layout.height}` }}
@@ -106,8 +111,10 @@ export function DragDropReplay({ challenge, layout, session }: Props) {
       <p ref={captionRef} className="mt-2 min-h-5 text-sm" data-testid="replay-caption" />
       <ReplayControls {...controlsProps} />
       <p className="mt-2 text-xs text-muted">
-        The replay draws your recorded events; it does not control the shapes. The dark dot is the pointer while a
-        shape is held. With reduced motion enabled, Play jumps to the end; use the position control to step through.
+        {t(
+          "Bản phát lại chỉ vẽ lại các sự kiện đã ghi; nó không điều khiển các hình. Chấm đậm là con trỏ khi đang giữ một hình. Khi bật giảm chuyển động, nút Phát sẽ nhảy thẳng đến cuối; hãy dùng thanh vị trí để xem từng bước.",
+          "The replay draws your recorded events; it does not control the shapes. The dark dot is the pointer while a shape is held. With reduced motion enabled, Play jumps to the end; use the position control to step through.",
+        )}
       </p>
     </div>
   );

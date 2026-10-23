@@ -3,6 +3,7 @@
 import { useRef, useState } from "react";
 import { createEventRecorder, type FeatureSet, type InteractionSession, type Point, type VerificationResult } from "@captchalab/captcha-core";
 import { registry, type RotationChallenge, type RotationFeatures } from "@captchalab/captcha-plugins";
+import { useT } from "@/lib/i18n";
 import { RotationController } from "./rotation-controller";
 import { RotationInspect } from "./RotationInspect";
 import { RotationSurface } from "./RotationSurface";
@@ -22,6 +23,9 @@ interface Props {
 
 /** One challenge = one session (the parent keys it by challenge). Turning again clears the result. */
 export function RotationSession({ challenge: initialChallenge, onNewChallenge }: Props) {
+  const t = useT();
+  const tRef = useRef(t);
+  tRef.current = t;
   const [challenge] = useState(initialChallenge);
   const plugin = registry.get("rotation");
   const applyAngleRef = useRef<(angle: number) => void>(() => {});
@@ -49,7 +53,7 @@ export function RotationSession({ challenge: initialChallenge, onNewChallenge }:
           setError(null);
         } catch (err) {
           console.error("Rotation submission failed", err instanceof Error ? err.message : "unknown error");
-          setError("Could not analyze this attempt. Start a new challenge.");
+          setError(tRef.current("Không phân tích được lần thử này. Hãy bắt đầu thử thách mới.", "Could not analyze this attempt. Start a new challenge."));
         }
       },
     });
@@ -59,11 +63,13 @@ export function RotationSession({ challenge: initialChallenge, onNewChallenge }:
     <div className="space-y-6">
       <section aria-labelledby="try-h" className="rounded-lg border border-line bg-panel p-4">
         <h2 id="try-h" className="mb-1 text-base font-semibold">
-          Try
+          {t("Thử", "Try")}
         </h2>
         <p className="mb-4 text-sm text-muted">
-          Turn the object until the arrow points up. Drag it around its center, or focus it (Tab) and use the left and
-          right arrow keys (5° per press). Then press Verify.
+          {t(
+            "Xoay vật thể cho đến khi mũi tên chỉ lên trên. Hãy kéo nó quanh tâm, hoặc chọn nó (phím Tab) rồi dùng phím mũi tên trái và phải (5° mỗi lần bấm). Sau đó nhấn Xác minh.",
+            "Turn the object until the arrow points up. Drag it around its center, or focus it (Tab) and use the left and right arrow keys (5° per press). Then press Verify.",
+          )}
         </p>
         <RotationSurface controller={controller} applyAngleRef={applyAngleRef} />
         <div className="mt-4 flex flex-wrap gap-3">
@@ -73,20 +79,21 @@ export function RotationSession({ challenge: initialChallenge, onNewChallenge }:
             data-testid="verify"
             className="rounded-md bg-accent px-3 py-1.5 text-sm font-medium text-bg hover:opacity-90"
           >
-            Verify
+            {t("Xác minh", "Verify")}
           </button>
           <button
             type="button"
             onClick={onNewChallenge}
             className="rounded-md border border-line bg-panel px-3 py-1.5 text-sm font-medium hover:bg-track"
           >
-            New challenge
+            {t("Thử thách mới", "New challenge")}
           </button>
         </div>
         <p className="mt-3 text-xs text-muted">
-          Accessibility: the object is a slider you can turn with a pointer or the arrow keys; its angle is exposed as
-          text and the result is stated in words. Seeing the arrow is still required, so this is not accessible to
-          everyone, and it is a demonstration, not a production CAPTCHA.
+          {t(
+            "Khả năng tiếp cận: vật thể là một thanh trượt bạn có thể xoay bằng con trỏ hoặc phím mũi tên; góc của nó được cung cấp dưới dạng chữ và kết quả được nêu bằng lời. Tuy nhiên vẫn cần nhìn thấy mũi tên, nên không phải ai cũng dùng được, và đây chỉ là bản minh họa, không phải một CAPTCHA thực tế.",
+            "Accessibility: the object is a slider you can turn with a pointer or the arrow keys; its angle is exposed as text and the result is stated in words. Seeing the arrow is still required, so this is not accessible to everyone, and it is a demonstration, not a production CAPTCHA.",
+          )}
         </p>
       </section>
       {error && (

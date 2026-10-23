@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, type KeyboardEvent, type MutableRefObject, type PointerEvent } from "react";
+import { useT } from "@/lib/i18n";
 import { toPointerSample } from "@/lib/pointer-adapter";
 import type { CheckboxController } from "./checkbox-controller";
 
@@ -25,6 +26,7 @@ interface Props {
  * the input for Space only.
  */
 export function CheckboxSurface({ controller, checked, measureRef }: Props) {
+  const t = useT();
   const labelRef = useRef<HTMLLabelElement>(null);
 
   useEffect(() => {
@@ -75,7 +77,7 @@ export function CheckboxSurface({ controller, checked, measureRef }: Props) {
         onBlur={() => controller.blur()}
         className="h-6 w-6 shrink-0 cursor-pointer accent-[var(--accent)]"
       />
-      <span className="text-base">Check this box to pass the challenge</span>
+      <span className="text-base">{t("Đánh dấu ô này để vượt qua thử thách", "Check this box to pass the challenge")}</span>
     </label>
   );
 }

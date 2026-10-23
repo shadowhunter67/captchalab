@@ -1,21 +1,22 @@
 import type { InteractionSession, Point, SeriesSample } from "@captchalab/captcha-core";
 import { deriveRotation, type RotationAnalysis, type RotationChallenge, type RotationFeatures } from "@captchalab/captcha-plugins";
+import { EN, type Translate } from "@/lib/i18n";
 import type { InspectMetric } from "@/lib/inspect/metrics";
 
 /** Which numbers the generic MetricTable shows for the rotation CAPTCHA. Null shows as a dash. */
-export function rotationMetrics(f: RotationFeatures): InspectMetric[] {
+export function rotationMetrics(f: RotationFeatures, t: Translate = EN): InspectMetric[] {
   return [
-    { id: "reactionTime", label: "Reaction time", value: f.reactionTime, unit: "ms", hint: "to first input" },
-    { id: "rotationDuration", label: "Rotation duration", value: f.rotationDuration, unit: "ms", hint: "first input to last" },
-    { id: "angularDistance", label: "Angular distance", value: f.angularDistance, unit: "deg", hint: "total turning" },
-    { id: "meanAngularVelocity", label: "Mean angular velocity", value: f.meanAngularVelocity, unit: "deg/s", hint: "pointer drags" },
-    { id: "maxAngularVelocity", label: "Max angular velocity", value: f.maxAngularVelocity, unit: "deg/s", hint: "pointer drags" },
-    { id: "angularCorrections", label: "Angular corrections", value: f.angularCorrections, unit: "count", description: "Reversals of turning direction." },
-    { id: "finalAngularError", label: "Final angular error", value: f.finalAngularError, unit: "deg", hint: "from upright" },
-    { id: "attemptCount", label: "Attempts", value: f.attemptCount, unit: "count", description: "Pointer drags plus keyboard bursts." },
-    { id: "eventCount", label: "Event count", value: f.eventCount, unit: "count" },
-    { id: "completionTime", label: "Session duration", value: f.completionTime, unit: "ms", hint: "since challenge shown" },
-    { id: "inputModality", label: "Input modality", text: f.inputModality },
+    { id: "reactionTime", label: t("Thời gian phản ứng", "Reaction time"), value: f.reactionTime, unit: "ms", hint: t("đến lần nhập đầu tiên", "to first input") },
+    { id: "rotationDuration", label: t("Thời gian xoay", "Rotation duration"), value: f.rotationDuration, unit: "ms", hint: t("từ lần nhập đầu đến lần cuối", "first input to last") },
+    { id: "angularDistance", label: t("Góc đã xoay", "Angular distance"), value: f.angularDistance, unit: "deg", hint: t("tổng góc xoay", "total turning") },
+    { id: "meanAngularVelocity", label: t("Vận tốc góc trung bình", "Mean angular velocity"), value: f.meanAngularVelocity, unit: "deg/s", hint: t("các lần kéo bằng con trỏ", "pointer drags") },
+    { id: "maxAngularVelocity", label: t("Vận tốc góc tối đa", "Max angular velocity"), value: f.maxAngularVelocity, unit: "deg/s", hint: t("các lần kéo bằng con trỏ", "pointer drags") },
+    { id: "angularCorrections", label: t("Số lần chỉnh góc", "Angular corrections"), value: f.angularCorrections, unit: "count", description: t("Số lần đổi chiều xoay.", "Reversals of turning direction.") },
+    { id: "finalAngularError", label: t("Sai lệch góc cuối", "Final angular error"), value: f.finalAngularError, unit: "deg", hint: t("so với hướng thẳng đứng", "from upright") },
+    { id: "attemptCount", label: t("Số lần thử", "Attempts"), value: f.attemptCount, unit: "count", description: t("Các lần kéo bằng con trỏ cộng các đợt bấm bàn phím.", "Pointer drags plus keyboard bursts.") },
+    { id: "eventCount", label: t("Số sự kiện", "Event count"), value: f.eventCount, unit: "count" },
+    { id: "completionTime", label: t("Thời gian phiên", "Session duration"), value: f.completionTime, unit: "ms", hint: t("từ lúc hiện thử thách", "since challenge shown") },
+    { id: "inputModality", label: t("Cách nhập", "Input modality"), text: f.inputModality },
   ];
 }
 

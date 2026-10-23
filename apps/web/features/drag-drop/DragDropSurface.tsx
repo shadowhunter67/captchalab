@@ -10,10 +10,11 @@ import {
   type DragDropChallenge,
   type DragDropLayout,
 } from "@captchalab/captcha-plugins";
+import { useT } from "@/lib/i18n";
 import { toPointerSample, type SurfaceOrigin } from "@/lib/pointer-adapter";
 import type { DragDropController, DragDropViewState } from "./drag-drop-controller";
 import { ShapeGlyph } from "./ShapeGlyph";
-import { SHAPE_NAME } from "./shapes";
+import { shapeName, shapeNameLower } from "./shapes";
 
 interface Props {
   challenge: DragDropChallenge;
@@ -33,6 +34,7 @@ interface Props {
  * as focusable controls, so they do not promise a keyboard action that does not exist.
  */
 export function DragDropSurface({ challenge, controller, view, applyItemRef }: Props) {
+  const t = useT();
   const surfaceRef = useRef<HTMLDivElement>(null);
   const itemRefs = useRef(new Map<string, HTMLDivElement>());
   const capturedRef = useRef(new Map<number, HTMLElement>());
@@ -116,16 +118,16 @@ export function DragDropSurface({ challenge, controller, view, applyItemRef }: P
       className="relative aspect-[4/3] w-full max-w-[560px] select-none overflow-hidden rounded-lg bg-bg ring-1 ring-line"
     >
       {layout &&
-        challenge.targets.map((t) => {
-          const kind = kindOf(t.acceptsItemId);
-          const c = normalizedToPx(t.position, layout);
-          const held = Object.entries(view.placements).find(([, target]) => target === t.id)?.[0];
+        challenge.targets.map((tg) => {
+          const kind = kindOf(tg.acceptsItemId);
+          const c = normalizedToPx(tg.position, layout);
+          const held = Object.entries(view.placements).find(([, target]) => target === tg.id)?.[0];
           return (
             <div
-              key={t.id}
+              key={tg.id}
               role="img"
-              aria-label={`Drop area for the ${SHAPE_NAME[kind].toLowerCase()}${held ? `. Holds the ${SHAPE_NAME[kindOf(held)].toLowerCase()}` : ". Empty"}`}
-              data-testid={`drop-${t.id}`}
+              aria-label={`${t("Vùng thả cho", "Drop area for the")} ${shapeNameLower(kind, t)}${held ? `. ${t("Đang chứa", "Holds the")} ${shapeNameLower(kindOf(held), t)}` : `. ${t("Trống", "Empty")}`}`}
+              data-testid={`drop-${tg.id}`}
               data-held={held ?? ""}
               className="absolute flex items-center justify-center rounded-full border-2 border-dashed border-line"
               style={{ left: c.x - radius, top: c.y - radius, width: radius * 2, height: radius * 2 }}
@@ -146,8 +148,12 @@ export function DragDropSurface({ challenge, controller, view, applyItemRef }: P
               else itemRefs.current.delete(item.id);
             }}
             role="img"
-            aria-label={`${SHAPE_NAME[item.kind]}, draggable with a pointer. ${
-              lifted ? "Being dragged" : target ? `On the ${SHAPE_NAME[targetKind ?? "circle"].toLowerCase()} drop area` : "Not placed"
+            aria-label={`${shapeName(item.kind, t)}, ${t("kéo được bằng con trỏ", "draggable with a pointer")}. ${
+              lifted
+                ? t("Đang được kéo", "Being dragged")
+                : target
+                  ? t(`Đang ở vùng thả ${shapeNameLower(targetKind ?? "circle", t)}`, `On the ${shapeNameLower(targetKind ?? "circle", t)} drop area`)
+                  : t("Chưa đặt", "Not placed")
             }`}
             data-testid={`item-${item.id}`}
             data-lifted={lifted}

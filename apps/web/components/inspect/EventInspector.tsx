@@ -1,4 +1,7 @@
+"use client";
+
 import type { InteractionEvent } from "@captchalab/captcha-core";
+import { useT } from "@/lib/i18n";
 import { projectEventFields } from "@/lib/inspect/events";
 
 interface Props {
@@ -14,24 +17,32 @@ const btn = "rounded-md border border-line bg-panel px-3 py-1.5 text-sm font-med
 
 /** Shows the normalized fields of one selected event. Never shows DOM objects or logs anything. */
 export function EventInspector({ event, index, total, onPrevious, onNext, onClear }: Props) {
+  const t = useT();
   return (
     <div data-testid="event-inspector" className="min-w-0">
       <div className="mb-2 flex flex-wrap items-center gap-2">
         <button type="button" className={btn} onClick={onPrevious} disabled={total === 0} data-testid="event-prev">
-          Previous event
+          {t("Sự kiện trước", "Previous event")}
         </button>
         <button type="button" className={btn} onClick={onNext} disabled={total === 0} data-testid="event-next">
-          Next event
+          {t("Sự kiện sau", "Next event")}
         </button>
         <button type="button" className={btn} onClick={onClear} disabled={index === null}>
-          Clear selection
+          {t("Bỏ chọn", "Clear selection")}
         </button>
         <span className="text-sm text-muted" aria-live="polite" data-testid="event-position">
-          {index === null ? `${total} events` : `Selected event #${index + 1} of ${total}`}
+          {index === null
+            ? t(`${total} sự kiện`, `${total} events`)
+            : t(`Đã chọn sự kiện #${index + 1} trên ${total}`, `Selected event #${index + 1} of ${total}`)}
         </span>
       </div>
       {event === null ? (
-        <p className="text-sm text-muted">Select a marker on the timeline, or step through events, to see its fields.</p>
+        <p className="text-sm text-muted">
+          {t(
+            "Chọn một mốc trên dòng thời gian, hoặc duyệt từng sự kiện, để xem chi tiết.",
+            "Select a marker on the timeline, or step through events, to see its fields.",
+          )}
+        </p>
       ) : (
         <dl className="grid grid-cols-[max-content_1fr] gap-x-4 gap-y-1 text-sm">
           {projectEventFields(event).map((f) => (

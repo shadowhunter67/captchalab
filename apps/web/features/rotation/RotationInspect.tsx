@@ -3,6 +3,7 @@
 import { useMemo } from "react";
 import type { FeatureSet, InteractionSession, Point, VerificationResult } from "@captchalab/captcha-core";
 import { deriveRotation, type RotationChallenge, type RotationFeatures } from "@captchalab/captcha-plugins";
+import { useT } from "@/lib/i18n";
 import { Card } from "@/components/inspect/Card";
 import { EventExplorer } from "@/components/inspect/EventExplorer";
 import { MetricTable } from "@/components/inspect/MetricTable";
@@ -23,38 +24,41 @@ interface Props {
 const axis = (v: number): string => String(Math.round(v));
 
 export function RotationInspect({ challenge, verification, featureSet, session, center }: Props) {
+  const t = useT();
   const f = featureSet.features;
   const selection = useEventSelection(session);
   const analysis = useMemo(() => deriveRotation(challenge, { center }, session), [challenge, center, session]);
   const segments = useMemo(() => angularVelocitySegments(analysis), [analysis]);
   const domain = useMemo(() => dragDomain(analysis), [analysis]);
-  const metrics = useMemo(() => rotationMetrics(f), [f]);
+  const metrics = useMemo(() => rotationMetrics(f, t), [f, t]);
 
   return (
     <section aria-labelledby="inspect-h" className="space-y-4" data-testid="inspect">
       <h2 id="inspect-h" className="text-base font-semibold">
-        Inspect
+        {t("Phân tích", "Inspect")}
       </h2>
       <VerificationSummary passed={verification.passed} reason={verification.reason} />
       <div className="grid gap-4 lg:grid-cols-2">
-        <Card id="replay-h" title="Replay">
+        <Card id="replay-h" title={t("Phát lại", "Replay")}>
           <RotationReplay challenge={challenge} center={center} session={session} />
         </Card>
-        <Card id="metrics-h" title="Metrics">
+        <Card id="metrics-h" title={t("Chỉ số", "Metrics")}>
           <div className="space-y-4">
-            <MetricTable heading="Rotation" metrics={metrics} />
+            <MetricTable heading={t("Xoay ảnh", "Rotation")} metrics={metrics} />
             <p className="text-xs text-muted">
-              Feature set <span className="font-mono">{featureSet.schemaVersion}</span> · extractor{" "}
-              <span className="font-mono">{featureSet.extractorVersion}</span>. These are descriptive measurements of
-              this one interaction, not evidence that it was made by a person or by software. Data stays in this
-              browser tab.
+              {t("Bộ đặc trưng", "Feature set")} <span className="font-mono">{featureSet.schemaVersion}</span> ·{" "}
+              {t("bộ trích xuất", "extractor")} <span className="font-mono">{featureSet.extractorVersion}</span>.{" "}
+              {t(
+                "Đây là các số đo mô tả cho riêng lần tương tác này, không phải bằng chứng cho thấy do người hay phần mềm thực hiện. Dữ liệu chỉ nằm trong thẻ trình duyệt này.",
+                "These are descriptive measurements of this one interaction, not evidence that it was made by a person or by software. Data stays in this browser tab.",
+              )}
             </p>
           </div>
         </Card>
       </div>
-      <Card id="angvel-h" title="Angular velocity">
+      <Card id="angvel-h" title={t("Vận tốc góc", "Angular velocity")}>
         <MotionChart
-          title="Angular velocity"
+          title={t("Vận tốc góc", "Angular velocity")}
           unit="°/s"
           segments={segments}
           xDomain={domain}
@@ -62,12 +66,15 @@ export function RotationInspect({ challenge, verification, featureSet, session, 
           selectedT={selection.event?.t ?? null}
           formatValue={axis}
           formatCell={(v) => `${v.toFixed(1)} °/s`}
-          segmentLabel="Drag"
+          segmentLabel={t("Lần kéo", "Drag")}
           testId="chart-angular-velocity"
-          scopeNote="Pointer drags only (signed: positive is clockwise). Keyboard turns have no velocity."
+          scopeNote={t(
+            "Chỉ tính các lần kéo bằng con trỏ (có dấu: số dương là theo chiều kim đồng hồ). Xoay bằng bàn phím không có vận tốc.",
+            "Pointer drags only (signed: positive is clockwise). Keyboard turns have no velocity.",
+          )}
         />
       </Card>
-      <Card id="events-h" title="Event timeline">
+      <Card id="events-h" title={t("Dòng thời gian sự kiện", "Event timeline")}>
         <EventExplorer session={session} selection={selection} />
       </Card>
     </section>

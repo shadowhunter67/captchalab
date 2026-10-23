@@ -1,4 +1,5 @@
 import type { SeriesSample } from "@captchalab/captcha-core";
+import { EN, type Translate } from "@/lib/i18n";
 import { countValidSegments, isValidSample, validSamples } from "./series";
 
 export interface ChartSize {
@@ -117,12 +118,17 @@ export function describeSeries(
   unit: string,
   segments: readonly (readonly SeriesSample[])[],
   format: (v: number) => string,
+  t: Translate = EN,
 ): string {
   const samples = segments.flatMap(validSamples);
-  if (samples.length === 0) return `Not enough motion samples to calculate ${name.toLowerCase()}.`;
+  if (samples.length === 0) return t(`Chưa đủ mẫu chuyển động để tính ${name.toLowerCase()}.`, `Not enough motion samples to calculate ${name.toLowerCase()}.`);
   const lo = samples.reduce((m, s) => Math.min(m, s.value), Number.POSITIVE_INFINITY);
   const peak = samples.reduce((m, s) => (Math.abs(s.value) > Math.abs(m.value) ? s : m));
   const hi = samples.reduce((m, s) => Math.max(m, s.value), Number.NEGATIVE_INFINITY);
   const drags = countValidSegments(segments);
-  return `${name} ranged from ${format(lo)} to ${format(hi)} ${unit} across ${drags} movement segment${drags === 1 ? "" : "s"}. Largest magnitude ${format(peak.value)} ${unit} at ${(peak.t / 1000).toFixed(2)} s.`;
+  const peakTime = (peak.t / 1000).toFixed(2);
+  return t(
+    `${name} dao động từ ${format(lo)} đến ${format(hi)} ${unit} trên ${drags} đoạn chuyển động. Giá trị lớn nhất là ${format(peak.value)} ${unit} tại ${peakTime} s.`,
+    `${name} ranged from ${format(lo)} to ${format(hi)} ${unit} across ${drags} movement segment${drags === 1 ? "" : "s"}. Largest magnitude ${format(peak.value)} ${unit} at ${peakTime} s.`,
+  );
 }

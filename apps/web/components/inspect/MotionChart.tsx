@@ -1,5 +1,8 @@
+"use client";
+
 import { memo, useId, useMemo } from "react";
 import type { SeriesSample } from "@captchalab/captcha-core";
+import { useT } from "@/lib/i18n";
 import { buildChartModel, describeSeries, type ChartSize } from "@/lib/inspect/chart";
 import { validSegmentIndexes } from "@/lib/inspect/series";
 import { MotionDataTable } from "./MotionDataTable";
@@ -35,12 +38,13 @@ const SIZE: ChartSize = { width: 400, height: 170, margin: { top: 10, right: 14,
  * single samples are dots. Has a text alternative that states the value range.
  */
 function MotionChartImpl({ title, unit, segments, xDomain, includeZero, selectedT, formatValue, formatCell, segmentLabel, segmentLabels, testId, scopeNote }: Props) {
+  const t = useT();
   const uid = useId();
   const lo = xDomain ? xDomain[0] : 0;
   const hi = xDomain ? xDomain[1] : 1;
   // The selection crosshair does not recompute the scales or paths.
   const model = useMemo(() => buildChartModel(segments, [lo, hi], SIZE, includeZero), [segments, lo, hi, includeZero]);
-  const summary = useMemo(() => describeSeries(title, unit, segments, formatValue), [title, unit, segments, formatValue]);
+  const summary = useMemo(() => describeSeries(title, unit, segments, formatValue, t), [title, unit, segments, formatValue, t]);
   const { plot } = model;
   const selX =
     selectedT !== null && selectedT !== undefined && selectedT >= model.xDomain[0] && selectedT <= model.xDomain[1]

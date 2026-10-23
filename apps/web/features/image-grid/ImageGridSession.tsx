@@ -3,10 +3,18 @@
 import { useRef, useState, type KeyboardEvent, type PointerEvent } from "react";
 import { createEventRecorder, type FeatureSet, type InteractionSession, type VerificationResult } from "@captchalab/captcha-core";
 import { GRID_SIZE, makeCellTarget, registry, type ImageGridChallenge, type ImageGridFeatures } from "@captchalab/captcha-plugins";
+import { useT } from "@/lib/i18n";
 import { toPointerSample, toRecorderEvent, type PointerKind } from "@/lib/pointer-adapter";
 import { ImageGridInspect } from "./ImageGridInspect";
 import { ImageGridTile } from "./ImageGridTile";
 import { moveFocus, toggleCell } from "./image-grid-view-data";
+
+const SHAPE_VI: Record<string, string> = {
+  circle: "hình tròn",
+  square: "hình vuông",
+  triangle: "hình tam giác",
+  star: "hình ngôi sao",
+};
 
 interface Completed {
   submission: number;
@@ -26,6 +34,8 @@ interface Props {
  * recorded separately. Arrow keys only move focus and are not recorded.
  */
 export function ImageGridSession({ challenge: initialChallenge, onNewChallenge }: Props) {
+  const t = useT();
+  const shapeName = (s: string): string => t(SHAPE_VI[s] ?? s, s);
   const [challenge] = useState(initialChallenge);
   const plugin = registry.get("image-grid");
   const gridRef = useRef<HTMLDivElement>(null);
@@ -72,7 +82,7 @@ export function ImageGridSession({ challenge: initialChallenge, onNewChallenge }
       setError(null);
     } catch (err) {
       console.error("Image grid submission failed", err instanceof Error ? err.message : "unknown error");
-      setError("Could not analyze this attempt. Start a new challenge.");
+      setError(t("Không phân tích được lần thử này. Hãy bắt đầu thử thách mới.", "Could not analyze this attempt. Start a new challenge."));
     }
   };
 
@@ -80,15 +90,17 @@ export function ImageGridSession({ challenge: initialChallenge, onNewChallenge }
     <div className="space-y-6">
       <section aria-labelledby="try-h" className="rounded-lg border border-line bg-panel p-4">
         <h2 id="try-h" className="mb-1 text-base font-semibold">
-          Try
+          {t("Thử", "Try")}
         </h2>
         <p className="mb-4 text-sm text-muted" data-testid="grid-instruction">
-          Select every image that shows a <strong>{challenge.target}</strong>, then press Verify.
+          {t("Chọn mọi ảnh có ", "Select every image that shows a ")}
+          <strong>{shapeName(challenge.target)}</strong>
+          {t(", rồi bấm Xác minh.", ", then press Verify.")}
         </p>
         <div
           ref={gridRef}
           role="group"
-          aria-label={`Image grid: select every ${challenge.target}`}
+          aria-label={t(`Lưới ảnh: chọn mọi ${shapeName(challenge.target)}`, `Image grid: select every ${challenge.target}`)}
           data-testid="image-grid"
           className="grid w-fit grid-cols-3 gap-2"
         >
@@ -102,7 +114,7 @@ export function ImageGridSession({ challenge: initialChallenge, onNewChallenge }
                 }}
                 type="button"
                 aria-pressed={on}
-                aria-label={`Image ${i + 1} of ${challenge.cells.length}: ${cell.shape}`}
+                aria-label={t(`Ảnh ${i + 1} trên ${challenge.cells.length}: ${shapeName(cell.shape)}`, `Image ${i + 1} of ${challenge.cells.length}: ${cell.shape}`)}
                 data-testid={`cell-${cell.id}`}
                 onPointerDown={(e) => recordPointer("pointerdown", e, cell.id)}
                 onPointerUp={(e) => recordPointer("pointerup", e, cell.id)}
@@ -124,16 +136,17 @@ export function ImageGridSession({ challenge: initialChallenge, onNewChallenge }
         </div>
         <div className="mt-4 flex flex-wrap gap-3">
           <button type="button" data-testid="verify" onClick={onVerify} className="rounded-md bg-accent px-3 py-1.5 text-sm font-medium text-bg hover:opacity-90">
-            Verify
+            {t("Xác minh", "Verify")}
           </button>
           <button type="button" onClick={onNewChallenge} className="rounded-md border border-line bg-panel px-3 py-1.5 text-sm font-medium hover:bg-track">
-            New challenge
+            {t("Thử thách mới", "New challenge")}
           </button>
         </div>
         <p className="mt-3 text-xs text-muted">
-          Accessibility: every image is a toggle button reachable with Tab, arrow keys move between them, and Space or
-          Enter toggles. Each button&apos;s label names its shape, so the task does not need sight; that also makes this
-          demo trivial for software. It is a demonstration, not a production CAPTCHA.
+          {t(
+            "Khả năng tiếp cận: mỗi ảnh là một nút bật/tắt, dùng phím Tab để tới, phím mũi tên để di chuyển giữa các ảnh, và phím Space hoặc Enter để bật/tắt. Nhãn của mỗi nút nêu tên hình nên không cần nhìn vẫn làm được; điều đó cũng khiến bản demo này rất dễ với phần mềm. Đây chỉ là bản minh hoạ, không phải CAPTCHA dùng cho sản phẩm thật.",
+            "Accessibility: every image is a toggle button reachable with Tab, arrow keys move between them, and Space or Enter toggles. Each button's label names its shape, so the task does not need sight; that also makes this demo trivial for software. It is a demonstration, not a production CAPTCHA.",
+          )}
         </p>
       </section>
       {error && (

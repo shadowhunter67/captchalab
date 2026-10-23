@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures";
 import { watchPrivacy } from "./privacy";
 
 const IDS = ["slider", "checkbox", "drag-drop", "rotation", "text", "image-grid"];

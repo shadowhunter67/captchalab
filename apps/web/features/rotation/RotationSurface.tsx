@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, type KeyboardEvent, type MutableRefObject, type PointerEvent } from "react";
 import { ROTATION_KEYS } from "@captchalab/captcha-plugins";
+import { useT } from "@/lib/i18n";
 import { toPointerSample } from "@/lib/pointer-adapter";
 import type { RotationController } from "./rotation-controller";
 import { RotationGlyph } from "./RotationGlyph";
@@ -20,6 +21,9 @@ interface Props {
  * the object's center and the surface origin are snapshotted at pointerdown.
  */
 export function RotationSurface({ controller, applyAngleRef }: Props) {
+  const t = useT();
+  const tRef = useRef(t);
+  tRef.current = t;
   const surfaceRef = useRef<HTMLDivElement>(null);
   const objectRef = useRef<HTMLDivElement>(null);
   const glyphRef = useRef<HTMLDivElement>(null);
@@ -33,7 +37,10 @@ export function RotationSurface({ controller, applyAngleRef }: Props) {
       const o = objectRef.current;
       if (o) {
         o.setAttribute("aria-valuenow", String(Math.round(angle)));
-        o.setAttribute("aria-valuetext", `${Math.round(angle)} degrees clockwise from upright`);
+        o.setAttribute(
+          "aria-valuetext",
+          tRef.current(`${Math.round(angle)} độ theo chiều kim đồng hồ so với hướng thẳng đứng`, `${Math.round(angle)} degrees clockwise from upright`),
+        );
         o.dataset.angle = angle.toFixed(1);
       }
     };
@@ -51,6 +58,11 @@ export function RotationSurface({ controller, applyAngleRef }: Props) {
       applyAngleRef.current = () => {};
     };
   }, [controller, applyAngleRef]);
+
+  // Re-write the slider's text when the language changes (no events are recorded by painting).
+  useEffect(() => {
+    controller.paint();
+  }, [t, controller]);
 
   const sample = (e: PointerEvent<HTMLElement>) => toPointerSample(e, originRef.current);
 
@@ -88,14 +100,17 @@ export function RotationSurface({ controller, applyAngleRef }: Props) {
       className="relative mx-auto flex aspect-square w-full max-w-[320px] items-center justify-center rounded-lg bg-bg ring-1 ring-line"
     >
       <span aria-hidden="true" className="absolute left-1/2 top-2 -translate-x-1/2 text-xs text-muted">
-        ▲ upright
+        {t("▲ hướng lên", "▲ upright")}
       </span>
       <div
         ref={objectRef}
         data-testid="rotation-object"
         role="slider"
         tabIndex={0}
-        aria-label="Object to turn. Turn it until the arrow points up. Drag it, or use the left and right arrow keys."
+        aria-label={t(
+          "Vật thể cần xoay. Xoay cho đến khi mũi tên chỉ lên trên. Hãy kéo nó, hoặc dùng phím mũi tên trái và phải.",
+          "Object to turn. Turn it until the arrow points up. Drag it, or use the left and right arrow keys.",
+        )}
         aria-valuemin={0}
         aria-valuemax={359}
         aria-valuenow={0}

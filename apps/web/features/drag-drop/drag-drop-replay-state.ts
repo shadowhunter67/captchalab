@@ -6,7 +6,8 @@ import {
   type DragDropChallenge,
   type DragDropLayout,
 } from "@captchalab/captcha-plugins";
-import { OUTCOME_TEXT, attemptLabel } from "./drag-drop-view-data";
+import { EN, type Translate } from "@/lib/i18n";
+import { attemptLabel, outcomeText } from "./drag-drop-view-data";
 
 export interface ReplayItemState {
   center: Point;
@@ -57,6 +58,7 @@ export function createDragDropReplay(
   challenge: DragDropChallenge,
   layout: DragDropLayout,
   session: InteractionSession,
+  tr: Translate = EN,
 ): DragDropReplayModel {
   const { attempts, initialState } = deriveDragAttempts(challenge, layout, session);
   if (attempts.length === 0) {
@@ -99,8 +101,8 @@ export function createDragDropReplay(
       const latest = [...attempts].reverse().find((a) => a.startT <= t);
       if (latest) {
         caption = active(latest, t)
-          ? `${attemptLabel(challenge, latest)}: dragging`
-          : `${attemptLabel(challenge, latest)}: ${OUTCOME_TEXT[latest.outcome]}`;
+          ? `${attemptLabel(challenge, latest, tr)}: ${tr("đang kéo", "dragging")}`
+          : `${attemptLabel(challenge, latest, tr)}: ${outcomeText(latest.outcome, tr)}`;
       }
       return { items, pointer, caption };
     },

@@ -1,4 +1,7 @@
+"use client";
+
 import type { TextChallenge } from "@captchalab/captcha-plugins";
+import { useT } from "@/lib/i18n";
 
 const W = 260;
 const H = 80;
@@ -9,11 +12,15 @@ const H = 80;
  * itself is hidden from the accessibility tree.
  */
 export function TextImage({ challenge }: { challenge: TextChallenge }) {
+  const t = useT();
   const step = W / (challenge.glyphs.length + 1);
   return (
     <div
       role="img"
-      aria-label="Image of distorted characters. Type the characters you see. There is no text alternative in this demo."
+      aria-label={t(
+        "Ảnh các ký tự bị méo. Hãy gõ các ký tự bạn thấy. Bản demo này không có văn bản thay thế.",
+        "Image of distorted characters. Type the characters you see. There is no text alternative in this demo.",
+      )}
       data-testid="text-image"
       className="inline-block rounded-md bg-bg ring-1 ring-line"
     >

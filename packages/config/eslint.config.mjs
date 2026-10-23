@@ -11,6 +11,7 @@ export default defineConfig(
     ignores: [
       "**/node_modules/**",
       "**/.next/**",
+      "**/out/**",
       "**/dist/**",
       "**/coverage/**",
       "**/test-results/**",

@@ -41,3 +41,5 @@ Not release blockers unless stated. Format: issue · impact · affected CAPTCHA 
 ## Compare
 - The Slider target is conveyed visually only, so the human half needs sight; the synthetic half works without an attempt · Compare · next accessibility pass
 - Only the Slider is supported as the reference CAPTCHA (Drag & Drop not wired) · Compare · later
+
+- Language: Vietnamese by default, English via the VI/EN switch (`lib/i18n`, `?lang=` in the URL, nothing stored). The suite runs in English through `e2e/fixtures.ts`. Input-modality values (mouse/touch/keyboard) are shown untranslated.

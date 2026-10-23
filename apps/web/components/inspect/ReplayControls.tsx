@@ -1,6 +1,7 @@
 "use client";
 
 import type { RefObject } from "react";
+import { useT } from "@/lib/i18n";
 import { REPLAY_SPEEDS, type ReplaySpeed, type ReplayStatus } from "@/lib/replay/replay-clock";
 
 interface Props {
@@ -34,7 +35,13 @@ export function ReplayControls({
   rangeRef,
   labelRef,
 }: Props) {
-  const playLabel = status === "playing" ? "Pause" : status === "finished" ? "Replay interaction" : "Play";
+  const t = useT();
+  const playLabel =
+    status === "playing"
+      ? t("Tạm dừng", "Pause")
+      : status === "finished"
+        ? t("Phát lại thao tác", "Replay interaction")
+        : t("Phát", "Play");
   return (
     <div className="mt-3 space-y-2" data-testid="replay-controls" data-status={status}>
       <div className="flex flex-wrap items-center gap-2">
@@ -42,9 +49,9 @@ export function ReplayControls({
           {playLabel}
         </button>
         <button type="button" className={btn} onClick={onRestart} disabled={disabled} data-testid="replay-restart">
-          Restart
+          {t("Phát lại từ đầu", "Restart")}
         </button>
-        <div role="group" aria-label="Replay speed" className="flex overflow-hidden rounded-md border border-line">
+        <div role="group" aria-label={t("Tốc độ phát lại", "Replay speed")} className="flex overflow-hidden rounded-md border border-line">
           {REPLAY_SPEEDS.map((s) => (
             <button
               key={s}
@@ -66,7 +73,7 @@ export function ReplayControls({
         <input
           ref={rangeRef}
           type="range"
-          aria-label="Replay position"
+          aria-label={t("Vị trí phát lại", "Replay position")}
           min={startTime}
           max={endTime}
           step="any"

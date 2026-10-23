@@ -1,3 +1,4 @@
+import { EN, type Translate } from "@/lib/i18n";
 import { SCHEMA_VERSION, createRng, inferModality, type InteractionEvent, type InteractionSession } from "@captchalab/captcha-core";
 import { SLIDER_TARGETS, positionToTravelPx, sliderTravel, type SliderChallenge, type SliderLayout } from "@captchalab/captcha-plugins";
 
@@ -23,6 +24,35 @@ export const PROFILE_DESCRIPTIONS: Record<SyntheticProfile, string> = {
   linear: "Constant speed in a straight line, regular sample times.",
   eased: "Speed follows an ease-in-out curve, regular sample times, straight line.",
   noisy: "Eased, then a small overshoot is corrected; position jitter and uneven sample times.",
+};
+
+/** Vietnamese-capable variants; the constants above stay English for tests. */
+export const profileLabel = (profile: SyntheticProfile, t: Translate = EN): string => {
+  switch (profile) {
+    case "linear":
+      return t("Tuyến tính", "Linear");
+    case "eased":
+      return t("Mượt dần", "Eased");
+    case "noisy":
+      return t("Có nhiễu", "Noisy");
+  }
+};
+
+export const profileDescription = (profile: SyntheticProfile, t: Translate = EN): string => {
+  switch (profile) {
+    case "linear":
+      return t("Tốc độ không đổi theo đường thẳng, các mẫu cách đều nhau.", "Constant speed in a straight line, regular sample times.");
+    case "eased":
+      return t(
+        "Tốc độ theo đường cong chậm - nhanh - chậm, mẫu cách đều nhau, đường thẳng.",
+        "Speed follows an ease-in-out curve, regular sample times, straight line.",
+      );
+    case "noisy":
+      return t(
+        "Mượt dần, rồi vượt nhẹ quá đích và chỉnh lại; vị trí rung nhẹ và thời gian giữa các mẫu không đều.",
+        "Eased, then a small overshoot is corrected; position jitter and uneven sample times.",
+      );
+  }
 };
 
 export const DEFAULT_SYNTHETIC_LAYOUT: SliderLayout = { trackLeft: 0, trackWidth: 320, handleWidth: 44 };

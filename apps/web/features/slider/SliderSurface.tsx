@@ -9,6 +9,7 @@ import {
   type PointerEvent as ReactPointerEvent,
 } from "react";
 import { positionToTravelPx, type SliderLayout } from "@captchalab/captcha-plugins";
+import { useT } from "@/lib/i18n";
 import { toPointerSample, type SurfaceOrigin } from "@/lib/pointer-adapter";
 import type { SliderController, SliderPhase } from "./slider-controller";
 
@@ -36,6 +37,7 @@ interface Props {
  * event is seen (and recorded) exactly once.
  */
 export function SliderSurface({ controller, target, phase, applyPositionRef }: Props) {
+  const t = useT();
   const trackRef = useRef<HTMLDivElement>(null);
   const handleRef = useRef<HTMLDivElement>(null);
   const originRef = useRef<SurfaceOrigin>({ left: 0, top: 0 });
@@ -186,7 +188,10 @@ export function SliderSurface({ controller, target, phase, applyPositionRef }: P
         data-testid="slider-handle"
         role="slider"
         tabIndex={disabled ? -1 : 0}
-        aria-label="Slider CAPTCHA handle. Drag to the dashed outline, or use arrow keys and press Enter."
+        aria-label={t(
+          "Tay nắm thanh trượt CAPTCHA. Kéo tới khung nét đứt, hoặc dùng phím mũi tên rồi nhấn Enter.",
+          "Slider CAPTCHA handle. Drag to the dashed outline, or use arrow keys and press Enter.",
+        )}
         aria-orientation="horizontal"
         aria-valuemin={0}
         aria-valuemax={100}

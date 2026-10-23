@@ -1,4 +1,5 @@
-import { expect, test, type Page } from "@playwright/test";
+import { type Page } from "@playwright/test";
+import { expect, test } from "./fixtures";
 import { createRng } from "@captchalab/captcha-core";
 import { expectedSelection, registry } from "@captchalab/captcha-plugins";
 import { watchPrivacy } from "./privacy";

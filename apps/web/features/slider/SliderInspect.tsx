@@ -3,6 +3,7 @@
 import { useMemo } from "react";
 import { isPointerEvent, type FeatureSet, type InteractionSession, type VerificationResult } from "@captchalab/captcha-core";
 import type { SliderChallenge, SliderFeatures, SliderLayout } from "@captchalab/captcha-plugins";
+import { useT } from "@/lib/i18n";
 import { Card } from "@/components/inspect/Card";
 import { EventExplorer } from "@/components/inspect/EventExplorer";
 import { MetricTable } from "@/components/inspect/MetricTable";
@@ -29,7 +30,6 @@ interface Props {
 
 const axisNumber = (v: number): string => String(Math.round(v));
 
-const CHART_SCOPE = "Handle drags only: hover is excluded and each attempt is a separate line.";
 
 /**
  * Slider's Inspect page, composed from generic primitives. Slider-specific choices live in
@@ -38,6 +38,11 @@ const CHART_SCOPE = "Handle drags only: hover is excluded and each attempt is a 
  * the timeline, the event inspector, the trajectory marker and the chart crosshairs all derive from it.
  */
 export function SliderInspect({ verification, featureSet, session, markers, layout, challenge, via }: Props) {
+  const t = useT();
+  const chartScope = t(
+    "Chỉ tính các lần kéo tay nắm: không tính di chuột qua, và mỗi lần thử là một đường riêng.",
+    "Handle drags only: hover is excluded and each attempt is a separate line.",
+  );
   const f = featureSet.features;
   const noDrag = f.numberOfAttempts === 0;
   const selection = useEventSelection(session);
@@ -47,11 +52,11 @@ export function SliderInspect({ verification, featureSet, session, markers, layo
   const accelerationSegments = useMemo(() => series.segments.map((s) => s.acceleration), [series]);
   const domain = useMemo(() => sliderDragDomain(session), [session]);
   const annotations = useMemo<TimelineAnnotation[]>(
-    () => markers.map((m) => ({ t: m.t, label: "try again" })),
-    [markers],
+    () => markers.map((m) => ({ t: m.t, label: t("thử lại", "try again") })),
+    [markers, t],
   );
-  const attemptMetrics = useMemo(() => sliderAttemptMetrics(f), [f]);
-  const sessionMetrics = useMemo(() => interactionMetrics(f), [f]);
+  const attemptMetrics = useMemo(() => sliderAttemptMetrics(f, t), [f, t]);
+  const sessionMetrics = useMemo(() => interactionMetrics(f, t), [f, t]);
   const selectedEvent = selection.event;
   const selectedT = selectedEvent?.t ?? null;
   const selectedPoint = selectedEvent && isPointerEvent(selectedEvent) ? { x: selectedEvent.x, y: selectedEvent.y } : null;
@@ -59,13 +64,13 @@ export function SliderInspect({ verification, featureSet, session, markers, layo
   return (
     <section aria-labelledby="inspect-h" className="space-y-4" data-testid="inspect">
       <h2 id="inspect-h" className="text-base font-semibold">
-        Inspect
+        {t("Phân tích", "Inspect")}
       </h2>
 
       <VerificationSummary passed={verification.passed} reason={verification.reason} />
 
       <div className="grid gap-4 lg:grid-cols-2">
-        <Card id="traj-h" title="Trajectory and replay">
+        <Card id="traj-h" title={t("Đường đi và phát lại", "Trajectory and replay")}>
           <SliderReplay
             session={session}
             markers={markers}
@@ -75,31 +80,33 @@ export function SliderInspect({ verification, featureSet, session, markers, layo
           />
         </Card>
 
-        <Card id="metrics-h" title="Metrics">
+        <Card id="metrics-h" title={t("Chỉ số", "Metrics")}>
           <div className="space-y-4">
             <MetricTable
-              heading="Slider attempt (final completed drag)"
+              heading={t("Lần thử thanh trượt (lần kéo hoàn tất cuối cùng)", "Slider attempt (final completed drag)")}
               metrics={attemptMetrics}
               {...(via === "keyboard" && !noDrag
-                ? { notice: "This submission used the keyboard. The drag metrics come from an earlier pointer attempt in this session." }
+                ? { notice: t("Lần gửi này dùng bàn phím. Các chỉ số kéo lấy từ một lần thử bằng con trỏ trước đó trong phiên này.", "This submission used the keyboard. The drag metrics come from an earlier pointer attempt in this session.") }
                 : noDrag
-                  ? { notice: "No pointer drag was recorded (keyboard interaction), so drag metrics are not available." }
+                  ? { notice: t("Không ghi được lần kéo bằng con trỏ nào (dùng bàn phím), nên không có chỉ số kéo.", "No pointer drag was recorded (keyboard interaction), so drag metrics are not available.") }
                   : {})}
             />
-            <MetricTable heading="Whole session (pointer motion)" metrics={sessionMetrics} />
+            <MetricTable heading={t("Cả phiên (chuyển động con trỏ)", "Whole session (pointer motion)")} metrics={sessionMetrics} />
             <p className="text-xs text-muted">
-              Feature set <span className="font-mono">{featureSet.schemaVersion}</span> · extractor{" "}
-              <span className="font-mono">{featureSet.extractorVersion}</span> · input: {session.inputModality}. These
-              are descriptive measurements of this one interaction, not evidence that it was made by a person or by
-              software. Data stays in this browser tab.
+              {t("Bộ đặc trưng", "Feature set")} <span className="font-mono">{featureSet.schemaVersion}</span> · {t("bộ trích xuất", "extractor")}{" "}
+              <span className="font-mono">{featureSet.extractorVersion}</span> · {t("cách nhập", "input")}: {session.inputModality}.{" "}
+              {t(
+                "Đây chỉ là các số đo mô tả của một lần tương tác này, không phải bằng chứng cho thấy nó do người hay phần mềm thực hiện. Dữ liệu chỉ nằm trong thẻ trình duyệt này.",
+                "These are descriptive measurements of this one interaction, not evidence that it was made by a person or by software. Data stays in this browser tab.",
+              )}
             </p>
           </div>
         </Card>
       </div>
 
-      <Card id="velocity-h" title="Velocity">
+      <Card id="velocity-h" title={t("Vận tốc", "Velocity")}>
         <MotionChart
-          title="Velocity"
+          title={t("Vận tốc", "Velocity")}
           unit="px/s"
           segments={velocitySegments}
           xDomain={domain}
@@ -107,15 +114,15 @@ export function SliderInspect({ verification, featureSet, session, markers, layo
           selectedT={selectedT}
           formatValue={axisNumber}
           formatCell={(v) => formatVelocity(v, 1)}
-          segmentLabel="Drag"
+          segmentLabel={t("Lần kéo", "Drag")}
           testId="chart-velocity"
-          scopeNote={CHART_SCOPE}
+          scopeNote={chartScope}
         />
       </Card>
 
-      <Card id="accel-h" title="Acceleration">
+      <Card id="accel-h" title={t("Gia tốc", "Acceleration")}>
         <MotionChart
-          title="Acceleration"
+          title={t("Gia tốc", "Acceleration")}
           unit="px/s²"
           segments={accelerationSegments}
           xDomain={domain}
@@ -123,13 +130,16 @@ export function SliderInspect({ verification, featureSet, session, markers, layo
           selectedT={selectedT}
           formatValue={axisNumber}
           formatCell={(v) => formatAcceleration(v, 1)}
-          segmentLabel="Drag"
+          segmentLabel={t("Lần kéo", "Drag")}
           testId="chart-acceleration"
-          scopeNote={`${CHART_SCOPE} Computed from the velocity samples (change in speed between consecutive segments).`}
+          scopeNote={`${chartScope} ${t(
+            "Tính từ các mẫu vận tốc (độ thay đổi tốc độ giữa các đoạn liên tiếp).",
+            "Computed from the velocity samples (change in speed between consecutive segments).",
+          )}`}
         />
       </Card>
 
-      <Card id="events-h" title="Event timeline">
+      <Card id="events-h" title={t("Dòng thời gian sự kiện", "Event timeline")}>
         <EventExplorer session={session} selection={selection} annotations={annotations} />
       </Card>
     </section>
