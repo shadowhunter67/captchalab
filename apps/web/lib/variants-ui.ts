@@ -6,7 +6,7 @@ import type { Translate } from "@/lib/i18n";
  * generated challenge's own `config.parameters`, so what is shown is what was actually applied.
  */
 
-export type CaptchaKey = "slider" | "checkbox" | "drag-drop" | "rotation" | "text" | "image-grid" | "shape-matching" | "math-logic" | "sequence";
+export type CaptchaKey = "slider" | "checkbox" | "drag-drop" | "rotation" | "text" | "image-grid" | "shape-matching" | "math-logic" | "sequence" | "memory" | "proof-of-work" | "audio";
 
 export const difficultyLabel = (d: CaptchaDifficulty, t: Translate): string =>
   d === "easy" ? t("Dễ", "Easy") : d === "medium" ? t("Vừa", "Medium") : t("Khó", "Hard");
@@ -29,6 +29,12 @@ const VARIANT_NAMES: Record<string, [vi: string, en: string]> = {
   "math-logic:comparison": ["So sánh", "Comparison"],
   "sequence:number": ["Dãy số", "Number"],
   "sequence:visual": ["Dãy hình", "Visual"],
+  "memory:sequence": ["Nhớ chuỗi", "Sequence memory"],
+  "memory:position": ["Nhớ vị trí", "Position memory"],
+  "proof-of-work:hash-prefix": ["Tiền tố mã băm", "Hash prefix"],
+  "proof-of-work:leading-zero-bits": ["Số bit 0 đứng đầu", "Leading zero bits"],
+  "audio:spoken-digits": ["Đọc chữ số", "Spoken digits"],
+  "audio:noisy-digits": ["Chữ số có nhiễu", "Digits with noise"],
 };
 
 const VARIANT_DESCRIPTIONS: Record<string, [vi: string, en: string]> = {
@@ -49,6 +55,12 @@ const VARIANT_DESCRIPTIONS: Record<string, [vi: string, en: string]> = {
   "math-logic:comparison": ["Hai giá trị cạnh nhau: gõ giá trị lớn hơn. Giá trị gần nhau và biểu thức thì khó hơn.", "Two values side by side: type the larger one. Closer values and expressions are harder."],
   "sequence:number": ["Tìm số còn thiếu: bước đều, rồi nhân hoặc bước xen kẽ, rồi hai quy tắc cùng lúc.", "Find the missing number: a steady step, then multiplication or alternating steps, then two rules at once."],
   "sequence:visual": ["Tìm hình còn thiếu trong một mẫu lặp; đơn vị lặp càng dài càng khó.", "Find the missing shape in a repeating pattern; longer units are harder."],
+  "memory:sequence": ["Xem một chuỗi hình ngắn rồi bấm lại theo đúng thứ tự.", "Watch a short sequence of shapes, then tap them again in the same order."],
+  "memory:position": ["Vài ô sáng lên trong chốc lát; nhớ lại đó là những ô nào.", "Some cells light up for a moment; recall which ones."],
+  "proof-of-work:hash-prefix": ["Tìm một nonce sao cho mã băm SHA-256 (dạng hex) bắt đầu bằng hai, ba hoặc bốn chữ số 0.", "Find a nonce whose SHA-256 hex digest starts with zeros: two, three or four."],
+  "proof-of-work:leading-zero-bits": ["Cùng ý tưởng nhưng đếm theo bit, nên mỗi mức tăng công việc theo bước nhỏ hơn.", "The same idea counted in bits, so each level doubles the work in finer steps."],
+  "audio:spoken-digits": ["Các chữ số được đọc lần lượt; độ khó thêm chữ số, rút ngắn khoảng nghỉ và thêm nhiễu nhỏ.", "Digits read out one by one; difficulty adds digits, shortens the gaps and adds quiet noise."],
+  "audio:noisy-digits": ["Cùng các chữ số nhưng có tiếng ồn nền ở mọi mức.", "The same digits over background noise at every level."],
 };
 
 export function variantName(captcha: CaptchaKey, variantId: string, fallback: string, t: Translate): string {
@@ -85,6 +97,13 @@ function sequencePattern(value: string, t: Translate): string {
   if (pair) return t(...pair);
   return /^[A-D]{2,4}$/.test(value) ? value : t(`đơn vị lặp ${value}`, `unit of ${value}`);
 }
+
+const NOISE_TEXT: Record<string, [vi: string, en: string]> = {
+  none: ["không", "None"],
+  low: ["nhỏ", "Low"],
+  moderate: ["vừa", "Moderate"],
+  high: ["lớn hơn", "High"],
+};
 
 const FAMILY_TEXT: Record<string, [vi: string, en: string]> = {
   basic: ["hình tròn, vuông, tam giác, ngôi sao", "circle, square, triangle, star"],
@@ -141,6 +160,24 @@ export function parameterRows(captcha: CaptchaKey, p: Readonly<Record<string, Pa
         { id: "length", label: t("Độ dài", "Length"), value: String(num(p.length)) },
         { id: "pattern", label: t("Kiểu quy luật", "Pattern type"), value: sequencePattern(String(p.pattern ?? p.patterns), t) },
         ...(num(p.options) > 0 ? [{ id: "options", label: t("Số lựa chọn", "Options"), value: String(num(p.options)) }] : []),
+      ];
+    case "memory":
+      return [
+        ...(num(p.items) > 0 ? [{ id: "items", label: t("Số hình cần nhớ", "Items"), value: String(num(p.items)) }, { id: "options", label: t("Số lựa chọn", "Options"), value: String(num(p.options)) }] : []),
+        ...(num(p.gridSize) > 0 ? [{ id: "gridSize", label: t("Lưới", "Grid"), value: `${num(p.gridSize)}\u00d7${num(p.gridSize)}` }, { id: "cells", label: t("Số ô cần nhớ", "Cells to remember"), value: String(num(p.cells)) }] : []),
+        { id: "previewMs", label: t("Thời gian xem", "Preview duration"), value: `${num(p.previewMs)} ms` },
+      ];
+    case "proof-of-work":
+      return [
+        { id: "algorithm", label: t("Thuật toán", "Algorithm"), value: String(p.algorithm) },
+        ...(String(p.prefix) !== "" ? [{ id: "prefix", label: t("Tiền tố yêu cầu", "Required prefix"), value: String(p.prefix) }] : [{ id: "bits", label: t("Số bit 0 đứng đầu", "Leading zero bits"), value: String(num(p.bits)) }]),
+        { id: "expectedHashes", label: t("Số lần băm trung bình", "Average hashes needed"), value: `~${num(p.expectedHashes).toLocaleString("en-US")}` },
+      ];
+    case "audio":
+      return [
+        { id: "digits", label: t("Số chữ số", "Digits"), value: String(num(p.digits)) },
+        { id: "gapMs", label: t("Khoảng nghỉ khi phát", "Playback spacing"), value: `${num(p.gapMs)} ms` },
+        { id: "noise", label: t("Nhiễu", "Noise"), value: NOISE_TEXT[String(p.noise)] ? t(...(NOISE_TEXT[String(p.noise)] as [string, string])) : String(p.noise) },
       ];
     case "checkbox":
       return [{ id: "activation", label: t("Cách kích hoạt", "Activation"), value: p.activation === "single press" ? t("một lần bấm", "single press") : String(p.activation) }];

@@ -7,7 +7,7 @@ import { EN, type Translate } from "@/lib/i18n";
  */
 
 export interface CatalogEntry {
-  id: "slider" | "checkbox" | "drag-drop" | "rotation" | "text" | "image-grid" | "shape-matching" | "math-logic" | "sequence";
+  id: "slider" | "checkbox" | "drag-drop" | "rotation" | "text" | "image-grid" | "shape-matching" | "math-logic" | "sequence" | "memory" | "proof-of-work" | "audio";
   name: string;
   route: string;
   summary: string;
@@ -423,6 +423,141 @@ export function catalogFor(t: Translate = EN): readonly CatalogEntry[] {
         automation: `${t(
           "Logic dãy đơn giản có thể được tự động hoá. CaptchaLab không cung cấp bộ giải nào cho người dùng.",
           "Simple sequence logic can be automated. CaptchaLab exposes no solver to users.",
+        )} ${automationNote}`,
+      },
+    },
+    {
+      id: "memory",
+      name: t("Trí nhớ", "Memory"),
+      route: "/playground/memory",
+      summary: t("Xem, rồi nhớ lại đúng thứ tự hoặc vị trí.", "Watch, then recall the order or the positions."),
+      variantsNote: t(
+        "Hai biến thể: Nhớ chuỗi (xem 3, 4, 5 hình rồi bấm lại đúng thứ tự) và Nhớ vị trí (2, 4 hoặc 6 ô sáng lên trên lưới 3×3 hoặc 4×4). Độ khó tăng số cần nhớ và rút ngắn thời gian xem trên mỗi mục; nút bấm luôn giữ nguyên cỡ.",
+        "Two variants: Sequence memory (watch 3, 4 or 5 shapes, then tap them in order) and Position memory (2, 4 or 6 cells light up on a 3×3 or 4×4 grid). Difficulty raises how much to remember and shortens the preview per item; the buttons never get smaller.",
+      ),
+      learn: {
+        howItWorks: t(
+          "Bạn bấm Bắt đầu, xem phần cần nhớ trong vài giây, rồi nó bị ẩn đi và bạn nhập lại: bấm các hình theo thứ tự, hoặc bấm các ô đã sáng. Có thể hoàn tác, xoá hoặc bỏ chọn.",
+          "You press Start and watch what is shown for a few seconds. Then it is hidden and you recall it: tap the shapes in order, or the cells that lit up. You can undo, clear or deselect.",
+        ),
+        generation: t(
+          "Bộ sinh theo seed chọn các hình khác nhau (và các hình gây nhiễu) hoặc các ô sáng. Cùng seed, biến thể và độ khó thì ra cùng một nội dung và cùng thời gian xem.",
+          "A seeded generator picks different shapes (plus distractors) or the lit cells. The same seed, variant and difficulty give the same content and the same preview time.",
+        ),
+        verification: t(
+          "Chỉ xét đúng sai: chuỗi phải đúng từng vị trí, hoặc tập ô phải đúng hoàn toàn. Cách bạn thao tác không ảnh hưởng đến kết quả.",
+          "Correctness only: the sequence must be right in every position, or the set of cells must be exactly right. How you interacted never affects the result.",
+        ),
+        signals: [
+          t("Thời gian từ lúc bắt đầu nhớ đến lần chọn đầu tiên và thời gian nhớ lại.", "Time from the start of recall to the first selection, and the recall duration."),
+          t("Số lần chọn đúng và sai, số lần hoàn tác hoặc bỏ chọn.", "Right and wrong selections, undos and deselections."),
+          t("Nội dung cần nhớ, cỡ lưới và thời gian xem là cấu hình thử thách, không phải chỉ số hành vi.", "What was to be remembered, the grid size and the preview time are challenge configuration, not behavioral measures."),
+        ],
+        strengths: [
+          t("Không cần di chuyển chính xác; dùng được bằng bàn phím.", "No precise movement needed; works with the keyboard."),
+          t("Đo được một khía cạnh khác với nhìn và kéo.", "Measures something different from looking and dragging."),
+        ],
+        weaknesses: [
+          t("Nhiệm vụ nhớ khó với một số người (trí nhớ ngắn hạn, mệt, xao nhãng).", "A memory task is hard for some people (short-term memory, fatigue, distraction)."),
+          t("Phần mềm nhớ hoàn hảo, nên nhiệm vụ nhớ đơn giản rất dễ tự động hoá.", "Software remembers perfectly, so a simple memory task is easy to automate."),
+        ],
+        accessibility: t(
+          "Có lo ngại về khả năng tiếp cận nhận thức; CaptchaLab không tuyên bố dùng được cho mọi người. Các nút có nhãn, dùng bằng Tab rồi Enter hoặc Space. Phần xem cũng được đọc cho trình đọc màn hình thì sẽ làm mất ý nghĩa của bài, nên bản demo không làm vậy.",
+          "There are cognitive-accessibility concerns; CaptchaLab does not claim it is usable by everyone. Buttons are labelled and work with Tab then Enter or Space. Reading the preview aloud to a screen reader would defeat the task, so the demo does not.",
+        ),
+        automation: `${t(
+          "Một nhiệm vụ nhớ đơn giản, xác định trước có thể được tự động hoá vì chương trình biết sẵn nội dung. CaptchaLab không cung cấp bộ giải nào.",
+          "A simple, deterministic memory task can be automated because a program is handed the content. CaptchaLab ships no solver.",
+        )} ${automationNote}`,
+      },
+    },
+    {
+      id: "proof-of-work",
+      name: t("Bằng chứng công việc", "Proof of Work"),
+      route: "/playground/proof-of-work",
+      summary: t("Máy tính của bạn tự tính để tạo bằng chứng.", "Your device computes a proof."),
+      variantsNote: t(
+        "Hai biến thể: Tiền tố mã băm (SHA-256 bắt đầu bằng 00, 000 hoặc 0000) và Số bit 0 đứng đầu (9, 13, 15 bit). Độ khó luôn rất thấp để chạy nhanh trên máy bình thường; công việc chạy từng đoạn nhỏ và có thể Huỷ.",
+        "Two variants: Hash prefix (SHA-256 starting with 00, 000 or 0000) and Leading zero bits (9, 13, 15 bits). Difficulty stays very low so it finishes quickly on a normal device; the work runs in small chunks and can be cancelled.",
+      ),
+      learn: {
+        howItWorks: t(
+          "Bạn bấm Bắt đầu. Trình duyệt thử lần lượt các số (nonce) 0, 1, 2... cho đến khi SHA-256 của \"chuỗi:nonce\" đạt điều kiện. Rồi bằng chứng được kiểm tra. Bạn có thể Huỷ giữa chừng.",
+          "You press Start. The browser tries nonces 0, 1, 2... until the SHA-256 of \"text:nonce\" meets the condition. Then the proof is checked. You can Cancel at any time.",
+        ),
+        generation: t(
+          "Bộ sinh theo seed chỉ tạo ra một chuỗi ngẫu nhiên cố định. Nó không tính gì cả: phần việc là do thiết bị của bạn làm. Vì tìm từ nonce 0, cùng thử thách luôn cho cùng nonce đầu tiên hợp lệ.",
+          "A seeded generator only makes a fixed random text. It computes nothing: the work is what your device does. Because the search starts at nonce 0, the same challenge always gives the same first valid nonce.",
+        ),
+        verification: t(
+          "Trình xác minh tự tính lại mã băm từ thử thách và nonce được nêu, không tin kết quả của giao diện. Nonce sai hình thức thì bị loại.",
+          "The verifier recomputes the hash itself from the challenge and the claimed nonce and does not trust what the page found. A malformed nonce fails.",
+        ),
+        signals: [
+          t("Đây là số đo của phép tính, không phải tín hiệu \"giống người\": thời gian tính, số lần băm, tốc độ băm, nonce tìm được.", "These measure the computation, not human-like signals: computation time, hashes, hashes per second, the nonce found."),
+          t("Số lần bấm Bắt đầu và Huỷ.", "How many times Start and Cancel were pressed."),
+          t("Chỉ ghi vài sự kiện bấm nút, không bao giờ ghi từng lần băm.", "Only a few button presses are recorded, never one event per hash."),
+        ],
+        strengths: [
+          t("Không cần người dùng suy nghĩ hay thao tác gì thêm.", "Needs no thinking or extra action from the user."),
+          t("Làm tốn chi phí tính toán cho mỗi yêu cầu.", "Puts a computational cost on every request."),
+        ],
+        weaknesses: [
+          t("Không chứng minh người dùng là con người: chỉ chứng minh thiết bị đã bỏ công việc tính toán.", "It does not prove the user is a person: it proves a device did the computational work."),
+          t("Máy mạnh hay phần cứng chuyên dụng làm việc này rất nhanh, còn thiết bị yếu thì chậm và tốn pin.", "Powerful machines and special hardware do the work very fast, while weak devices are slow and drain the battery."),
+        ],
+        accessibility: t(
+          "Không cần nhìn, nghe hay thao tác chính xác, nên ít rào cản về giác quan. Người dùng thiết bị cũ có thể phải chờ lâu hơn; luôn có nút Huỷ.",
+          "No sight, hearing or precise movement is needed, so there are few sensory barriers. People on older devices may wait longer; Cancel is always there.",
+        ),
+        automation: `${t(
+          "Bằng chứng công việc không ngăn tự động hoá: một chương trình tự tính nó. Mục đích của nó là làm cho việc gửi hàng loạt trở nên tốn kém.",
+          "Proof of work does not stop automation: a program simply computes it. Its aim is to make bulk requests costly.",
+        )} ${automationNote}`,
+      },
+    },
+    {
+      id: "audio",
+      name: t("Âm thanh", "Audio"),
+      route: "/playground/audio",
+      summary: t("Nghe các chữ số rồi gõ lại.", "Listen to the digits and type them."),
+      variantsNote: t(
+        "Hai biến thể: Đọc chữ số và Chữ số có nhiễu. Độ khó thêm chữ số (4, 5, 6), rút ngắn khoảng nghỉ (không dưới 240 ms) và thêm tiếng ồn nhỏ; tiếng ồn luôn nhỏ hơn nhiều so với giọng đọc.",
+        "Two variants: Spoken digits and Digits with noise. Difficulty adds digits (4, 5, 6), shortens the gaps (never below 240 ms) and adds quiet noise; the noise always stays well below the speech.",
+      ),
+      learn: {
+        howItWorks: t(
+          "Bạn bấm Phát để nghe các chữ số (tiếng Anh), có thể bấm Phát lại, rồi gõ các chữ số nghe được và bấm Xác minh.",
+          "You press Play to hear the digits (in English), can press Replay, then type what you heard and press Verify.",
+        ),
+        generation: t(
+          "Bộ sinh theo seed chọn các chữ số, khoảng nghỉ và mức nhiễu. Âm thanh ghép từ các đoạn thu sẵn trong repo (một đoạn cho mỗi chữ số) và nhiễu tạo ngay trong trình duyệt từ một seed, nên cùng thử thách luôn nghe giống nhau. Không dùng dịch vụ đọc bên ngoài.",
+          "A seeded generator picks the digits, the gaps and the noise level. The sound is made from clips stored in the repository (one per digit) plus noise generated in the browser from a seed, so the same challenge always sounds the same. No external speech service is used.",
+        ),
+        verification: t(
+          "Chỉ xét đúng sai: các chữ số gõ vào phải đúng bằng các chữ số đã phát, không thừa không thiếu. Cách bạn gõ không ảnh hưởng đến kết quả.",
+          "Correctness only: the typed digits must equal the played digits exactly. How you typed never affects the result.",
+        ),
+        signals: [
+          t("Thời gian đến lần phát đầu tiên, số lần phát hoặc phát lại.", "Time to the first play, and how many times it was played or replayed."),
+          t("Nhịp gõ, số lần xoá và sửa; bản ghi chỉ lưu loại phím, không bao giờ lưu chữ số cụ thể.", "Typing rhythm, deletes and corrections; the recording stores key classes, never which digit."),
+          t("Thời gian từ lần phát cuối đến lúc gửi.", "Time from the last play to submitting."),
+        ],
+        strengths: [
+          t("Hữu ích với một số người không dùng được thử thách hình ảnh.", "Useful for some people who cannot use visual challenges."),
+          t("Chỉ cần một ô nhập có nhãn.", "Needs only a labelled input."),
+        ],
+        weaknesses: [
+          t("Không dùng được với người khiếm thính; nghe lẫn trong môi trường ồn cũng khó.", "Not usable by deaf or hard-of-hearing people; hearing in a noisy place is hard too."),
+          t("Nhận dạng giọng nói hiện đại có thể giải các thử thách âm thanh đơn giản.", "Modern speech recognition can solve simple audio challenges."),
+        ],
+        accessibility: t(
+          "Âm thanh không bao giờ nên là cách duy nhất: trang này có đường dẫn sang một thử thách không dùng âm thanh. Trang không hiện lời của thử thách bằng chữ vì như vậy sẽ phá mục đích của bản demo. Hệ thống thật cần các cách thay thế khác.",
+          "Audio should never be the only way: this page links to a challenge that needs no audio. The page does not show the challenge as text, since that would defeat the demo. Real systems need alternative modalities.",
+        ),
+        automation: `${t(
+          "Nhận dạng giọng nói có thể giải thử thách âm thanh đơn giản. CaptchaLab không cài bộ giải nào và không dùng micro.",
+          "Speech recognition can solve simple audio challenges. CaptchaLab implements no solver and never uses the microphone.",
         )} ${automationNote}`,
       },
     },

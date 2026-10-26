@@ -5,17 +5,23 @@ import { expect, type Page } from "@playwright/test";
  *
  * Call `watchPrivacy(page)` right after `page.goto(...)` (it installs spies in the page), perform
  * the interaction, then `await assertNoDataLeft()`. It fails if, since the call:
- *  - any network request was made,
+ *  - any network request was made (except same-origin GETs the caller explicitly allows, e.g. local audio clips),
  *  - anything was logged to the console,
  *  - localStorage / sessionStorage were written to (even if later cleared),
  *  - an IndexedDB database was opened,
  *  - a cookie was set.
  */
-export async function watchPrivacy(page: Page): Promise<() => Promise<void>> {
+export async function watchPrivacy(page: Page, options: { allowRequests?: RegExp[] } = {}): Promise<() => Promise<void>> {
   await page.waitForLoadState("networkidle");
   const requests: string[] = [];
   const logs: string[] = [];
-  page.on("request", (r) => requests.push(`${r.method()} ${r.url()}`));
+  // Only same-origin GETs of files the caller names (for example the local audio clips) are tolerated.
+  const allowed = options.allowRequests ?? [];
+  page.on("request", (r) => {
+    const sameOrigin = new URL(r.url()).origin === new URL(page.url()).origin;
+    if (r.method() === "GET" && sameOrigin && allowed.some((re) => re.test(new URL(r.url()).pathname))) return;
+    requests.push(`${r.method()} ${r.url()}`);
+  });
   page.on("console", (m) => logs.push(m.text()));
 
   await page.evaluate(() => {

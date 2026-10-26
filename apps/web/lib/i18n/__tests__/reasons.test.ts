@@ -6,6 +6,23 @@ const VI = (vi: string, _en: string): string => vi;
 
 // Every `reason` literal found in packages/captcha-plugins/src/*/verifier.ts.
 const VERIFIER_REASONS = [
+  "The answer must be a list of options.",
+  "The answer mentions an option that is not offered.",
+  "The sequence is recalled in the right order.",
+  "The sequence is not complete yet.",
+  "The sequence is not in the right order.",
+  "The answer must be a list of cells.",
+  "The answer mentions a cell that is not on this grid.",
+  "The highlighted cells are recalled exactly.",
+  "Some highlighted cells are missing.",
+  "Some chosen cells were not highlighted.",
+  "Some highlighted cells are missing and some chosen cells were not highlighted.",
+  "The proof must be a whole number nonce.",
+  "The hash meets the difficulty: the proof is valid.",
+  "The hash does not meet the difficulty.",
+  "The answer must be digits only.",
+  "The digits match what was played.",
+  "The digits do not match what was played.",
   "The answer must map each shape to a target.",
   "The answer mentions a shape or target that is not on this board.",
   "Every shape is matched to its own target.",

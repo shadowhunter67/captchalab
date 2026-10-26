@@ -8,6 +8,8 @@ const config: NextConfig = {
   // Workspace packages ship TypeScript source.
   transpilePackages: ["@captchalab/captcha-core", "@captchalab/captcha-plugins"],
   reactStrictMode: true,
+  // Lets client code build URLs for files in /public that still work under the GitHub Pages base path.
+  env: { NEXT_PUBLIC_BASE_PATH: pagesBasePath ?? "" },
   ...(pagesBasePath ? { output: "export" as const, basePath: pagesBasePath, trailingSlash: true } : {}),
 };
 

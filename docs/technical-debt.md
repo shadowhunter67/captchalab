@@ -58,3 +58,13 @@ Not release blockers unless stated. Format: issue · impact · affected CAPTCHA 
 - Number sequences are checked for a single answer only against four pattern families (arithmetic, geometric, alternating, interleaved), simplest first; other rules are not considered · documented in `sequence/rules.ts` · Sequence · later
 - Sequence visual patterns use shapes only (no colour or size patterns) · Sequence · later
 - Compare still supports only the Slider · all new CAPTCHAs · later
+
+## Memory, Proof of Work, Audio (v0.4)
+- Memory has no replay of the recall order · Memory · later
+- The Proof of Work search runs on the main thread in small chunks (no Web Worker, no fallback); a very weak device can still be slow on the hard levels, and Cancel is the only brake · Proof of Work · later
+- Proof of Work shows no progress percentage (the number of hashes needed is random) · Proof of Work · later
+- Audio has one voice (English digits only, recorded with Windows SAPI "Zira"), no letters and no Vietnamese clips · Audio · later
+- Audio has no text or non-audio equivalent beyond the link to another challenge, by design; deaf and hard-of-hearing users cannot use it · Audio · documented limitation
+- Audio noise is plain white noise, mixed in the browser; no band-limiting or room effects · Audio · later
+- Browser-specific audio behaviour (autoplay policies, Safari AudioContext start) is not tested beyond Chromium · Audio · later
+- Compare still supports only the Slider · all new CAPTCHAs · later
