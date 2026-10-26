@@ -7,7 +7,7 @@ import { EN, type Translate } from "@/lib/i18n";
  */
 
 export interface CatalogEntry {
-  id: "slider" | "checkbox" | "drag-drop" | "rotation" | "text" | "image-grid";
+  id: "slider" | "checkbox" | "drag-drop" | "rotation" | "text" | "image-grid" | "shape-matching" | "math-logic" | "sequence";
   name: string;
   route: string;
   summary: string;
@@ -288,6 +288,141 @@ export function catalogFor(t: Translate = EN): readonly CatalogEntry[] {
         automation: `${t(
           "Vì nhãn nêu tên hình, bản demo này rất dễ với phần mềm.",
           "Because labels name the shape, this demo is trivial for software.",
+        )} ${automationNote}`,
+      },
+    },
+    {
+      id: "shape-matching",
+      name: t("Ghép hình", "Shape Matching"),
+      route: "/playground/shape-matching",
+      summary: t("Ghép mỗi hình với đích giống nó.", "Match each shape to its counterpart."),
+      variantsNote: t(
+        "Hai biến thể: Hình y hệt (mỗi hình có bản sao giống hệt) và Ghép theo cấu trúc (đích bị xoay, chỉ có viền hoặc đổi cỡ). Độ khó tăng số cặp (3, 4, 5) và độ giống của các hình nhiễu (ở mức khó có cả cặp tròn/bầu dục và vuông/vuông bo góc).",
+        "Two variants: Exact shape (each shape has an identical twin) and Pattern match (targets are turned, outlined or resized). Difficulty raises the number of pairs (3, 4, 5) and how alike the distractors are (the hard level has both the circle/oval and square/rounded-square pairs).",
+      ),
+      learn: {
+        howItWorks: t(
+          "Bạn chọn một hình nguồn, rồi chọn đích tương ứng để tạo một cặp. Bạn có thể đổi cặp, bỏ chọn hoặc gỡ một cặp sai. Dùng được bằng chuột, cảm ứng và bàn phím.",
+          "You select a source shape, then its matching target to make a pair. You can replace a pair, clear a selection or remove a wrong pair. It works with a mouse, touch and the keyboard.",
+        ),
+        generation: t(
+          "Bộ sinh theo seed chọn các hình khác nhau cho từng cặp, rồi xáo thứ tự các đích. Ở biến thể Ghép theo cấu trúc, đích còn bị xoay, đổi cỡ hoặc chỉ vẽ viền. Mỗi hình chỉ xuất hiện một lần ở mỗi bên nên chỉ có đúng một cách ghép.",
+          "A seeded generator picks a different shape for each pair and shuffles the targets. In Pattern match the targets are also turned, resized or drawn as outlines. Every shape appears once on each side, so there is exactly one correct matching.",
+        ),
+        verification: t(
+          "Chỉ xét đúng sai: mọi hình nguồn phải được ghép với đích của nó. Cách bạn thao tác không ảnh hưởng đến kết quả.",
+          "Correctness only: every source must be matched to its own target. How you interacted never affects the result.",
+        ),
+        signals: [
+          t("Thời gian phản ứng, thời gian đến lần ghép đầu tiên và tổng thời gian.", "Reaction time, time to the first match and total time."),
+          t("Số lần chọn, số lần ghép đúng và sai.", "Selections, correct and incorrect match attempts."),
+          t("Số lần sửa (đổi hoặc gỡ một cặp) và thời gian trung bình giữa các thao tác.", "Corrections (replacing or removing a pair) and the mean time between actions."),
+        ],
+        strengths: [
+          t("Cần so sánh hình ảnh nhưng không cần kéo thả chính xác.", "Needs visual comparison but no precise dragging."),
+          t("Dùng được bằng bàn phím.", "Works with the keyboard."),
+        ],
+        weaknesses: [
+          t("Ghép hình đơn giản có thể giải bằng hình học hoặc thị giác máy tính.", "Simple shape matching can be solved with geometry or computer vision."),
+          t("Các hình na ná nhau gây khó cho cả người dùng.", "Look-alike shapes are hard for people too."),
+        ],
+        accessibility: t(
+          "Mỗi hình là một nút có nhãn nêu tên hình, chọn bằng Tab rồi Enter hoặc Space. Nhãn nêu tên hình nên không cần nhìn, và điều đó cũng khiến bản demo rất dễ với phần mềm.",
+          "Each shape is a button whose label names the shape: Tab to it, then Enter or Space. Labels name the shapes, so sight is not needed, which also makes the demo trivial for software.",
+        ),
+        automation: `${t(
+          "Ghép hình đơn giản có thể được tự động hoá bằng thị giác máy tính hoặc hình học. CaptchaLab không cung cấp bộ giải nào.",
+          "Simple shape matching can be automated with computer vision or geometry. CaptchaLab ships no solver.",
+        )} ${automationNote}`,
+      },
+    },
+    {
+      id: "math-logic",
+      name: t("Toán / Logic", "Math / Logic"),
+      route: "/playground/math-logic",
+      summary: t("Tính hoặc so sánh rồi gõ đáp án.", "Work it out or compare, then type the answer."),
+      variantsNote: t(
+        "Hai biến thể: Tính toán (dễ: cộng/trừ, vừa: có nhân với số lớn hơn, khó: hai bước như (7 + 5) × 2) và So sánh (dễ: hai số cách xa, vừa: gần nhau, khó: hai biểu thức). Biểu thức được sinh thành cây dữ liệu rồi mới hiển thị; không dùng eval.",
+        "Two variants: Arithmetic (easy: add/subtract, medium: adds multiplication with larger operands, hard: two steps such as (7 + 5) × 2) and Comparison (easy: far-apart numbers, medium: close ones, hard: two expressions). Expressions are generated as a data tree and then shown; there is no eval.",
+      ),
+      learn: {
+        howItWorks: t(
+          "Bạn thấy một phép tính hoặc hai giá trị và gõ đáp án (với phép so sánh, gõ giá trị lớn hơn), rồi bấm Xác minh hoặc nhấn Enter.",
+          "You see a calculation or two values and type the answer (for a comparison, the larger value), then press Verify or Enter.",
+        ),
+        generation: t(
+          "Bộ sinh theo seed dựng một cây biểu thức nhỏ và tính đáp án từ chính cây đó. Không bao giờ phân tích chuỗi do người dùng nhập thành biểu thức, và không dùng eval.",
+          "A seeded generator builds a small expression tree and computes the answer from that same tree. A string typed by the user is never parsed as an expression, and there is no eval.",
+        ),
+        verification: t(
+          "Chỉ xét đúng sai: chuỗi gõ vào được đọc rất chặt (chỉ dấu trừ tuỳ chọn và chữ số) và so với đáp án tính lại từ thử thách. \"12abc\" là sai.",
+          "Correctness only: the typed text is read strictly (an optional minus sign and digits) and compared with the answer recomputed from the challenge. \"12abc\" fails.",
+        ),
+        signals: [
+          t("Thời gian đến phím đầu tiên và tổng thời gian.", "Time to the first key and total time."),
+          t("Nhịp gõ, số lần xoá và sửa, số đợt gõ.", "Typing rhythm, deletes and corrections, typing bursts."),
+          t("Bản ghi chỉ lưu loại phím (Chữ số, Chữ cái...), không bao giờ lưu chữ số cụ thể.", "The recording stores key classes (Digit, Letter...), never which digit."),
+        ],
+        strengths: [
+          t("Dễ tiếp cận hơn nhiều thử thách thị giác.", "Much easier to make accessible than visual challenges."),
+          t("Chỉ cần một ô nhập có nhãn.", "Needs only a labelled input."),
+        ],
+        weaknesses: [
+          t("Phép tính đơn giản rất dễ tự động hoá.", "Simple arithmetic is trivial to automate."),
+          t("Độ khó cao hơn không có nghĩa là an toàn hơn trong thực tế.", "A higher difficulty does not mean more security in practice."),
+        ],
+        accessibility: t(
+          "Một ô nhập có nhãn dùng được bằng bàn phím và trình đọc màn hình; phép tính được viết bằng chữ cho trình đọc màn hình. Người gặp khó khăn với tính nhẩm có thể thấy khó.",
+          "A labelled input usable with a keyboard and a screen reader; the calculation is also exposed as text. People who find mental arithmetic hard may struggle.",
+        ),
+        automation: `${t(
+          "Số học đơn giản có thể được tự động hoá chỉ bằng vài dòng mã. CaptchaLab không cung cấp bộ giải nào.",
+          "Simple arithmetic can be automated in a few lines of code. CaptchaLab ships no solver.",
+        )} ${automationNote}`,
+      },
+    },
+    {
+      id: "sequence",
+      name: t("Dãy quy luật", "Sequence"),
+      route: "/playground/sequence",
+      summary: t("Tìm số hoặc hình còn thiếu trong một dãy.", "Find the missing number or shape in a sequence."),
+      variantsNote: t(
+        "Hai biến thể: Dãy số (dễ: cộng một bước đều, vừa: nhân hoặc hai bước xen kẽ, khó: hai quy tắc xen kẽ) và Dãy hình (đơn vị lặp dài 2, 3, 4 hình). Mỗi thử thách chỉ có một đáp án theo các họ quy luật tương ứng.",
+        "Two variants: Number (easy: a steady step, medium: multiplying or alternating steps, hard: two interleaved rules) and Visual (a repeating unit of 2, 3, 4 shapes). Each challenge has exactly one answer under the pattern families of its level.",
+      ),
+      learn: {
+        howItWorks: t(
+          "Dãy số: gõ số còn thiếu. Dãy hình: chọn hình còn thiếu trong các lựa chọn. Cả hai đều có thể dùng bằng bàn phím.",
+          "Number: type the missing number. Visual: pick the missing shape from the options. Both work with the keyboard.",
+        ),
+        generation: t(
+          "Bộ sinh theo seed dựng dãy từ một quy luật, ẩn một phần tử, rồi kiểm tra rằng không có quy luật đơn giản hơn nào cho đáp án khác. Nếu mơ hồ, nó bốc lại.",
+          "A seeded generator builds the sequence from one rule, hides one term, then checks that no simpler rule would give a different answer. If it is ambiguous, it draws again.",
+        ),
+        verification: t(
+          "Chỉ xét đúng sai: số hoặc hình lựa chọn phải đúng bằng phần tử bị ẩn. Cách bạn thao tác không ảnh hưởng đến kết quả.",
+          "Correctness only: the number or option must equal the hidden term. How you interacted never affects the result.",
+        ),
+        signals: [
+          t("Dãy số: nhịp gõ, số lần xoá và sửa, số đợt gõ.", "Number: typing rhythm, deletes and corrections, typing bursts."),
+          t("Dãy hình: thời gian đến lần chọn đầu tiên, số lần chọn và đổi ý.", "Visual: time to the first choice, selections and changes of mind."),
+          t("Chỉ số không áp dụng cho biến thể đang dùng được để trống.", "Measures that do not apply to the variant in use are left empty."),
+        ],
+        strengths: [
+          t("Đòi hỏi suy luận quy luật chứ không chỉ nhìn.", "Calls for reasoning about a pattern, not just looking."),
+          t("Dùng được bằng bàn phím.", "Works with the keyboard."),
+        ],
+        weaknesses: [
+          t("Quy luật đơn giản có thể tự động hoá.", "Simple patterns can be automated."),
+          t("Quy luật mơ hồ làm người dùng bực mình; vì vậy bộ sinh loại bỏ chúng.", "Ambiguous patterns frustrate people; the generator therefore rejects them."),
+        ],
+        accessibility: t(
+          "Dãy số dùng một ô nhập có nhãn; dãy hình dùng các nút có nhãn nêu tên hình. Cả hai dùng được bằng bàn phím, nhưng dãy hình cần nhận biết quy luật.",
+          "Numbers use a labelled input; shapes use buttons whose labels name the shape. Both work with the keyboard, but the visual variant needs pattern recognition.",
+        ),
+        automation: `${t(
+          "Logic dãy đơn giản có thể được tự động hoá. CaptchaLab không cung cấp bộ giải nào cho người dùng.",
+          "Simple sequence logic can be automated. CaptchaLab exposes no solver to users.",
         )} ${automationNote}`,
       },
     },

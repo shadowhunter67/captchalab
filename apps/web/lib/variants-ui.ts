@@ -6,7 +6,7 @@ import type { Translate } from "@/lib/i18n";
  * generated challenge's own `config.parameters`, so what is shown is what was actually applied.
  */
 
-export type CaptchaKey = "slider" | "checkbox" | "drag-drop" | "rotation" | "text" | "image-grid";
+export type CaptchaKey = "slider" | "checkbox" | "drag-drop" | "rotation" | "text" | "image-grid" | "shape-matching" | "math-logic" | "sequence";
 
 export const difficultyLabel = (d: CaptchaDifficulty, t: Translate): string =>
   d === "easy" ? t("Dễ", "Easy") : d === "medium" ? t("Vừa", "Medium") : t("Khó", "Hard");
@@ -23,6 +23,12 @@ const VARIANT_NAMES: Record<string, [vi: string, en: string]> = {
   "text:noisy": ["Nhiễu", "Noisy"],
   "image-grid:basic-shapes": ["Hình cơ bản", "Basic shapes"],
   "image-grid:similar-shapes": ["Hình giống nhau", "Similar shapes"],
+  "shape-matching:exact": ["Hình y hệt", "Exact shape"],
+  "shape-matching:pattern": ["Ghép theo cấu trúc", "Pattern match"],
+  "math-logic:arithmetic": ["Tính toán", "Arithmetic"],
+  "math-logic:comparison": ["So sánh", "Comparison"],
+  "sequence:number": ["Dãy số", "Number"],
+  "sequence:visual": ["Dãy hình", "Visual"],
 };
 
 const VARIANT_DESCRIPTIONS: Record<string, [vi: string, en: string]> = {
@@ -37,6 +43,12 @@ const VARIANT_DESCRIPTIONS: Record<string, [vi: string, en: string]> = {
   "text:noisy": ["Xoay nhẹ, nhiều đường ngẫu nhiên cắt qua chữ.", "Mild rotation with many random lines crossing the text."],
   "image-grid:basic-shapes": ["Bốn hình khác nhau rõ rệt; độ khó tăng số ô khớp.", "Four clearly different shapes; difficulty raises how many cells match."],
   "image-grid:similar-shapes": ["Các cặp hình trông giống nhau (tròn và bầu dục, vuông và vuông bo góc) làm nhiễu.", "Pairs that look alike (circle and oval, square and rounded square) act as distractors."],
+  "shape-matching:exact": ["Mỗi hình nguồn có một bản sao giống hệt trong các đích; độ khó thêm cặp và hình na ná nhau.", "Each source has an identical twin among the targets; difficulty adds pairs and look-alikes."],
+  "shape-matching:pattern": ["Các đích là cùng hình nhưng bị xoay, chỉ có viền hoặc đổi cỡ: ghép theo cấu trúc, không theo vẻ ngoài.", "Targets show the same shape turned, outlined or resized: match by structure, not by looks."],
+  "math-logic:arithmetic": ["Tính một tổng, hiệu hoặc tích; mức khó nhất có hai bước.", "Work out a sum, difference or product; the hardest level has two steps."],
+  "math-logic:comparison": ["Hai giá trị cạnh nhau: gõ giá trị lớn hơn. Giá trị gần nhau và biểu thức thì khó hơn.", "Two values side by side: type the larger one. Closer values and expressions are harder."],
+  "sequence:number": ["Tìm số còn thiếu: bước đều, rồi nhân hoặc bước xen kẽ, rồi hai quy tắc cùng lúc.", "Find the missing number: a steady step, then multiplication or alternating steps, then two rules at once."],
+  "sequence:visual": ["Tìm hình còn thiếu trong một mẫu lặp; đơn vị lặp càng dài càng khó.", "Find the missing shape in a repeating pattern; longer units are harder."],
 };
 
 export function variantName(captcha: CaptchaKey, variantId: string, fallback: string, t: Translate): string {
@@ -57,6 +69,22 @@ export interface ConfigRow {
 
 const pct = (n: number): string => `${Math.round(n * 1000) / 10}%`;
 const num = (v: ParameterValue | undefined): number => (typeof v === "number" ? v : Number.NaN);
+
+
+const SEQUENCE_PATTERNS: Record<string, [vi: string, en: string]> = {
+  arithmetic: ["cộng một bước đều", "steady step"],
+  geometric: ["nhân", "multiplying"],
+  alternating: ["hai bước xen kẽ", "alternating steps"],
+  interleaved: ["hai quy tắc xen kẽ", "two interleaved rules"],
+  "geometric, alternating": ["nhân hoặc hai bước xen kẽ", "multiplying or alternating steps"],
+  "two interleaved rules": ["hai quy tắc xen kẽ", "two interleaved rules"],
+};
+
+function sequencePattern(value: string, t: Translate): string {
+  const pair = SEQUENCE_PATTERNS[value];
+  if (pair) return t(...pair);
+  return /^[A-D]{2,4}$/.test(value) ? value : t(`đơn vị lặp ${value}`, `unit of ${value}`);
+}
 
 const FAMILY_TEXT: Record<string, [vi: string, en: string]> = {
   basic: ["hình tròn, vuông, tam giác, ngôi sao", "circle, square, triangle, star"],
@@ -93,6 +121,27 @@ export function parameterRows(captcha: CaptchaKey, p: Readonly<Record<string, Pa
         { id: "family", label: t("Bộ hình", "Shape set"), value: fam ? t(...fam) : String(p.family) },
       ];
     }
+    case "shape-matching":
+      return [
+        { id: "pairs", label: t("Số cặp", "Pairs"), value: String(num(p.pairs)) },
+        { id: "similarity", label: t("Độ giống của các hình nhiễu", "Distractor similarity"), value: p.similarity === "low" ? t("thấp", "Low") : p.similarity === "medium" ? t("vừa", "Medium") : t("cao", "High") },
+        { id: "rotationDeg", label: t("Xoay đích", "Target rotation"), value: num(p.rotationDeg) > 0 ? `0–${num(p.rotationDeg)}°` : t("không", "none") },
+        { id: "mixedFill", label: t("Đích chỉ có viền", "Outlined targets"), value: p.mixedFill ? t("có thể", "possible") : t("không", "no") },
+        { id: "sizeVariation", label: t("Đổi cỡ đích", "Target size change"), value: num(p.sizeVariation) > 0 ? `±${pct(num(p.sizeVariation))}` : t("không", "none") },
+      ];
+    case "math-logic":
+      return [
+        { id: "operations", label: t("Phép toán", "Operations"), value: p.operations === "none" ? t("không (số nguyên)", "none (plain integers)") : String(p.operations).replace(/-/g, "\u2212").replace(/x/g, "\u00d7") },
+        { id: "operandMax", label: t("Số hạng lớn nhất", "Operand range"), value: `1–${num(p.operandMax)}` },
+        { id: "steps", label: t("Số bước", "Steps"), value: String(num(p.steps)) },
+        ...(num(p.maxGap) > 0 ? [{ id: "gap", label: t("Khoảng cách hai giá trị", "Gap between values"), value: `${num(p.minGap)}–${num(p.maxGap)}` }] : []),
+      ];
+    case "sequence":
+      return [
+        { id: "length", label: t("Độ dài", "Length"), value: String(num(p.length)) },
+        { id: "pattern", label: t("Kiểu quy luật", "Pattern type"), value: sequencePattern(String(p.pattern ?? p.patterns), t) },
+        ...(num(p.options) > 0 ? [{ id: "options", label: t("Số lựa chọn", "Options"), value: String(num(p.options)) }] : []),
+      ];
     case "checkbox":
       return [{ id: "activation", label: t("Cách kích hoạt", "Activation"), value: p.activation === "single press" ? t("một lần bấm", "single press") : String(p.activation) }];
   }

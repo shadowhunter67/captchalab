@@ -51,3 +51,10 @@ Not release blockers unless stated. Format: issue · impact · affected CAPTCHA 
 - `parameterRows` lists a fixed set of parameters per CAPTCHA; a new preset parameter must also be added there · Inspect · later
 - No Custom mode yet (presets first) · all · later
 - Seeds are numbers up to 4294967295; a URL seed above that is ignored · all · later
+
+## Shape Matching, Math / Logic, Sequence (v0.3)
+- Shape Matching has no replay and no drag interaction (select-then-select only) · by design for now · Shape Matching · later
+- Math / Logic comparison asks for the larger value, not for a side; "type the larger value" could be mistaken for typing a side label · wording · Math / Logic · later
+- Number sequences are checked for a single answer only against four pattern families (arithmetic, geometric, alternating, interleaved), simplest first; other rules are not considered · documented in `sequence/rules.ts` · Sequence · later
+- Sequence visual patterns use shapes only (no colour or size patterns) · Sequence · later
+- Compare still supports only the Slider · all new CAPTCHAs · later

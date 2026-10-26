@@ -6,6 +6,22 @@ const VI = (vi: string, _en: string): string => vi;
 
 // Every `reason` literal found in packages/captcha-plugins/src/*/verifier.ts.
 const VERIFIER_REASONS = [
+  "The answer must map each shape to a target.",
+  "The answer mentions a shape or target that is not on this board.",
+  "Every shape is matched to its own target.",
+  "Some shapes are not matched yet.",
+  "Some shapes are matched to the wrong target.",
+  "Some shapes are not matched and some are matched to the wrong target.",
+  "The answer must be a whole number and nothing else.",
+  "The answer is correct.",
+  "The answer is not correct.",
+  "The answer must be a whole number.",
+  "The missing number is correct.",
+  "The missing number is not correct.",
+  "The answer must be one of the options.",
+  "The answer is not one of the options.",
+  "The missing shape is correct.",
+  "The missing shape is not correct.",
   "The challenge is missing or malformed.",
   "The answer must state whether the box is checked.",
   "The checkbox was left checked, as the challenge requires.",

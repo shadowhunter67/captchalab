@@ -6,7 +6,7 @@ import { isReportMessage, type SessionReport } from "@/lib/embed-report";
 import { useLang, useT } from "@/lib/i18n";
 import { translateReason } from "@/lib/i18n/reasons";
 
-type ItemId = "slider" | "checkbox" | "text" | "drag-drop" | "rotation" | "image-grid" | "compare" | "learn";
+type ItemId = "slider" | "checkbox" | "text" | "drag-drop" | "rotation" | "image-grid" | "shape-matching" | "math-logic" | "sequence" | "compare" | "learn";
 type Tab = "experience" | "events" | "analysis" | "access";
 type SideTab = "summary" | "log" | "features";
 
@@ -17,6 +17,7 @@ interface Group {
 
 const GROUPS: readonly Group[] = [
   { title: ["Cơ bản", "Basics"], items: ["slider", "checkbox", "text"] },
+  { title: ["Tư duy", "Reasoning"], items: ["math-logic", "sequence", "shape-matching"] },
   { title: ["Tương tác không gian", "Spatial interaction"], items: ["drag-drop", "rotation", "image-grid"] },
   { title: ["Nghiên cứu", "Research"], items: ["compare", "learn"] },
 ];
@@ -29,6 +30,9 @@ const PATHS: Record<ItemId, string> = {
   "drag-drop": "playground/drag-drop/",
   rotation: "playground/rotation/",
   "image-grid": "playground/image-grid/",
+  "shape-matching": "playground/shape-matching/",
+  "math-logic": "playground/math-logic/",
+  sequence: "playground/sequence/",
   compare: "compare/",
   learn: "learn/",
 };
@@ -45,6 +49,9 @@ function Icon({ id }: { id: ItemId | "logo" | "clock" | "pulse" | "pointer" | "t
     case "drag-drop": return <svg {...common}><path d="M8 13V6a1.5 1.5 0 0 1 3 0v5m0-1a1.5 1.5 0 0 1 3 0v1m0-.5a1.5 1.5 0 0 1 3 0V15a6 6 0 0 1-6 6h-1a6 6 0 0 1-5-3l-2-4a1.5 1.5 0 0 1 2.5-1.5L8 15" /></svg>;
     case "rotation": return <svg {...common}><path d="M4 12a8 8 0 1 0 3-6.2M4 4v4h4" /></svg>;
     case "image-grid": return <svg {...common}><rect x="4" y="4" width="7" height="7" rx="1" /><rect x="13" y="4" width="7" height="7" rx="1" /><rect x="4" y="13" width="7" height="7" rx="1" /><rect x="13" y="13" width="7" height="7" rx="1" /></svg>;
+    case "shape-matching": return <svg {...common}><circle cx="7" cy="7" r="3.5" /><rect x="14" y="14" width="6" height="6" rx="1" /><path d="M10.5 7H17v4M17 11l-2-2M17 11l2-2" /></svg>;
+    case "math-logic": return <svg {...common}><path d="M5 8h6M8 5v6M13 8h6M5 17h6M13 15l6 4M19 15l-6 4" /></svg>;
+    case "sequence": return <svg {...common}><circle cx="5" cy="12" r="2" /><circle cx="12" cy="12" r="2" /><path d="M16.5 12h4M18.5 10v4" /><path d="M7 12h3M14 12h1" /></svg>;
     case "compare": return <svg {...common}><path d="M6 20V10M12 20V4M18 20v-7" /></svg>;
     case "learn": return <svg {...common}><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0 0 12 3Z" /></svg>;
     case "logo": return <svg {...common} width={30} height={30}><rect x="3" y="5" width="14" height="14" rx="3" /><path d="M8 3h10a3 3 0 0 1 3 3v10" /><path d="m7.5 12 2.5 2.5 4-5" /></svg>;

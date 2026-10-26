@@ -26,8 +26,8 @@ export function PlaygroundIndex() {
         <h1 className="mt-2 text-2xl font-semibold tracking-tight">{t("Sân thử", "Playground")}</h1>
         <p className="mt-1 text-sm text-muted">
           {t(
-            "Sáu thử thách trong phòng thí nghiệm. Mỗi thử thách ghi lại tương tác của bạn ngay trên máy, hiển thị các chỉ số đo được và cho bạn phân tích từng sự kiện.",
-            "Six lab challenges. Each one records your interaction locally, shows the measured features and lets you inspect the events.",
+            `${catalog.length} thử thách trong phòng thí nghiệm. Mỗi thử thách ghi lại tương tác của bạn ngay trên máy, hiển thị các chỉ số đo được và cho bạn phân tích từng sự kiện.`,
+            `${catalog.length} lab challenges. Each one records your interaction locally, shows the measured features and lets you inspect the events.`,
           )}
         </p>
       </header>
