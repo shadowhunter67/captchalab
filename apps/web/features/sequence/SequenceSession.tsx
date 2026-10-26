@@ -50,13 +50,15 @@ export function SequenceSession({ challenge: initialChallenge, onNewChallenge }:
     setError(null);
   };
 
+  const optionsRef = useRef<HTMLDivElement>(null);
   const recordKey = (type: "keydown" | "keyup", e: KeyboardEvent<HTMLInputElement>): void => {
     if (e.nativeEvent.isComposing) return;
     recorder.record({ type, code: toTextKeyCode(e.code), target: SEQUENCE_TARGET });
   };
 
   const recordPointer = (kind: PointerKind, e: PointerEvent<HTMLButtonElement>, id: string): void => {
-    const sample = toPointerSample(e, { left: 0, top: 0 });
+    const rect = optionsRef.current?.getBoundingClientRect();
+    const sample = toPointerSample(e, { left: rect?.left ?? 0, top: rect?.top ?? 0 });
     if (!sample) return;
     // A captured touch/pen release outside the button does not click it: record a cancel.
     const b = e.currentTarget.getBoundingClientRect();
@@ -178,7 +180,7 @@ export function SequenceSession({ challenge: initialChallenge, onNewChallenge }:
                 ))}
               </div>
             </div>
-            <div role="group" aria-label={t("Các lựa chọn cho hình còn thiếu", "Options for the missing shape")} className="flex flex-wrap gap-2">
+            <div ref={optionsRef} role="group" aria-label={t("Các lựa chọn cho hình còn thiếu", "Options for the missing shape")} className="flex flex-wrap gap-2">
               {challenge.options.map((o, i) => (
                 <button
                   key={o.id}

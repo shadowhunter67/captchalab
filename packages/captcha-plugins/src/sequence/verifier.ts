@@ -1,5 +1,6 @@
 import type { VerificationResult } from "@captchalab/captcha-core";
 import { GRID_SHAPES } from "../image-grid/types";
+import { isUnambiguous, isVisualUnambiguous } from "./rules";
 import type { SequenceAnswer, SequenceChallenge } from "./types";
 
 const isRecord = (v: unknown): v is Record<string, unknown> => typeof v === "object" && v !== null && !Array.isArray(v);
@@ -12,7 +13,9 @@ function numberChallengeOk(c: Record<string, unknown>): boolean {
   if (!Array.isArray(terms) || terms.length < 4 || terms.length > 10 || typeof h !== "number" || !Number.isInteger(h)) return false;
   if (h < 2 || h >= terms.length || terms[h] !== null) return false;
   if (!terms.every((t, k) => (k === h ? t === null : Number.isSafeInteger(t)))) return false;
-  return Number.isSafeInteger(c.expectedAnswer);
+  const rules = ["arithmetic", "geometric", "alternating", "interleaved"];
+  if (!Number.isSafeInteger(c.expectedAnswer) || typeof c.rule !== "string" || !rules.includes(c.rule)) return false;
+  return isUnambiguous(terms as (number | null)[], h, c.rule as "arithmetic", c.expectedAnswer as number); // the declared answer must follow the pattern
 }
 
 function visualChallengeOk(c: Record<string, unknown>): boolean {
@@ -30,7 +33,10 @@ function visualChallengeOk(c: Record<string, unknown>): boolean {
     ids.add(o.id);
     shapes.add(o.shape as string);
   }
-  return options.length >= 2 && shapes.size === options.length && typeof c.expectedOptionId === "string" && ids.has(c.expectedOptionId);
+  if (options.length < 2 || shapes.size !== options.length || typeof c.expectedOptionId !== "string" || !ids.has(c.expectedOptionId)) return false;
+  const expected = (options.find((o) => isRecord(o) && o.id === c.expectedOptionId) as Record<string, unknown>).shape as string;
+  const period = typeof c.pattern === "string" ? c.pattern.length : 0;
+  return period >= 2 && isVisualUnambiguous(cells as (string | null)[], h, period, expected);
 }
 
 /**

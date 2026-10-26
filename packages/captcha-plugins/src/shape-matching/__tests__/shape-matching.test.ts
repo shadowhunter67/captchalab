@@ -192,3 +192,12 @@ describe("features", () => {
     expect(r.selectionCount).toBe(0);
   });
 });
+
+describe("a challenge whose pairs show different shapes is rejected", () => {
+  it("fails even when the answer follows the declared matches", () => {
+    const c = gen(5, "exact", "easy");
+    const [a, b] = c.sources;
+    const bad = { ...c, matches: { ...c.matches, [a!.id]: c.matches[b!.id]!, [b!.id]: c.matches[a!.id]! } };
+    expect(verifyShapeMatchingAnswer(bad, { matches: bad.matches }).passed).toBe(false);
+  });
+});

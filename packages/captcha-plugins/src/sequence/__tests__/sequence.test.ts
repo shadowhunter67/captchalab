@@ -165,3 +165,16 @@ describe("features", () => {
     expect(extractSequenceFeatures(num(1, "easy"), session([])).features).toMatchObject({ keyCount: 0, correctionCount: 0 });
   });
 });
+
+describe("a challenge that contradicts itself is rejected", () => {
+  it("number: a declared answer that does not follow the pattern", () => {
+    const n = num(2, "easy");
+    expect(verifySequenceAnswer({ ...n, expectedAnswer: 999 }, { kind: "number", value: 999 }).passed).toBe(false);
+    expect(verifySequenceAnswer({ ...n, rule: "nope" } as never, { kind: "number", value: n.expectedAnswer }).passed).toBe(false);
+  });
+  it("visual: a declared option that does not follow the pattern", () => {
+    const v = vis(2, "medium");
+    const wrong = v.options.find((o) => o.id !== v.expectedOptionId)!;
+    expect(verifySequenceAnswer({ ...v, expectedOptionId: wrong.id }, { kind: "option", optionId: wrong.id }).passed).toBe(false);
+  });
+});

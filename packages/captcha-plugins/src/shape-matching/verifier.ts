@@ -20,10 +20,12 @@ function challengeIsValid(c: unknown): c is ShapeMatchingChallenge {
   const sources = ids(c.sources);
   const targets = ids(c.targets);
   if (!sources || !targets) return false;
+  const shapeOf = (list: unknown[], id: string): unknown => (list.find((x) => isRecord(x) && x.id === id) as Record<string, unknown> | undefined)?.shape;
   const used = new Set<string>();
   for (const s of sources) {
     const t = c.matches[s];
     if (typeof t !== "string" || !targets.has(t) || used.has(t)) return false;
+    if (shapeOf(c.sources, s) !== shapeOf(c.targets, t)) return false; // a pair must show the same structural shape
     used.add(t);
   }
   return true;
