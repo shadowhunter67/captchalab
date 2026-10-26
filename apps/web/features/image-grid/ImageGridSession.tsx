@@ -14,6 +14,8 @@ const SHAPE_VI: Record<string, string> = {
   square: "hình vuông",
   triangle: "hình tam giác",
   star: "hình ngôi sao",
+  oval: "hình bầu dục",
+  rounded: "hình vuông bo góc",
 };
 
 interface Completed {

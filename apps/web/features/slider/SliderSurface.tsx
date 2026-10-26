@@ -22,6 +22,8 @@ interface Props {
   controller: SliderController;
   /** Normalized target, used only to draw the target marker. */
   target: number;
+  /** Normalized accepted release distance; draws the width of the accepted window. */
+  tolerance?: number;
   phase: SliderPhase;
   /** Set by the surface; the controller calls it (no React state) to move the handle. */
   applyPositionRef: MutableRefObject<(position: number) => void>;
@@ -36,7 +38,7 @@ interface Props {
  * measurement. One handler set on the track; events captured by the handle bubble here, so each
  * event is seen (and recorded) exactly once.
  */
-export function SliderSurface({ controller, target, phase, applyPositionRef }: Props) {
+export function SliderSurface({ controller, target, tolerance, phase, applyPositionRef }: Props) {
   const t = useT();
   const trackRef = useRef<HTMLDivElement>(null);
   const handleRef = useRef<HTMLDivElement>(null);
@@ -183,6 +185,17 @@ export function SliderSurface({ controller, target, phase, applyPositionRef }: P
           left: `calc((100% - ${HANDLE_WIDTH_PX}px) * ${target})`,
         }}
       />
+      {tolerance !== undefined && (
+        <div
+          aria-hidden="true"
+          data-testid="slider-tolerance"
+          className="absolute bottom-1 h-1.5 rounded-full bg-accent/60"
+          style={{
+            left: `calc((100% - ${HANDLE_WIDTH_PX}px) * ${target - tolerance} + ${HANDLE_WIDTH_PX / 2}px)`,
+            width: `calc((100% - ${HANDLE_WIDTH_PX}px) * ${tolerance * 2})`,
+          }}
+        />
+      )}
       <div
         ref={handleRef}
         data-testid="slider-handle"

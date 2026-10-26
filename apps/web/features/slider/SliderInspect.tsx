@@ -6,6 +6,7 @@ import { isPointerEvent, type FeatureSet, type InteractionSession, type Verifica
 import type { SliderChallenge, SliderFeatures, SliderLayout } from "@captchalab/captcha-plugins";
 import { useT } from "@/lib/i18n";
 import { Card } from "@/components/inspect/Card";
+import { ChallengeConfigSlot } from "@/components/inspect/ChallengeConfigCard";
 import { EventExplorer } from "@/components/inspect/EventExplorer";
 import { MetricTable } from "@/components/inspect/MetricTable";
 import { MotionChart } from "@/components/inspect/MotionChart";
@@ -70,6 +71,8 @@ export function SliderInspect({ verification, featureSet, session, markers, layo
       </h2>
 
       <VerificationSummary passed={verification.passed} reason={verification.reason} />
+
+      <ChallengeConfigSlot />
 
       <div className="grid gap-4 lg:grid-cols-2">
         <Card id="traj-h" title={t("Đường đi và phát lại", "Trajectory and replay")}>

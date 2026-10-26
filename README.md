@@ -6,7 +6,7 @@ CaptchaLab is a small lab where you try different CAPTCHA challenges and then se
 
 **Live demo: https://shadowhunter67.github.io/captchalab/** (pick a challenge on the left, try it on the right)
 
-> **Status: Alpha (`0.1.0-alpha`).** Things may still change.
+> **Status: Alpha (`0.2.0-alpha`).** Things may still change.
 
 The site is in **Vietnamese by default**. Use the **VI / EN** button in the top-right corner to switch to English.
 
@@ -22,6 +22,8 @@ Six challenges, each with its own page:
 | Image Rotation | Turn an object until it is upright |
 | Text | Read distorted letters and type them |
 | Image Grid | Pick all the tiles that show a given shape |
+
+Each challenge has **variants** (for example Clean, Rotated or Noisy text) and three **difficulty levels** (Easy, Medium, Hard), plus a **seed**. The same seed, variant and difficulty always give the same challenge, and the page shows exactly what the difficulty changed (tolerance, number of noise lines...). A link such as `/playground/text/?variant=noisy&difficulty=hard&seed=742193` opens that exact challenge.
 
 After each attempt you can look at:
 

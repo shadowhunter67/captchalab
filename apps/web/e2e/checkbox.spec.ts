@@ -39,7 +39,7 @@ test("clicking the label text activates the native input and is recorded once", 
 });
 
 test("keyboard: Tab to the checkbox, Space activates it (Enter does not)", async ({ page }) => {
-  for (let i = 0; i < 5; i++) {
+  for (let i = 0; i < 15; i++) {
     await page.keyboard.press("Tab");
     if (await input(page).evaluate((el) => el === document.activeElement)) break;
   }

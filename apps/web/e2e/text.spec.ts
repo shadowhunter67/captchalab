@@ -86,8 +86,11 @@ test("privacy: stored key events never say which letter or digit was pressed, an
 
 test("New challenge clears the field, result and recording; the field is labelled and keyboard reachable", async ({ page }) => {
   await expect(page.getByLabel("Characters in the image")).toBeVisible();
-  await page.keyboard.press("Tab");
-  await page.keyboard.press("Tab"); // link, then the field
+  // The link, the setup controls (variant, difficulty, seed), then the field.
+  for (let i = 0; i < 15; i++) {
+    await page.keyboard.press("Tab");
+    if (await answer(page).evaluate((el) => el === document.activeElement)) break;
+  }
   await expect(answer(page)).toBeFocused();
   await page.keyboard.type("abc");
   await page.getByTestId("verify").click();

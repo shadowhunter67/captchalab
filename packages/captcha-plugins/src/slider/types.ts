@@ -1,4 +1,4 @@
-import type { BaseCaptchaFeatures, MotionFeatures } from "@captchalab/captcha-core";
+import type { ChallengeConfig, BaseCaptchaFeatures, MotionFeatures } from "@captchalab/captcha-core";
 
 export const SLIDER_ID = "slider" as const;
 
@@ -31,6 +31,8 @@ export interface SliderChallenge {
   target: number;
   /** Accepted |answer.position - target|, normalized (same units as target). */
   tolerance: number;
+  /** How it was generated (variant, difficulty, parameters). Absent on hand-built challenges. */
+  config?: ChallengeConfig;
 }
 
 /** Final state of the solution only. The trajectory lives in the InteractionSession. */

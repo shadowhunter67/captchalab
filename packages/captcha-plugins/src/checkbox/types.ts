@@ -1,4 +1,4 @@
-import type { BaseCaptchaFeatures, InputModality } from "@captchalab/captcha-core";
+import type { ChallengeConfig, BaseCaptchaFeatures, InputModality } from "@captchalab/captcha-core";
 
 export const CHECKBOX_ID = "checkbox" as const;
 
@@ -14,6 +14,8 @@ export interface CheckboxChallenge {
   id: string;
   /** The state the user must leave the checkbox in. */
   expectedChecked: true;
+  /** How it was generated (variant, difficulty, parameters). Absent on hand-built challenges. */
+  config?: ChallengeConfig;
 }
 
 /** Final state only. The interaction history lives in the InteractionSession. */

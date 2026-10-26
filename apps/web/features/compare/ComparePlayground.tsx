@@ -3,7 +3,9 @@
 import Link from "next/link";
 import { useCallback, useMemo, useState } from "react";
 import { createRng } from "@captchalab/captcha-core";
-import { registry, type SliderChallenge } from "@captchalab/captcha-plugins";
+import { VARIANT_SETS, registry, type SliderChallenge } from "@captchalab/captcha-plugins";
+import { ChallengeControls } from "@/components/ChallengeControls";
+import { ChallengeConfigCard } from "@/components/inspect/ChallengeConfigCard";
 import { Card } from "@/components/inspect/Card";
 import { TrajectoryView } from "@/components/inspect/TrajectoryView";
 import { buildSliderTrajectory } from "@/features/slider/slider-view-data";
@@ -17,10 +19,11 @@ import {
   type SyntheticProfile,
 } from "@/lib/synthetic/slider-synthetic";
 import { useT } from "@/lib/i18n";
-import { useSeededChallenge } from "@/lib/useSeededChallenge";
+import { stampSeed, useSeededChallenge, type VariantChoice } from "@/lib/useSeededChallenge";
 import { compareRows } from "./compare-data";
 
-const generateSlider = (seed: number) => registry.get("slider").generate({ rng: createRng(seed) });
+const generateSlider = (seed: number, choice: VariantChoice) =>
+  stampSeed(registry.get("slider").generate({ rng: createRng(seed), variantId: choice.variantId, difficulty: choice.difficulty }), seed);
 const TRACK_HEIGHT = 44;
 
 function Trajectory({ result, challenge, label, testId }: { result: SliderResult; challenge: SliderChallenge; label: string; testId: string }) {
@@ -124,6 +127,13 @@ function CompareBody({ challenge, onNewChallenge }: { challenge: SliderChallenge
         <h2 id="result-h" className="text-base font-semibold">
           {t("3. Điểm khác biệt", "3. Differences")}
         </h2>
+        <ChallengeConfigCard captcha="slider" config={challenge.config} />
+        <p className="text-xs text-muted" data-testid="compare-same-config">
+          {t(
+            "Cả hai bên chạy cùng một cấu hình thử thách (biến thể, độ khó và seed ở trên); so sánh chỉ có nghĩa khi hai bên cùng cấu hình.",
+            "Both sides run the same challenge configuration (variant, difficulty and seed above); the comparison only means something when they match.",
+          )}
+        </p>
         <div className="grid gap-4 lg:grid-cols-2">
           <Card id="human-traj-h" title={t("Đường đi của bạn", "Your trajectory")}>
             {human ? (
@@ -178,7 +188,7 @@ function CompareBody({ challenge, onNewChallenge }: { challenge: SliderChallenge
 
 export function ComparePlayground() {
   const t = useT();
-  const { challenge, failed, round, newChallenge } = useSeededChallenge(generateSlider);
+  const { challenge, failed, round, newChallenge, choice, seed, setVariant, setDifficulty, setSeed } = useSeededChallenge(generateSlider, VARIANT_SETS.slider);
   return (
     <main className="mx-auto max-w-4xl space-y-6 px-4 py-8 sm:px-6">
       <header>
@@ -193,6 +203,15 @@ export function ComparePlayground() {
           )}
         </p>
       </header>
+      <ChallengeControls
+        captcha="slider"
+        variantSet={VARIANT_SETS.slider}
+        choice={choice}
+        seed={seed}
+        onVariant={setVariant}
+        onDifficulty={setDifficulty}
+        onSeed={setSeed}
+      />
       {failed && (
         <p role="alert" className="text-sm text-bad">
           {t("Không tạo được thử thách. Hãy tải lại trang.", "Could not generate a challenge. Reload the page.")}

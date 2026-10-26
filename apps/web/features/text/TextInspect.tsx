@@ -6,6 +6,7 @@ import type { FeatureSet, InteractionSession, VerificationResult } from "@captch
 import type { TextFeatures } from "@captchalab/captcha-plugins";
 import { useT } from "@/lib/i18n";
 import { Card } from "@/components/inspect/Card";
+import { ChallengeConfigSlot } from "@/components/inspect/ChallengeConfigCard";
 import { EventExplorer } from "@/components/inspect/EventExplorer";
 import { MetricTable } from "@/components/inspect/MetricTable";
 import { VerificationSummary } from "@/components/inspect/VerificationSummary";
@@ -30,6 +31,8 @@ export function TextInspect({ verification, featureSet, session }: Props) {
         {t("Phân tích", "Inspect")}
       </h2>
       <VerificationSummary passed={verification.passed} reason={verification.reason} />
+
+      <ChallengeConfigSlot />
       <Card id="metrics-h" title={t("Chỉ số", "Metrics")}>
         <div className="space-y-4">
           <MetricTable heading={t("Gõ phím", "Typing")} metrics={metrics} />

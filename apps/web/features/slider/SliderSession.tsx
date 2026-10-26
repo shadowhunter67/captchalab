@@ -126,6 +126,7 @@ export function SliderSession({ challenge: initialChallenge, onNewChallenge, onR
         <SliderSurface
           controller={controller}
           target={challenge.target}
+          tolerance={challenge.tolerance}
           phase={phase}
           applyPositionRef={applyPositionRef}
         />

@@ -16,10 +16,12 @@ type P = { x: number; y: number };
 const metric = (page: Page, id: string) => page.getByTestId(`metric-${id}`);
 
 async function surface(page: Page) {
+  await page.getByTestId("drag-surface").scrollIntoViewIfNeeded(); // the setup panel sits above the board
   const box = (await page.getByTestId("drag-surface").boundingBox())!;
   return { box, px: (p: { x: number; y: number }): P => ({ x: box.x + p.x * box.width, y: box.y + p.y * box.height }) };
 }
 async function centerOf(page: Page, id: string): Promise<P> {
+  await page.getByTestId("drag-surface").scrollIntoViewIfNeeded();
   const b = (await page.getByTestId(`item-${id}`).boundingBox())!;
   return { x: b.x + b.width / 2, y: b.y + b.height / 2 };
 }
@@ -112,10 +114,11 @@ test("wrong targets are Not passed; dropping on an occupied area sends that shap
   await page.mouse.up(); // dropped back where it was
 
   // Repair: A takes its own area (B, sitting there, is sent back), then B goes to its own.
-  await drag(page, A, s.px(targetOf(A).position));
+  const board = await surface(page); // the page scrolled to the result: measure the board again
+  await drag(page, A, board.px(targetOf(A).position));
   await expect(page.getByTestId("drag-status")).toContainText("went back");
   await expect(page.getByTestId(`item-${B}`)).toHaveAttribute("data-placement", "");
-  await drag(page, B, s.px(targetOf(B).position));
+  await drag(page, B, (await surface(page)).px(targetOf(B).position));
   await verify(page);
   await expect(page.getByTestId("result")).toContainText("Passed");
   await expect(page.getByTestId("metric-numberOfDragAttempts")).toHaveText("6"); // A, B, C, B (lifted and put back), A home, B home

@@ -43,3 +43,11 @@ Not release blockers unless stated. Format: issue · impact · affected CAPTCHA 
 - Only the Slider is supported as the reference CAPTCHA (Drag & Drop not wired) · Compare · later
 
 - Language: Vietnamese by default, English via the VI/EN switch (`lib/i18n`, `?lang=` in the URL, nothing stored). The suite runs in English through `e2e/fixtures.ts`. Input-modality values (mouse/touch/keyboard) are shown untranslated.
+
+## Variants and difficulty (v0.2)
+- Image Grid has no 4x4 variant (`GRID_SIZE` is shared by the verifier and UI) · backlog · Image Grid · later
+- Text has no "distorted" variant (would need a canvas/filter pipeline) · only Clean, Rotated, Noisy · Text · later
+- Classic Rotation shows its start range as an angle (40°–320°), not a shortest displacement · wording only · Rotation · later
+- `parameterRows` lists a fixed set of parameters per CAPTCHA; a new preset parameter must also be added there · Inspect · later
+- No Custom mode yet (presets first) · all · later
+- Seeds are numbers up to 4294967295; a URL seed above that is ignored · all · later

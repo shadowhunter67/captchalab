@@ -49,6 +49,8 @@ export function LearnIndex() {
           <p className="text-muted">{c.learn.generation}</p>
           <h3 className="font-semibold">{t("Cách xác minh", "Verification")}</h3>
           <p className="text-muted">{c.learn.verification}</p>
+          <h3 className="font-semibold">{t("Biến thể và độ khó", "Variants & difficulty")}</h3>
+          <p className="text-muted" data-testid={`variants-${c.id}`}>{c.variantsNote}</p>
           <h3 className="font-semibold">{t("Tín hiệu hành vi", "Behavioral signals")}</h3>
           <List items={c.learn.signals} />
           <h3 className="font-semibold">{t("Điểm mạnh", "Strengths")}</h3>

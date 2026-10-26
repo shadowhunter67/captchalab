@@ -1,10 +1,15 @@
 import type { BaseCaptchaFeatures } from "../features/motion";
 import type { FeatureSet } from "../features/feature-set";
 import type { InteractionSession } from "../types/events";
+import type { CaptchaDifficulty } from "./variants";
 
 export interface GenerateContext {
   /** Deterministic PRNG in [0, 1). Generators must use this, never Math.random. */
   rng: () => number;
+  /** Which variant to generate; omitted = the plugin's default. */
+  variantId?: string | undefined;
+  /** Which preset level of that variant; omitted = the default (or "medium" when a variant is named). */
+  difficulty?: CaptchaDifficulty | undefined;
 }
 
 export interface VerificationResult {

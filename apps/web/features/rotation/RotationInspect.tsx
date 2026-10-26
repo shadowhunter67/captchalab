@@ -6,6 +6,7 @@ import type { FeatureSet, InteractionSession, Point, VerificationResult } from "
 import { deriveRotation, type RotationChallenge, type RotationFeatures } from "@captchalab/captcha-plugins";
 import { useT } from "@/lib/i18n";
 import { Card } from "@/components/inspect/Card";
+import { ChallengeConfigSlot } from "@/components/inspect/ChallengeConfigCard";
 import { EventExplorer } from "@/components/inspect/EventExplorer";
 import { MetricTable } from "@/components/inspect/MetricTable";
 import { MotionChart } from "@/components/inspect/MotionChart";
@@ -40,6 +41,8 @@ export function RotationInspect({ challenge, verification, featureSet, session, 
         {t("Phân tích", "Inspect")}
       </h2>
       <VerificationSummary passed={verification.passed} reason={verification.reason} />
+
+      <ChallengeConfigSlot />
       <div className="grid gap-4 lg:grid-cols-2">
         <Card id="replay-h" title={t("Phát lại", "Replay")}>
           <RotationReplay challenge={challenge} center={center} session={session} />

@@ -14,8 +14,9 @@ describe("seed helpers", () => {
     }
   });
 
-  it("wraps seeds above 2^32 into the unsigned 32-bit range", () => {
-    expect(parseSeed("?seed=4294967296")).toBe(0);
+  it("ignores seeds above the unsigned 32-bit range instead of wrapping them", () => {
+    expect(parseSeed("?seed=4294967296")).toBeNull();
+    expect(parseSeed("?seed=4294967295")).toBe(4294967295);
   });
 
   it("randomSeed returns an unsigned 32-bit integer", () => {

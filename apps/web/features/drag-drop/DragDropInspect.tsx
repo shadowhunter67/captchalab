@@ -11,6 +11,7 @@ import {
 } from "@captchalab/captcha-plugins";
 import { useT } from "@/lib/i18n";
 import { Card } from "@/components/inspect/Card";
+import { ChallengeConfigSlot } from "@/components/inspect/ChallengeConfigCard";
 import { EventExplorer } from "@/components/inspect/EventExplorer";
 import { MetricTable } from "@/components/inspect/MetricTable";
 import { MotionChart } from "@/components/inspect/MotionChart";
@@ -78,6 +79,8 @@ export function DragDropInspect({ challenge, verification, featureSet, session, 
       </h2>
 
       <VerificationSummary passed={verification.passed} reason={verification.reason} />
+
+      <ChallengeConfigSlot />
       {layoutChanged && (
         <p className="text-xs text-muted" data-testid="layout-changed-note">
           {t(

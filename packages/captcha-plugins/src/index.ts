@@ -5,3 +5,4 @@ export * from "./drag-drop";
 export * from "./rotation";
 export * from "./text";
 export * from "./image-grid";
+export * from "./variants";

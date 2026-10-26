@@ -1,4 +1,4 @@
-import type { BaseCaptchaFeatures, InputModality } from "@captchalab/captcha-core";
+import type { ChallengeConfig, BaseCaptchaFeatures, InputModality } from "@captchalab/captcha-core";
 
 export const DRAG_DROP_ID = "drag-drop" as const;
 
@@ -43,6 +43,8 @@ export interface DragDropChallenge {
   targets: readonly DragDropTarget[];
   itemSize: number;
   dropTolerance: number;
+  /** How it was generated (variant, difficulty, parameters). Absent on hand-built challenges. */
+  config?: ChallengeConfig;
 }
 
 /**

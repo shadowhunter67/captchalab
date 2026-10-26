@@ -10,3 +10,4 @@ export * from "./replay/timeline";
 export * from "./plugin/types";
 export * from "./plugin/registry";
 export * from "./plugin/rng";
+export * from "./plugin/variants";

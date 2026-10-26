@@ -2,17 +2,23 @@
 
 import Link from "next/link";
 import { createRng } from "@captchalab/captcha-core";
-import { registry } from "@captchalab/captcha-plugins";
+import { VARIANT_SETS, registry } from "@captchalab/captcha-plugins";
 import { useT } from "@/lib/i18n";
-import { useSeededChallenge } from "@/lib/useSeededChallenge";
+import { ChallengeControls } from "@/components/ChallengeControls";
+import { ChallengeConfigProvider } from "@/components/inspect/ChallengeConfigCard";
+import { stampSeed, useSeededChallenge, type VariantChoice } from "@/lib/useSeededChallenge";
 import { ImageGridLearn } from "./ImageGridLearn";
 import { ImageGridSession } from "./ImageGridSession";
 
-const generateGrid = (seed: number) => registry.get("image-grid").generate({ rng: createRng(seed) });
+const generateGrid = (seed: number, choice: VariantChoice) =>
+  stampSeed(registry.get("image-grid").generate({ rng: createRng(seed), variantId: choice.variantId, difficulty: choice.difficulty }), seed);
 
 export function ImageGridPlayground() {
   const t = useT();
-  const { challenge, failed, round, newChallenge } = useSeededChallenge(generateGrid);
+  const { challenge, failed, round, newChallenge, choice, seed, setVariant, setDifficulty, setSeed } = useSeededChallenge(
+    generateGrid,
+    VARIANT_SETS["image-grid"],
+  );
   return (
     <main className="mx-auto max-w-3xl space-y-6 px-4 py-8 sm:px-6">
       <header>
@@ -27,13 +33,26 @@ export function ImageGridPlayground() {
           )}
         </p>
       </header>
+      <ChallengeControls
+        captcha="image-grid"
+        variantSet={VARIANT_SETS["image-grid"]}
+        choice={choice}
+        seed={seed}
+        onVariant={setVariant}
+        onDifficulty={setDifficulty}
+        onSeed={setSeed}
+      />
       {failed && (
         <p role="alert" className="text-sm text-bad">
           {t("Không tạo được thử thách. Hãy tải lại trang.", "Could not generate a challenge. Reload the page.")}
         </p>
       )}
       {challenge === null && !failed && <p className="text-sm text-muted">{t("Đang tải…", "Loading…")}</p>}
-      {challenge && <ImageGridSession key={`${challenge.id}:${round}`} challenge={challenge} onNewChallenge={newChallenge} />}
+      {challenge && (
+        <ChallengeConfigProvider captcha="image-grid" config={challenge.config}>
+          <ImageGridSession key={`${challenge.id}:${round}`} challenge={challenge} onNewChallenge={newChallenge} />
+        </ChallengeConfigProvider>
+      )}
       <ImageGridLearn />
     </main>
   );

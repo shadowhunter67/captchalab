@@ -2,17 +2,23 @@
 
 import Link from "next/link";
 import { createRng } from "@captchalab/captcha-core";
-import { registry } from "@captchalab/captcha-plugins";
+import { VARIANT_SETS, registry } from "@captchalab/captcha-plugins";
 import { useT } from "@/lib/i18n";
-import { useSeededChallenge } from "@/lib/useSeededChallenge";
+import { ChallengeControls } from "@/components/ChallengeControls";
+import { ChallengeConfigProvider } from "@/components/inspect/ChallengeConfigCard";
+import { stampSeed, useSeededChallenge, type VariantChoice } from "@/lib/useSeededChallenge";
 import { TextLearn } from "./TextLearn";
 import { TextSession } from "./TextSession";
 
-const generateText = (seed: number) => registry.get("text").generate({ rng: createRng(seed) });
+const generateText = (seed: number, choice: VariantChoice) =>
+  stampSeed(registry.get("text").generate({ rng: createRng(seed), variantId: choice.variantId, difficulty: choice.difficulty }), seed);
 
 export function TextPlayground() {
   const t = useT();
-  const { challenge, failed, round, newChallenge } = useSeededChallenge(generateText);
+  const { challenge, failed, round, newChallenge, choice, seed, setVariant, setDifficulty, setSeed } = useSeededChallenge(
+    generateText,
+    VARIANT_SETS["text"],
+  );
   return (
     <main className="mx-auto max-w-3xl space-y-6 px-4 py-8 sm:px-6">
       <header>
@@ -27,13 +33,26 @@ export function TextPlayground() {
           )}
         </p>
       </header>
+      <ChallengeControls
+        captcha="text"
+        variantSet={VARIANT_SETS["text"]}
+        choice={choice}
+        seed={seed}
+        onVariant={setVariant}
+        onDifficulty={setDifficulty}
+        onSeed={setSeed}
+      />
       {failed && (
         <p role="alert" className="text-sm text-bad">
           {t("Không tạo được thử thách. Hãy tải lại trang.", "Could not generate a challenge. Reload the page.")}
         </p>
       )}
       {challenge === null && !failed && <p className="text-sm text-muted">{t("Đang tải…", "Loading…")}</p>}
-      {challenge && <TextSession key={`${challenge.id}:${round}`} challenge={challenge} onNewChallenge={newChallenge} />}
+      {challenge && (
+        <ChallengeConfigProvider captcha="text" config={challenge.config}>
+          <TextSession key={`${challenge.id}:${round}`} challenge={challenge} onNewChallenge={newChallenge} />
+        </ChallengeConfigProvider>
+      )}
       <TextLearn />
     </main>
   );

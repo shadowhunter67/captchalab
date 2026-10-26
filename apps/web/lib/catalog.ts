@@ -11,6 +11,8 @@ export interface CatalogEntry {
   name: string;
   route: string;
   summary: string;
+  /** Short text for "Variants & difficulty" on the Learn page. */
+  variantsNote: string;
   learn: {
     howItWorks: string;
     generation: string;
@@ -34,6 +36,10 @@ export function catalogFor(t: Translate = EN): readonly CatalogEntry[] {
       name: t("Thanh trượt", "Slider"),
       route: "/playground/slider",
       summary: t("Kéo một tay nắm đến vị trí đích.", "Drag a handle to a target position."),
+      variantsNote: t(
+        "Hai biến thể: Cổ điển (độ khó thu hẹp vùng thả được chấp nhận: ±4%, ±2%, ±1,2% quãng trượt) và Chính xác (vùng đích hẹp ngay từ đầu: ±1,5%, ±1,2%, ±1%). Phím mũi tên đi 1% mỗi lần nên dung sai không xuống dưới 1%.",
+        "Two variants: Classic (difficulty narrows the accepted release window: ±4%, ±2%, ±1.2% of the travel) and Precision (a narrow target from the start: ±1.5%, ±1.2%, ±1%). Arrow keys move 1% per press, so the tolerance never goes below 1%.",
+      ),
       learn: {
         howItWorks: t(
           "Bạn kéo tay nắm dọc theo thanh cho đến khi nó nằm trên khung nét đứt, rồi thả ra.",
@@ -75,6 +81,10 @@ export function catalogFor(t: Translate = EN): readonly CatalogEntry[] {
       name: t("Ô đánh dấu", "Checkbox"),
       route: "/playground/checkbox",
       summary: t("Bật một ô đánh dấu có sẵn của trình duyệt.", "Activate a native checkbox."),
+      variantsNote: t(
+        "Một biến thể Cơ bản với một mức duy nhất. Làm ô đánh dấu \"khó hơn\" bằng độ trễ hay thao tác xác nhận chỉ gây phiền cho người dùng, nên độ khó không áp dụng ở đây.",
+        "One Basic variant with a single level. Making a checkbox \"harder\" with a delay or a confirmation step would only annoy people, so difficulty does not apply here.",
+      ),
       learn: {
         howItWorks: t(
           "Bạn bật ô đánh dấu bằng con trỏ hoặc phím Space. Đánh dấu xong là gửi thử thách.",
@@ -115,6 +125,10 @@ export function catalogFor(t: Translate = EN): readonly CatalogEntry[] {
       name: t("Kéo thả", "Drag & Drop"),
       route: "/playground/drag-drop",
       summary: t("Đặt nhiều vật vào đúng ô đích tương ứng.", "Place several items on matching targets."),
+      variantsNote: t(
+        "Biến thể Ghép hình: độ khó làm các hình và vùng thả nhỏ lại (cỡ hình 19% → 17% → 15%, bán kính vùng thả 18% → 14% → 10%).",
+        "Shape match: difficulty shrinks the shapes and the drop areas (shape size 19% → 17% → 15%, drop-area radius 18% → 14% → 10%).",
+      ),
       learn: {
         howItWorks: t(
           "Bạn kéo từng vật vào ô đích tương ứng. Thả vào ô đã có vật khác sẽ đưa vật cũ về chỗ ban đầu.",
@@ -156,6 +170,10 @@ export function catalogFor(t: Translate = EN): readonly CatalogEntry[] {
       name: t("Xoay ảnh", "Image Rotation"),
       route: "/playground/rotation",
       summary: t("Xoay một vật cho thẳng đứng.", "Turn an object upright."),
+      variantsNote: t(
+        "Cổ điển: độ khó thu hẹp góc được chấp nhận (±20°, ±12°, ±6°). Lệch góc ban đầu: dung sai ±12° giữ nguyên, nhưng vật bắt đầu xa vị trí thẳng đứng hơn (40–90°, 90–140°, 140–180° về một bên ngẫu nhiên).",
+        "Classic: difficulty narrows the accepted angle (±20°, ±12°, ±6°). Offset start: the ±12° tolerance stays, but the object starts further from upright (40–90°, 90–140°, 140–180° to a random side).",
+      ),
       learn: {
         howItWorks: t(
           "Bạn xoay vật bằng cách kéo quanh tâm của nó hoặc dùng phím mũi tên cho đến khi thẳng đứng, rồi bấm Xác minh.",
@@ -194,6 +212,10 @@ export function catalogFor(t: Translate = EN): readonly CatalogEntry[] {
       name: t("Văn bản", "Text"),
       route: "/playground/text",
       summary: t("Đọc các ký tự bị biến dạng và gõ lại.", "Read distorted characters and type them."),
+      variantsNote: t(
+        "Ba biến thể: Sạch (ít méo), Xoay chữ (mỗi chữ xoay và dịch riêng) và Nhiễu (nhiều đường ngẫu nhiên). Độ khó đổi số ký tự (5 hoặc 6), góc xoay mỗi chữ, độ dịch dọc và số đường nhiễu; mọi tham số được hiện trong phần Cấu hình thử thách.",
+        "Three variants: Clean (little distortion), Rotated (each character turned and shifted) and Noisy (many random lines). Difficulty changes the character count (5 or 6), the rotation of each character, the vertical shift and the number of noise lines; every parameter is shown in Challenge configuration.",
+      ),
       learn: {
         howItWorks: t("Bạn đọc một chuỗi ngắn bị biến dạng và gõ lại.", "You read a short distorted string and type it."),
         generation: t(
@@ -229,6 +251,10 @@ export function catalogFor(t: Translate = EN): readonly CatalogEntry[] {
       name: t("Lưới ảnh", "Image Grid"),
       route: "/playground/image-grid",
       summary: t("Chọn mọi ô có hình được nêu tên.", "Select every tile that shows a named shape."),
+      variantsNote: t(
+        "Hình cơ bản (bốn hình khác nhau rõ) và Hình giống nhau (tròn và bầu dục, vuông và vuông bo góc làm nhiễu). Độ khó tăng số ô khớp: 2–3, 2–4, 3–5 trong 9 ô. Lưới 4×4 chưa có.",
+        "Basic shapes (four clearly different shapes) and Similar shapes (circle and oval, square and rounded square act as distractors). Difficulty raises the number of matching cells: 2–3, 2–4, 3–5 of 9. A 4×4 grid is not available yet.",
+      ),
       learn: {
         howItWorks: t(
           "Bạn thấy chín ảnh và chọn tất cả ảnh khớp với một hình được nêu tên, rồi bấm Xác minh.",

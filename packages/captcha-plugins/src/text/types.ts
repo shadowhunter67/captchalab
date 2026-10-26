@@ -1,11 +1,10 @@
-import type { BaseCaptchaFeatures, InputModality } from "@captchalab/captcha-core";
+import type { ChallengeConfig, BaseCaptchaFeatures, InputModality } from "@captchalab/captcha-core";
 
 export const TEXT_ID = "text" as const;
 /** Semantic target of the key events recorded from the answer field. */
 export const TEXT_TARGET = "text-input" as const;
 /** Characters the generator uses: no 0/O, 1/I/l look-alikes. */
 export const TEXT_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-export const TEXT_LENGTH = 6;
 
 export interface TextGlyph {
   char: string;
@@ -32,6 +31,8 @@ export interface TextChallenge {
   text: string;
   glyphs: readonly TextGlyph[];
   noise: readonly TextNoiseLine[];
+  /** How it was generated (variant, difficulty, parameters). Absent on hand-built challenges. */
+  config?: ChallengeConfig;
 }
 
 /** What the user typed. Compared case-insensitively after trimming (see verifier.ts). */

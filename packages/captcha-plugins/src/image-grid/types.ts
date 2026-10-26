@@ -1,9 +1,15 @@
-import type { BaseCaptchaFeatures, InputModality } from "@captchalab/captcha-core";
+import type { ChallengeConfig, BaseCaptchaFeatures, InputModality } from "@captchalab/captcha-core";
 
 export const IMAGE_GRID_ID = "image-grid" as const;
 export const GRID_SIZE = 3;
-export const GRID_SHAPES = ["circle", "square", "triangle", "star"] as const;
+export const GRID_SHAPES = ["circle", "square", "triangle", "star", "oval", "rounded"] as const;
 export type GridShape = (typeof GRID_SHAPES)[number];
+
+/** Shape sets a variant draws from. "similar" pairs look alike on purpose. */
+export const GRID_FAMILIES: Readonly<Record<string, readonly GridShape[]>> = {
+  basic: ["circle", "square", "triangle", "star"],
+  similar: ["circle", "oval", "square", "rounded"],
+};
 
 export interface GridCell {
   id: string;
@@ -15,6 +21,8 @@ export interface ImageGridChallenge {
   id: string;
   target: GridShape;
   cells: readonly GridCell[];
+  /** How it was generated (variant, difficulty, parameters). Absent on hand-built challenges. */
+  config?: ChallengeConfig;
 }
 
 /** Final selection only: cell ids. */

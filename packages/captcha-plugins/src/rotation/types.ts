@@ -1,4 +1,4 @@
-import type { BaseCaptchaFeatures, InputModality } from "@captchalab/captcha-core";
+import type { ChallengeConfig, BaseCaptchaFeatures, InputModality } from "@captchalab/captcha-core";
 
 export const ROTATION_ID = "rotation" as const;
 /** Semantic target of every pointer and key event of this CAPTCHA. */
@@ -19,6 +19,8 @@ export interface RotationChallenge {
   targetAngle: number;
   /** Accepted shortest angular distance to the target, degrees (inclusive). */
   tolerance: number;
+  /** How it was generated (variant, difficulty, parameters). Absent on hand-built challenges. */
+  config?: ChallengeConfig;
 }
 
 /** Final angle only, degrees (any real number; it is wrapped for comparison). */

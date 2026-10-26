@@ -1,4 +1,5 @@
-import type { GenerateContext } from "@captchalab/captcha-core";
+import { assertRange, resolveVariant, type GenerateContext } from "@captchalab/captcha-core";
+import { DRAG_DROP_VARIANTS } from "./variants";
 import type { DragDropChallenge, DragDropItem, DragDropTarget, ShapeKind } from "./types";
 
 export const DRAG_DROP_ITEM_SIZE = 0.17;
@@ -28,7 +29,10 @@ function shuffled<T>(values: readonly T[], rng: () => number): T[] {
  * surface at least as wide as tall (the UI guarantees it) items and targets never overlap and no item
  * starts on a target. Same seed, same challenge. No clock, no Math.random.
  */
-export function generateDragDropChallenge({ rng }: GenerateContext): DragDropChallenge {
+export function generateDragDropChallenge({ rng, variantId, difficulty }: GenerateContext): DragDropChallenge {
+  const { config, challengeConfig } = resolveVariant(DRAG_DROP_VARIANTS, { variantId, difficulty });
+  assertRange("drag-drop item size", config.itemSize, 0.1, 0.25);
+  assertRange("drag-drop drop tolerance", config.dropTolerance, 0.06, 0.25);
   const targetKinds = shuffled(KINDS, rng);
   const itemColumns = shuffled([0, 1, 2], rng);
 
@@ -49,5 +53,5 @@ export function generateDragDropChallenge({ rng }: GenerateContext): DragDropCha
   const id = `drag-drop-${Math.floor(rng() * 0x100000000)
     .toString(16)
     .padStart(8, "0")}`;
-  return { id, items, targets, itemSize: DRAG_DROP_ITEM_SIZE, dropTolerance: DRAG_DROP_TOLERANCE };
+  return { id, items, targets, itemSize: config.itemSize, dropTolerance: config.dropTolerance, config: challengeConfig };
 }

@@ -1,8 +1,18 @@
 "use client";
 
 import Link from "next/link";
-import { catalogFor } from "@/lib/catalog";
-import { useT } from "@/lib/i18n";
+import { supportedDifficulties } from "@captchalab/captcha-core";
+import { VARIANT_SETS } from "@captchalab/captcha-plugins";
+import { catalogFor, type CatalogEntry } from "@/lib/catalog";
+import { useT, type Translate } from "@/lib/i18n";
+
+/** "3 variants · 3 levels", counted from the real variant set. */
+function variantSummary(id: CatalogEntry["id"], t: Translate): string {
+  const variants: readonly { difficulties: Partial<Record<"easy" | "medium" | "hard", unknown>> }[] = VARIANT_SETS[id].variants;
+  const levels = Math.max(...variants.map((v) => supportedDifficulties(v as never).length));
+  const v = variants.length;
+  return t(`${v} biến thể · ${levels} mức độ khó`, `${v} ${v === 1 ? "variant" : "variants"} · ${levels} difficulty ${levels === 1 ? "level" : "levels"}`);
+}
 
 export function PlaygroundIndex() {
   const t = useT();
@@ -26,6 +36,9 @@ export function PlaygroundIndex() {
           <li key={c.id} className="rounded-lg border border-line bg-panel p-4">
             <h2 className="text-base font-semibold">{c.name}</h2>
             <p className="mt-1 text-sm text-muted">{c.summary}</p>
+            <p className="mt-1 text-xs text-muted" data-testid={`variants-count-${c.id}`}>
+              {variantSummary(c.id, t)}
+            </p>
             <div className="mt-3 flex flex-wrap gap-3 text-sm">
               <Link href={c.route} data-testid={`open-${c.id}`} className="rounded-md bg-accent px-3 py-1.5 font-medium text-bg hover:opacity-90">
                 {t("Mở ", "Open ")}
