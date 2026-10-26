@@ -51,7 +51,11 @@ export function PowSession({ challenge: initialChallenge, onNewChallenge }: Prop
     const rect = boardRef.current?.getBoundingClientRect();
     const sample = toPointerSample(e, { left: rect?.left ?? 0, top: rect?.top ?? 0 });
     if (!sample) return;
-    recorder.record(toRecorderEvent(kind, sample, target));
+    // A captured touch/pen release outside the button does not press it: record a cancel, not a press.
+    const b = e.currentTarget.getBoundingClientRect();
+    const inside = e.clientX >= b.left && e.clientX <= b.right && e.clientY >= b.top && e.clientY <= b.bottom;
+    const recorded: PointerKind = kind === "pointerup" && !inside ? "pointercancel" : kind;
+    recorder.record(toRecorderEvent(recorded, sample, target));
   };
 
   const onKeyDown = (e: KeyboardEvent<HTMLButtonElement>, target: string): void => {

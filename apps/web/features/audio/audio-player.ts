@@ -101,6 +101,8 @@ export function createAudioPlayer(challenge: AudioChallenge, deps: Partial<Playe
   let state: PlayerState = "idle";
   let sources: SourceNodeLike[] = [];
   const cache = new Map<string, AudioBufferLike>();
+  // In-flight loads are shared, so rapid Replay presses never fetch or decode the same clip twice.
+  const loading = new Map<string, Promise<AudioBufferLike>>();
 
   const setState = (s: PlayerState): void => {
     if (disposed || state === s) return;
@@ -123,9 +125,19 @@ export function createAudioPlayer(challenge: AudioChallenge, deps: Partial<Playe
   const loadClip = async (digit: string, c: AudioContextLike): Promise<AudioBufferLike> => {
     const hit = cache.get(digit);
     if (hit) return hit;
-    const buf = await c.decodeAudioData(await d.fetchClip(d.urlFor(digit)));
-    cache.set(digit, buf);
-    return buf;
+    const pending = loading.get(digit);
+    if (pending) return pending;
+    const job = (async () => {
+      try {
+        const buf = await c.decodeAudioData(await d.fetchClip(d.urlFor(digit)));
+        cache.set(digit, buf);
+        return buf;
+      } finally {
+        loading.delete(digit);
+      }
+    })();
+    loading.set(digit, job);
+    return job;
   };
 
   return {
@@ -171,12 +183,13 @@ export function createAudioPlayer(challenge: AudioChallenge, deps: Partial<Playe
         master.gain.value = MASTER_GAIN;
         master.connect(c.destination);
         const made: SourceNodeLike[] = [];
+        sources = made; // registered up front: if a later step throws, silence() still stops what already started
         buffers.forEach((b, i) => {
           const src = c.createBufferSource();
           src.buffer = b;
           src.connect(master);
-          src.start(starts[i]);
           made.push(src);
+          src.start(starts[i]);
         });
         const first = starts[0] ?? c.currentTime;
         const end = (starts.at(-1) ?? first) + (buffers.at(-1)?.duration ?? 0);
@@ -190,10 +203,9 @@ export function createAudioPlayer(challenge: AudioChallenge, deps: Partial<Playe
           g.gain.value = Math.min(challenge.noiseLevel, MAX_NOISE_GAIN);
           noise.connect(g);
           g.connect(master);
-          noise.start(c.currentTime);
           made.push(noise);
+          noise.start(c.currentTime);
         }
-        sources = made;
         const lastSpeech = made[buffers.length - 1];
         if (lastSpeech) {
           lastSpeech.onended = () => {

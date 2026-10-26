@@ -119,10 +119,11 @@ describe("audio player", () => {
     };
     const { ctx, player, hooks } = setup(challenge({ digits: "12" }), { fetchClip });
     const slow = player.play(); // waits for the first fetch(es)
-    const fast = player.play(); // newer play, resolves immediately from cache-less fetches
-    await fast;
+    const fast = player.play(); // newer play: shares the loads that are already in flight
+    await new Promise((r) => setTimeout(r, 0));
     releases.forEach((r) => r());
-    await slow;
+    await Promise.all([slow, fast]);
+    expect(calls).toBe(2); // one fetch per distinct digit, however many plays were pressed
     expect(ctx.sources).toHaveLength(2); // only the newer playback was scheduled
     expect(hooks.onError).not.toHaveBeenCalled();
   });
