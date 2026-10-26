@@ -80,3 +80,19 @@ Not release blockers unless stated. Format: issue · impact · affected CAPTCHA 
 - Invisible demo: one fixed task (four targets); no timing noise from slow devices is modelled · Invisible demo · later
 - The generated reference distribution is 30 runs on the main thread; it is fast today but would need a worker for heavier profiles · Compare · later
 - Signal definitions are versioned (`behavior-signals@1`) but there is no stored data to migrate yet · Behavioral Lab · when export arrives
+
+## Challenge builder and experiments (v0.6)
+- Only the six Behavioral Lab CAPTCHAs are supported by the builder and the workspace; the other six have no behavioral coverage · Builder / Experiments · later
+- There are no custom challenge parameters beyond variant, difficulty and seed, because the plugins take none; real custom parameters need a declarative parameter schema in the plugin contract · Builder · later
+- Nothing persists (by design): reloading loses an experiment that was not exported; a persistent workspace would need an explicit, opt-in design · Experiments · later
+- One challenge per experiment; cross-challenge or cross-CAPTCHA grouping is not supported · Experiments · later
+- Hard limits (100 recorded sessions, 300 synthetic runs, 12 batches, 25 MB per file); the table lists 100 rows and charts draw 24 sessions. Larger experiments would need paging or a Web Worker, which was not needed in measurements · Experiments · later
+- No accuracy, precision, recall, ROC, AUC or confusion matrix: there are no validated labels, and a user-labelled dataset is separate future work · Experiments · later
+- The classifier is still the hand-set `behavioral-baseline@1`; nothing imported retunes it, and no threshold override exists · Classifier · later
+- The checksum in a bundle is not a signature and proves no origin; a signed format would need key management · Data formats · later
+- `startedAt` is exported as 0, so the time of a session is not kept; timestamps that matter would need an explicit field and a privacy review · Data formats · later
+- A forged file can claim a challenge it was not recorded on (provenance is claimed, not authenticated); only accidental mixing is prevented · Data formats · later
+- Import accepts only version 1 of each format; migrations will be needed when a version 2 exists · Data formats · later
+- The tag and note fields are plain text only; there is no Markdown · Experiments · by design
+- The download uses a Blob URL and an anchor; browsers that block programmatic downloads would need a manual save-as fallback · Experiments · later
+

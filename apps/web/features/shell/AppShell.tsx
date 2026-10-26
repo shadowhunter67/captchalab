@@ -6,7 +6,7 @@ import { isReportMessage, type SessionReport } from "@/lib/embed-report";
 import { useLang, useT } from "@/lib/i18n";
 import { translateReason } from "@/lib/i18n/reasons";
 
-type ItemId = "slider" | "checkbox" | "text" | "drag-drop" | "rotation" | "image-grid" | "shape-matching" | "math-logic" | "sequence" | "memory" | "proof-of-work" | "audio" | "behavior" | "compare" | "learn";
+type ItemId = "slider" | "checkbox" | "text" | "drag-drop" | "rotation" | "image-grid" | "shape-matching" | "math-logic" | "sequence" | "memory" | "proof-of-work" | "audio" | "behavior" | "builder" | "experiments" | "compare" | "learn";
 type Tab = "experience" | "events" | "analysis" | "access";
 type SideTab = "summary" | "log" | "features";
 
@@ -20,7 +20,7 @@ const GROUPS: readonly Group[] = [
   { title: ["Tư duy", "Reasoning"], items: ["math-logic", "sequence", "shape-matching", "memory"] },
   { title: ["Khác", "Other"], items: ["proof-of-work", "audio"] },
   { title: ["Tương tác không gian", "Spatial interaction"], items: ["drag-drop", "rotation", "image-grid"] },
-  { title: ["Nghiên cứu", "Research"], items: ["behavior", "compare", "learn"] },
+  { title: ["Nghiên cứu", "Research"], items: ["behavior", "builder", "experiments", "compare", "learn"] },
 ];
 
 /** Relative on purpose: it works at "/" in dev and under "/captchalab/" on GitHub Pages. */
@@ -38,6 +38,8 @@ const PATHS: Record<ItemId, string> = {
   "proof-of-work": "playground/proof-of-work/",
   audio: "playground/audio/",
   behavior: "behavior/",
+  builder: "builder/",
+  experiments: "experiments/",
   compare: "compare/",
   learn: "learn/",
 };
@@ -61,6 +63,8 @@ function Icon({ id }: { id: ItemId | "logo" | "clock" | "pulse" | "pointer" | "t
     case "proof-of-work": return <svg {...common}><path d="M12 3 4 7v5c0 4.5 3.2 7.8 8 9 4.8-1.2 8-4.5 8-9V7Z" /><path d="m8.5 12 2.5 2.5 4.5-5" /></svg>;
     case "audio": return <svg {...common}><path d="M4 10v4h3.5l5 4V6l-5 4Z" /><path d="M16 9a4 4 0 0 1 0 6M18.5 6.5a8 8 0 0 1 0 11" /></svg>;
     case "behavior": return <svg {...common}><path d="M3 12h3l2.5-6 4 12 2.5-7 1.5 3H21" /></svg>;
+    case "builder": return <svg {...common}><path d="M4 7h10M18 7h2M4 17h2M10 17h10" /><circle cx="16" cy="7" r="2" /><circle cx="8" cy="17" r="2" /></svg>;
+    case "experiments": return <svg {...common}><path d="M9 3h6M10 3v6l-5 9a2 2 0 0 0 2 3h10a2 2 0 0 0 2-3l-5-9V3" /></svg>;
     case "compare": return <svg {...common}><path d="M6 20V10M12 20V4M18 20v-7" /></svg>;
     case "learn": return <svg {...common}><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0 0 12 3Z" /></svg>;
     case "logo": return <svg {...common} width={30} height={30}><rect x="3" y="5" width="14" height="14" rx="3" /><path d="M8 3h10a3 3 0 0 1 3 3v10" /><path d="m7.5 12 2.5 2.5 4-5" /></svg>;
@@ -154,10 +158,14 @@ export function AppShell() {
 
   const entry = catalog.find((c) => c.id === selected);
   const nameOf = (id: ItemId): string =>
-    id === "behavior" ? t("Hành vi", "Behavior") : id === "compare" ? t("So sánh", "Compare") : id === "learn" ? t("Tìm hiểu", "Learn") : (catalog.find((c) => c.id === id)?.name ?? id);
+    id === "behavior" ? t("Hành vi", "Behavior") : id === "builder" ? t("Trình dựng", "Builder") : id === "experiments" ? t("Thí nghiệm", "Experiments") : id === "compare" ? t("So sánh", "Compare") : id === "learn" ? t("Tìm hiểu", "Learn") : (catalog.find((c) => c.id === id)?.name ?? id);
   const hintOf = (id: ItemId): string =>
     id === "behavior"
       ? t("Tín hiệu hành vi và bộ phân loại thử nghiệm", "Behavioral signals and an experimental classifier")
+      : id === "builder"
+      ? t("Dựng thử thách tái lập được", "Build a reproducible challenge")
+      : id === "experiments"
+      ? t("Nhiều phiên, xuất và nhập tệp", "Many sessions, file export and import")
       : id === "compare"
       ? t("Thao tác của bạn và bản tạo sẵn", "Your attempt vs a generated one")
       : id === "learn"
@@ -185,7 +193,7 @@ export function AppShell() {
     return points;
   }, [report, t]);
 
-  const hasSession = selected !== "behavior" && selected !== "compare" && selected !== "learn";
+  const hasSession = !["behavior", "builder", "experiments", "compare", "learn"].includes(selected);
   const empty = (
     <p className="text-sm text-muted" data-testid="session-empty">
       {hasSession
@@ -240,7 +248,7 @@ export function AppShell() {
   return (
     <div className="flex min-h-screen flex-col">
       <header className="flex flex-wrap items-center gap-x-4 gap-y-2 border-b border-line bg-panel py-3 pl-4 pr-32 sm:pl-6">
-        <span className="text-accent">
+        <span className="text-accent drop-shadow-[0_0_10px_rgba(98,173,255,0.8)]">
           <Icon id="logo" />
         </span>
         <h1 className="text-xl font-semibold tracking-tight">CaptchaLab</h1>
@@ -293,8 +301,8 @@ export function AppShell() {
             <p className="text-sm text-muted">
               {t("Thử thách", "Challenge")} / {nameOf(selected)}
             </p>
-            <h2 className="mt-1 text-3xl font-semibold tracking-tight" data-testid="shell-title">
-              {selected === "behavior" || selected === "compare" || selected === "learn" ? nameOf(selected) : t(`CAPTCHA ${nameOf(selected).toLowerCase()}`, `${nameOf(selected)} CAPTCHA`)}
+            <h2 className="title-glow mt-1 text-4xl font-semibold tracking-tight" data-testid="shell-title">
+              {["behavior", "builder", "experiments", "compare", "learn"].includes(selected) ? nameOf(selected) : t(`CAPTCHA ${nameOf(selected).toLowerCase()}`, `${nameOf(selected)} CAPTCHA`)}
             </h2>
             {entry && <p className="mt-2 max-w-3xl text-sm text-muted">{entry.learn.howItWorks}</p>}
           </div>

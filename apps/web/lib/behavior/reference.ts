@@ -46,12 +46,17 @@ export function summarize(signal: string, raw: readonly (number | null | undefin
   };
 }
 
+/** The seed of run `i` in a batch: consecutive from the base, wrapping at 2^32. The one seed strategy for every batch. */
+export function derivedSeed(baseSeed: number, i: number): number {
+  return (baseSeed + i) >>> 0;
+}
+
 /**
  * Runs the profile `runs` times with consecutive seeds on the SAME challenge. These are generated runs, so this
  * is a "generated synthetic reference distribution": it describes the generator, not people.
  */
 export function syntheticDistribution(req: Omit<SyntheticRequest, "seed">, baseSeed: number, runs = DISTRIBUTION_RUNS): SyntheticDistribution {
-  const samples = Array.from({ length: runs }, (_, i) => generateSyntheticSample({ ...req, seed: baseSeed + i }));
+  const samples = Array.from({ length: runs }, (_, i) => generateSyntheticSample({ ...req, seed: derivedSeed(baseSeed, i) }));
   return {
     captchaId: req.captchaId,
     profile: req.profile,

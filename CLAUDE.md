@@ -39,6 +39,7 @@ corepack pnpm --filter web test:e2e   # Playwright dùng Chrome cài sẵn (chan
 - `packages/captcha-plugins/src/rotation/` + `apps/web/features/rotation/` — xoay đối tượng về thẳng đứng (góc độ, chiều kim đồng hồ dương). `angles.ts` = toán góc (`wrap180`, `pointerTurn`, `keyTurn`) + `deriveRotation` mô phỏng phiên: DÙNG CHUNG cho controller và extractor. Phím ←/→ = 5°/lần (kể cả lặp), bị bỏ qua khi đang kéo; drag bị cancel hoàn nguyên góc (feature bỏ qua, replay vẫn vẽ). Dự án đang ở chế độ MVP Fast-Track: xem `docs/technical-debt.md` cho nợ kỹ thuật.
 - `packages/captcha-plugins/src/text/` + `apps/web/features/text/` — CAPTCHA chữ. RIÊNG TƯ: mã phím ký tự được gộp NGAY khi ghi (`toTextKeyCode`: chữ→"Letter", số→"Digit", dấu→"Other", chỉ phím điều khiển giữ code) nên không khôi phục được nội dung gõ; text chỉ nằm trong `<input>`, đọc 1 lần khi verify và xoá khi đạt. Verify không phân biệt hoa/thường, trim.
 - Behavioral Lab (v0.5): `apps/web/lib/behavior/` (+ `components/behavior/`, `features/compare|behavior/`) = tín hiệu hành vi, synthetic profile, bộ phân loại THỬ NGHIỆM `behavioral-baseline@1` (luật tay, chỉ 3 nhãn, không %, có vùng Uncertain), Compare 6 CAPTCHA, demo vô hình `/behavior/invisible`. Đọc `docs/behavioral-lab.md` trước khi sửa. Synthetic sinh `InteractionSession` trực tiếp, KHÔNG dispatch DOM event.
+- Research workbench (v0.6): `apps/web/lib/research/` (định dạng có version, import an toàn, experiment trong bộ nhớ), routes `/builder` và `/experiments`. Đọc `docs/data-formats.md` + `docs/experiment-workbench.md` trước khi sửa. Import = DỮ LIỆU không tin cậy: strict, giới hạn kích thước/độ sâu, cấm khoá nguy hiểm; không bao giờ tự lưu (không localStorage), không retrain classifier.
 - Chưa có: database, ui package, dữ liệu người thật (không upload/aggregate; để v0.6 opt-in).
 - ADR: `docs/adr/` (0001–0005). Bảng dữ liệu thay thế cho chart: `MotionDataTable` + `lib/inspect/series.ts` (định nghĩa mẫu hợp lệ DUY NHẤT cho chart/summary/table).
 
@@ -74,3 +75,4 @@ corepack pnpm --filter web test:e2e   # Playwright dùng Chrome cài sẵn (chan
 | [`docs/adr/`](docs/adr) | Cần lý do các quyết định kiến trúc |
 | [`docs/claude/lich-su.md`](docs/claude/lich-su.md) | Backlog / lịch sử |
 | [`docs/behavioral-lab.md`](docs/behavioral-lab.md) | Sửa Behavioral Lab / Compare / classifier / synthetic |
+| [`docs/data-formats.md`](docs/data-formats.md), [`docs/experiment-workbench.md`](docs/experiment-workbench.md) | Sửa builder / experiments / import-export |

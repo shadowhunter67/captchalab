@@ -4,12 +4,15 @@ The Behavioral Lab turns CaptchaLab from a set of demos into a small research be
 
 It is not a bot detector. It never claims to tell a person from a program. See "What it does not claim" below.
 
+> v0.6 adds a builder, versioned files and a multi-session workspace around this lab; the signals and the classifier below are unchanged. See [experiment-workbench.md](experiment-workbench.md) and [data-formats.md](data-formats.md).
+
 ## Routes
 
 | Route | What |
 |---|---|
 | `/behavior` | Landing page: what the lab does and does not do, supported CAPTCHAs, signal groups, a signal explorer with the classifier's configured ranges, the research disclaimer. |
 | `/compare?captcha=<id>` | Human attempt vs synthetic profile for one of six CAPTCHAs, plus classification, a generated reference distribution and an evaluation panel. |
+| `/builder`, `/experiments` | v0.6: build a reproducible challenge; record, generate, compare, export and import experiments. |
 | `/behavior/invisible` | A neutral pointer task with an experimental classification and a **simulated** escalation suggestion. |
 
 Supported CAPTCHAs: Slider, Drag & Drop, Checkbox, Image Grid, Text, Rotation. Memory, Math, Sequence, Audio, Proof of Work and Shape Matching are not wired yet.

@@ -187,6 +187,19 @@ export function BehaviorHome() {
 
       <Explorer />
 
+      <Card id="workbench-h" title={t("Bàn làm việc nghiên cứu", "Research workbench")}>
+        <p className="text-sm text-muted">
+          {t(
+            "Dựng một thử thách tái lập được, ghi nhiều phiên cục bộ, sinh các mẻ phiên mô phỏng xác định, so sánh tín hiệu và bằng chứng, rồi xuất ra tệp có phiên bản để nhập lại và tái lập sau này. Mọi thứ nằm trong trình duyệt; không có gì được lưu hay gửi đi.",
+            "Build a reproducible challenge, record several local sessions, generate deterministic synthetic batches, compare signals and evidence, then export versioned files you can import again to reproduce the setup. Everything stays in the browser; nothing is saved or sent.",
+          )}
+        </p>
+        <div className="mt-3 flex flex-wrap gap-3">
+          <Link href="/builder" data-testid="cta-builder" className={`${cta} border border-line bg-panel hover:bg-track`}>{t("Trình dựng thử thách", "Challenge builder")}</Link>
+          <Link href="/experiments" data-testid="cta-experiments" className={`${cta} border border-line bg-panel hover:bg-track`}>{t("Thí nghiệm", "Experiments")}</Link>
+        </div>
+      </Card>
+
       <Card id="invisible-h" title={t("Thử nghiệm hành vi / vô hình", "Behavioral / invisible demo")}>
         <p className="text-sm text-muted">
           {t(

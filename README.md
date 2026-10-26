@@ -6,7 +6,7 @@ CaptchaLab is a small lab where you try different CAPTCHA challenges and then se
 
 **Live demo: https://shadowhunter67.github.io/captchalab/** (pick a challenge on the left, try it on the right)
 
-> **Status: Alpha (`0.5.0-alpha`).** Things may still change.
+> **Status: Alpha (`0.6.0-alpha`).** Things may still change.
 
 The site is in **Vietnamese by default**. Use the **VI / EN** button in the top-right corner to switch to English.
 
@@ -43,6 +43,8 @@ There are a few extra pages:
 - **Learn**: a short explanation of how each challenge works, its strengths and weaknesses, and how behavioral ("invisible") CAPTCHA works.
 - **Behavioral Lab**: record an attempt, set it next to a computer-generated one on the very same challenge, and see which signals differ (timing, motion, corrections, rhythm). Works for Slider, Drag & Drop, Checkbox, Image Grid, Text and Rotation. An **experimental** rule-based classifier reads both as *Human-like*, *Synthetic-like* or *Uncertain* and shows its evidence. It is a lab toy for CaptchaLab's own data: it never gives a percentage and does not prove whether a real person is human or automated. See [docs/behavioral-lab.md](docs/behavioral-lab.md).
 - **Compare**: the side-by-side view of the Behavioral Lab, with a signal table, a path or timing view and optional generated reference runs.
+- **Challenge builder** (`/builder`): pick a CAPTCHA, variant, difficulty and seed, preview and try the exact challenge, and download it as a small versioned file.
+- **Experiments** (`/experiments`): record several local sessions on one challenge, add deterministic synthetic batches, compare signals and the classifier's evidence, then export the whole experiment to a file and import it again to reproduce it. Everything stays in your browser; nothing is saved unless you download it. See [docs/experiment-workbench.md](docs/experiment-workbench.md) and [docs/data-formats.md](docs/data-formats.md).
 - **Behavioral demo**: a tiny click-the-target task that shows a *simulated* escalation suggestion. Nothing is ever blocked or redirected.
 
 ## Privacy

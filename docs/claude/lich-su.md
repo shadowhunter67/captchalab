@@ -67,3 +67,10 @@ Plugin `text`, route `/playground/text`: SVG distorted text deterministic, verif
 - Recorder / registry / plugin KHÔNG đổi; 5 Session thêm prop tuỳ chọn `onResult` / `onReset` / `showInspect`.
 - Quy tắc cứng: chỉ 3 nhãn Human-like / Synthetic-like / Uncertain, KHÔNG phần trăm, KHÔNG "bot"; luôn kèm câu miễn trừ; vùng Uncertain phải với tới được; synthetic sinh dữ liệu trực tiếp (không DOM event, không trang bên thứ ba); không fingerprint / storage / upload.
 - Bẫy: E2E phải `scrollIntoViewIfNeeded` trước khi tính toạ độ chuột (trang Compare dài, slider nằm dưới nếp gấp); bash heredoc dài có nháy hay lỗi -> dùng Write + script.
+
+## v0.6 Research workbench (2026-10-26)
+- `/builder` (challenge-definition@1), `/experiments` (experiment-bundle@1, interaction-session@1, experiment-summary@1 one-way). Code: `apps/web/lib/research/{safe,definition,experiment,formats,browser}.ts`, `features/{builder,experiments}`, `components/behavior/CohortStrips.tsx`. Docs: `docs/data-formats.md`, `docs/experiment-workbench.md`.
+- Quy tắc cứng: dữ liệu import là untrusted (đo kích thước trước khi đọc; duyệt cây lặp, không đệ quy; cấm khoá __proto__/constructor/prototype; object STRICT, khoá lạ = lỗi; version sai bị từ chối, không đoán); synthetic xuất dạng công thức {profile, baseSeed, runs} (seed i = baseSeed + i) nên cùng bundle → cùng dữ liệu; `null` là thiếu, không bao giờ là 0; đếm kết quả phân loại, KHÔNG accuracy/%; classifier KHÔNG bị chỉnh bởi dữ liệu import; không storage/localStorage.
+- Checksum (sha256 canonical JSON) KHÔNG gồm `createdAt`; không phải chữ ký. `startedAt` xuất = 0.
+- Bẫy: `new Array(n).fill()` là any[] (lint unsafe); biến thể thật: checkbox `basic`, image-grid `basic-shapes`, drag-drop `shape-match`, text `clean|rotated|noisy`; URL builder sai biến thể -> rơi về mặc định (không sửa âm thầm).
+
