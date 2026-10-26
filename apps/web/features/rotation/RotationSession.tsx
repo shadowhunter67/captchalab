@@ -6,6 +6,7 @@ import { registry, type RotationChallenge, type RotationFeatures } from "@captch
 import { useT } from "@/lib/i18n";
 import { RotationController } from "./rotation-controller";
 import { RotationInspect } from "./RotationInspect";
+import type { SessionReport } from "@/lib/behavior/human";
 import { RotationSurface } from "./RotationSurface";
 
 interface Completed {
@@ -19,11 +20,21 @@ interface Completed {
 interface Props {
   challenge: RotationChallenge;
   onNewChallenge: () => void;
+  /** Called after each analyzed submission (used by the Behavioral Lab). */
+  onResult?: (report: SessionReport) => void;
+  /** Called when the shown result is discarded. */
+  onReset?: () => void;
+  /** Hide the Inspect panel (the Behavioral Lab shows its own view). Default true. */
+  showInspect?: boolean;
 }
 
 /** One challenge = one session (the parent keys it by challenge). Turning again clears the result. */
-export function RotationSession({ challenge: initialChallenge, onNewChallenge }: Props) {
+export function RotationSession({ challenge: initialChallenge, onNewChallenge, onResult, onReset, showInspect = true }: Props) {
   const t = useT();
+  const onResultRef = useRef(onResult);
+  onResultRef.current = onResult;
+  const onResetRef = useRef(onReset);
+  onResetRef.current = onReset;
   const tRef = useRef(t);
   tRef.current = t;
   const [challenge] = useState(initialChallenge);
@@ -42,6 +53,7 @@ export function RotationSession({ challenge: initialChallenge, onNewChallenge }:
       onInput: () => {
         setCompleted(null);
         setError(null);
+        onResetRef.current?.();
       },
       onVerify: (answer, center) => {
         try {
@@ -51,6 +63,7 @@ export function RotationSession({ challenge: initialChallenge, onNewChallenge }:
           submissionsRef.current += 1;
           setCompleted({ submission: submissionsRef.current, session, center, verification, featureSet });
           setError(null);
+          onResultRef.current?.({ session, context: { center }, passed: verification.passed });
         } catch (err) {
           console.error("Rotation submission failed", err instanceof Error ? err.message : "unknown error");
           setError(tRef.current("Không phân tích được lần thử này. Hãy bắt đầu thử thách mới.", "Could not analyze this attempt. Start a new challenge."));
@@ -101,7 +114,7 @@ export function RotationSession({ challenge: initialChallenge, onNewChallenge }:
           {error}
         </p>
       )}
-      {completed && (
+      {completed && showInspect && (
         <RotationInspect
           key={completed.submission}
           challenge={challenge}

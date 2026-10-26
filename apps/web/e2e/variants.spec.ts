@@ -161,7 +161,7 @@ test("compare: the human and synthetic sides share the chosen slider configurati
   await expect(page.getByTestId("compare-same-config")).toContainText("same challenge configuration");
   await level(page, "easy").click();
   await expect(cfg(page, "difficulty")).toHaveText("Easy");
-  await expect(page.getByTestId("human-empty")).toBeVisible(); // a new configuration starts from an empty human side
+  await expect(page.getByTestId("compare-pending")).toBeVisible(); // a new configuration starts with nothing generated
 });
 
 test("playground index and Learn describe the variants", async ({ page }) => {

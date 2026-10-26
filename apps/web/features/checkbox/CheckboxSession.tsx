@@ -9,6 +9,7 @@ import {
 } from "@captchalab/captcha-core";
 import { registry, type CheckboxChallenge, type CheckboxFeatures } from "@captchalab/captcha-plugins";
 import { useT } from "@/lib/i18n";
+import type { SessionReport } from "@/lib/behavior/human";
 import { CheckboxController } from "./checkbox-controller";
 import { CheckboxInspect } from "./CheckboxInspect";
 import { CheckboxSurface, type ControlSize } from "./CheckboxSurface";
@@ -27,6 +28,12 @@ const FALLBACK_SIZE: ControlSize = { width: 360, height: 56 };
 interface Props {
   challenge: CheckboxChallenge;
   onNewChallenge: () => void;
+  /** Called after each analyzed submission (used by the Behavioral Lab). */
+  onResult?: (report: SessionReport) => void;
+  /** Called when the shown result is discarded. */
+  onReset?: () => void;
+  /** Hide the Inspect panel (the Behavioral Lab shows its own view). Default true. */
+  showInspect?: boolean;
 }
 
 /**
@@ -34,8 +41,12 @@ interface Props {
  * remounts it and drops the recorder, checked state, result, selection and replay with it.
  * Unchecking and checking again stays in the same session (activations accumulate).
  */
-export function CheckboxSession({ challenge: initialChallenge, onNewChallenge }: Props) {
+export function CheckboxSession({ challenge: initialChallenge, onNewChallenge, onResult, onReset, showInspect = true }: Props) {
   const t = useT();
+  const onResultRef = useRef(onResult);
+  onResultRef.current = onResult;
+  const onResetRef = useRef(onReset);
+  onResetRef.current = onReset;
   const [challenge] = useState(initialChallenge); // pinned: drawn, verified and analyzed as one challenge
   const checkbox = registry.get("checkbox");
   const measureRef = useRef<() => ControlSize | null>(() => null);
@@ -53,6 +64,7 @@ export function CheckboxSession({ challenge: initialChallenge, onNewChallenge }:
       onClear: () => {
         setCompleted(null);
         setError(null);
+        onResetRef.current?.();
       },
       onSubmit: (answer) => {
         try {
@@ -69,6 +81,7 @@ export function CheckboxSession({ challenge: initialChallenge, onNewChallenge }:
             featureSet,
           });
           setError(null);
+          onResultRef.current?.({ session, context: undefined, passed: verification.passed });
         } catch (err) {
           console.error("Checkbox submission failed", err instanceof Error ? err.message : "unknown error");
           setError(t("Không phân tích được lần thử này. Hãy bắt đầu thử thách mới.", "Could not analyze this attempt. Start a new challenge."));
@@ -113,7 +126,7 @@ export function CheckboxSession({ challenge: initialChallenge, onNewChallenge }:
         </p>
       )}
 
-      {completed && (
+      {completed && showInspect && (
         <CheckboxInspect
           key={completed.submission}
           verification={completed.verification}

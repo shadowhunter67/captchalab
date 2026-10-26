@@ -10,20 +10,23 @@ import { SLIDER_TARGETS, positionToTravelPx, sliderTravel, type SliderChallenge,
  *   linear  constant speed in a straight line
  *   eased   speed follows an ease-in-out curve (slow, fast, slow)
  *   noisy   eased, with a small overshoot that is corrected, jittered x/y and uneven sample times
+ *   stop-and-correct  eased to about 70%, a pause, then past the target and back (straight line, regular samples)
  */
-export const SYNTHETIC_PROFILES = ["linear", "eased", "noisy"] as const;
+export const SYNTHETIC_PROFILES = ["linear", "eased", "noisy", "stop-and-correct"] as const;
 export type SyntheticProfile = (typeof SYNTHETIC_PROFILES)[number];
 
 export const PROFILE_LABELS: Record<SyntheticProfile, string> = {
   linear: "Linear",
   eased: "Eased",
   noisy: "Noisy",
+  "stop-and-correct": "Stop-and-correct",
 };
 
 export const PROFILE_DESCRIPTIONS: Record<SyntheticProfile, string> = {
   linear: "Constant speed in a straight line, regular sample times.",
   eased: "Speed follows an ease-in-out curve, regular sample times, straight line.",
   noisy: "Eased, then a small overshoot is corrected; position jitter and uneven sample times.",
+  "stop-and-correct": "Eased to about 70% of the way, pauses, then goes past the target and comes back.",
 };
 
 /** Vietnamese-capable variants; the constants above stay English for tests. */
@@ -35,6 +38,8 @@ export const profileLabel = (profile: SyntheticProfile, t: Translate = EN): stri
       return t("Mượt dần", "Eased");
     case "noisy":
       return t("Có nhiễu", "Noisy");
+    case "stop-and-correct":
+      return t("Dừng rồi chỉnh", "Stop-and-correct");
   }
 };
 
@@ -51,6 +56,11 @@ export const profileDescription = (profile: SyntheticProfile, t: Translate = EN)
       return t(
         "Mượt dần, rồi vượt nhẹ quá đích và chỉnh lại; vị trí rung nhẹ và thời gian giữa các mẫu không đều.",
         "Eased, then a small overshoot is corrected; position jitter and uneven sample times.",
+      );
+    case "stop-and-correct":
+      return t(
+        "Kéo mượt tới khoảng 70%, dừng lại, rồi đi quá đích và quay về.",
+        "Eased to about 70% of the way, pauses, then goes past the target and comes back.",
       );
   }
 };
@@ -79,11 +89,19 @@ export function generateSyntheticSliderSession(opts: SyntheticSliderOptions): In
   const travel = sliderTravel(layout);
   const x0 = layout.trackLeft + layout.handleWidth / 2;
   const xEnd = x0 + positionToTravelPx(challenge.target, layout);
-  const duration = profile === "noisy" ? 1000 + Math.round(rng() * 400) : 900;
+  const duration = profile === "noisy" ? 1000 + Math.round(rng() * 400) : profile === "stop-and-correct" ? 1500 : 900;
   const overshoot = Math.min(10, travel * 0.03);
   const steps = Math.max(2, Math.round(duration / SAMPLE_MS));
 
   const xAt = (p: number): number => {
+    if (profile === "stop-and-correct") {
+      const mid = x0 + (xEnd - x0) * 0.7;
+      const peak = xEnd + overshoot;
+      if (p < 0.35) return x0 + (mid - x0) * easeInOutCubic(p / 0.35);
+      if (p < 0.55) return mid;
+      if (p < 0.85) return mid + (peak - mid) * easeInOutCubic((p - 0.55) / 0.3);
+      return peak + (xEnd - peak) * easeInOutCubic((p - 0.85) / 0.15);
+    }
     if (profile === "linear") return x0 + (xEnd - x0) * p;
     if (profile === "eased") return x0 + (xEnd - x0) * easeInOutCubic(p);
     const peak = xEnd + overshoot;
@@ -103,6 +121,8 @@ export function generateSyntheticSliderSession(opts: SyntheticSliderOptions): In
   let y = TRACK_Y;
   for (let i = 1; i < steps; i++) {
     const p = i / steps;
+    // The pause of stop-and-correct: the pointer is still, so no sample is produced.
+    if (profile === "stop-and-correct" && p >= 0.35 && p < 0.55) continue;
     t = profile === "noisy" ? Math.max(t + 1, START_T + p * duration + (rng() - 0.5) * 8) : START_T + p * duration;
     let x = xAt(p);
     if (profile === "noisy") {

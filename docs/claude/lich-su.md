@@ -61,3 +61,9 @@ Plugin `text`, route `/playground/text`: SVG distorted text deterministic, verif
 
 ## Release prep (2026-10-23)
 - LICENSE Apache-2.0 (chuẩn từ apache.org), package.json có license, branch master -> main khớp CI. Codex final: P0 LICENSE chưa track (đã add), P1 README "five" và wording typed text (đã sửa). Version package giữ 0.0.0 (private).
+
+## v0.5 Behavioral Lab (2026-10-26)
+- `/behavior`, `/compare?captcha=` (Slider, Drag & Drop, Checkbox, Image Grid, Text, Rotation), `/behavior/invisible`. Code: `apps/web/lib/behavior/*` (signals, vector, synthetic profiles, rules/normalize/classifier `behavioral-baseline@1`, compare/observations/reference, invisible task). Chi tiết: `docs/behavioral-lab.md`.
+- Recorder / registry / plugin KHÔNG đổi; 5 Session thêm prop tuỳ chọn `onResult` / `onReset` / `showInspect`.
+- Quy tắc cứng: chỉ 3 nhãn Human-like / Synthetic-like / Uncertain, KHÔNG phần trăm, KHÔNG "bot"; luôn kèm câu miễn trừ; vùng Uncertain phải với tới được; synthetic sinh dữ liệu trực tiếp (không DOM event, không trang bên thứ ba); không fingerprint / storage / upload.
+- Bẫy: E2E phải `scrollIntoViewIfNeeded` trước khi tính toạ độ chuột (trang Compare dài, slider nằm dưới nếp gấp); bash heredoc dài có nháy hay lỗi -> dùng Write + script.

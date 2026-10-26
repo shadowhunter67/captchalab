@@ -6,6 +6,7 @@ import { TEXT_TARGET, registry, toTextKeyCode, type TextChallenge, type TextFeat
 import { useT } from "@/lib/i18n";
 import { TextImage } from "./TextImage";
 import { TextInspect } from "./TextInspect";
+import type { SessionReport } from "@/lib/behavior/human";
 
 interface Completed {
   submission: number;
@@ -17,6 +18,12 @@ interface Completed {
 interface Props {
   challenge: TextChallenge;
   onNewChallenge: () => void;
+  /** Called after each analyzed submission (used by the Behavioral Lab). */
+  onResult?: (report: SessionReport) => void;
+  /** Called when the shown result is discarded. */
+  onReset?: () => void;
+  /** Hide the Inspect panel (the Behavioral Lab shows its own view). Default true. */
+  showInspect?: boolean;
 }
 
 /**
@@ -24,7 +31,7 @@ interface Props {
  * element and is read once, when verifying: it is not kept in React state, storage or the recording.
  * Key events are stored with coarsened codes (letters -> "Letter", digits -> "Digit").
  */
-export function TextSession({ challenge: initialChallenge, onNewChallenge }: Props) {
+export function TextSession({ challenge: initialChallenge, onNewChallenge, onResult, onReset, showInspect = true }: Props) {
   const t = useT();
   const [challenge] = useState(initialChallenge);
   const plugin = registry.get("text");
@@ -48,6 +55,7 @@ export function TextSession({ challenge: initialChallenge, onNewChallenge }: Pro
       submissionsRef.current += 1;
       setCompleted({ submission: submissionsRef.current, session, verification, featureSet });
       setError(null);
+      onResult?.({ session, context: undefined, passed: verification.passed });
       // The text is only needed to verify: once the challenge is passed, do not leave it in the field.
       if (verification.passed && inputRef.current) inputRef.current.value = "";
     } catch (err) {
@@ -88,6 +96,7 @@ export function TextSession({ challenge: initialChallenge, onNewChallenge }: Pro
               onChange={() => {
                 setCompleted(null);
                 setError(null);
+                onReset?.();
               }}
               onKeyDown={(e) => record("keydown", e)}
               onKeyUp={(e) => record("keyup", e)}
@@ -119,7 +128,7 @@ export function TextSession({ challenge: initialChallenge, onNewChallenge }: Pro
           {error}
         </p>
       )}
-      {completed && (
+      {completed && showInspect && (
         <TextInspect key={completed.submission} verification={completed.verification} featureSet={completed.featureSet} session={completed.session} />
       )}
     </div>

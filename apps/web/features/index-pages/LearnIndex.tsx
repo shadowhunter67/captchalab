@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { catalogFor } from "@/lib/catalog";
+import { BehavioralLearn } from "./BehavioralLearn";
 import { useT } from "@/lib/i18n";
 
 function List({ items }: { items: readonly string[] }) {
@@ -36,6 +37,9 @@ export function LearnIndex() {
               {c.name}
             </a>
           ))}
+          <a href="#behavioral" className="underline">
+            {t("Hành vi / vô hình", "Behavioral / Invisible")}
+          </a>
         </nav>
       </header>
       {catalog.map((c) => (
@@ -68,6 +72,7 @@ export function LearnIndex() {
           </p>
         </section>
       ))}
+      <BehavioralLearn />
     </main>
   );
 }

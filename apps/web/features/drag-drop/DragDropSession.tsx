@@ -17,6 +17,7 @@ import {
 import { useT } from "@/lib/i18n";
 import { DragDropController, type DragDropViewState } from "./drag-drop-controller";
 import { DragDropInspect } from "./DragDropInspect";
+import type { SessionReport } from "@/lib/behavior/human";
 import { DragDropSurface } from "./DragDropSurface";
 import { shapeName, shapeNameLower } from "./shapes";
 
@@ -35,6 +36,12 @@ const INITIAL_VIEW: DragDropViewState = { ready: false, activeItemId: null, plac
 interface Props {
   challenge: DragDropChallenge;
   onNewChallenge: () => void;
+  /** Called after each analyzed submission (used by the Behavioral Lab). */
+  onResult?: (report: SessionReport) => void;
+  /** Called when the shown result is discarded. */
+  onReset?: () => void;
+  /** Hide the Inspect panel (the Behavioral Lab shows its own view). Default true. */
+  showInspect?: boolean;
 }
 
 /**
@@ -42,8 +49,12 @@ interface Props {
  * it and drops the recorder, controller, placements, result, selection and replay with it.
  * Every drag in the session accumulates (Inspect shows all attempts); lifting an item clears a result.
  */
-export function DragDropSession({ challenge: initialChallenge, onNewChallenge }: Props) {
+export function DragDropSession({ challenge: initialChallenge, onNewChallenge, onResult, onReset, showInspect = true }: Props) {
   const t = useT();
+  const onResultRef = useRef(onResult);
+  onResultRef.current = onResult;
+  const onResetRef = useRef(onReset);
+  onResetRef.current = onReset;
   const [challenge] = useState(initialChallenge); // pinned: drawn, verified and analyzed as one challenge
   const plugin = registry.get("drag-drop");
   const applyItemRef = useRef<(itemId: string, centerPx: Point) => void>(() => {});
@@ -70,6 +81,7 @@ export function DragDropSession({ challenge: initialChallenge, onNewChallenge }:
         if (s.activeItemId !== null) {
           setCompleted(null); // a held item means the old result no longer describes the board
           setError(null);
+          onResetRef.current?.();
         }
       },
       onVerify: (answer, layout) => {
@@ -88,6 +100,7 @@ export function DragDropSession({ challenge: initialChallenge, onNewChallenge }:
             layoutChanged: resizedRef.current,
           });
           setError(null);
+          onResultRef.current?.({ session, context: layout, passed: verification.passed });
         } catch (err) {
           console.error("Drag & drop submission failed", err instanceof Error ? err.message : "unknown error");
           setError(tRef.current("Không phân tích được lần thử này. Hãy bắt đầu thử thách mới.", "Could not analyze this attempt. Start a new challenge."));
@@ -166,7 +179,7 @@ export function DragDropSession({ challenge: initialChallenge, onNewChallenge }:
         </p>
       )}
 
-      {completed && (
+      {completed && showInspect && (
         <DragDropInspect
           key={completed.submission}
           challenge={challenge}

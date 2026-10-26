@@ -6,7 +6,7 @@ CaptchaLab is a small lab where you try different CAPTCHA challenges and then se
 
 **Live demo: https://shadowhunter67.github.io/captchalab/** (pick a challenge on the left, try it on the right)
 
-> **Status: Alpha (`0.4.0-alpha`).** Things may still change.
+> **Status: Alpha (`0.5.0-alpha`).** Things may still change.
 
 The site is in **Vietnamese by default**. Use the **VI / EN** button in the top-right corner to switch to English.
 
@@ -38,10 +38,12 @@ After each attempt you can look at:
 - the path your pointer took, where it applies,
 - a replay of your attempt.
 
-There are two extra pages:
+There are a few extra pages:
 
-- **Learn**: a short explanation of how each challenge works, its strengths and weaknesses.
-- **Compare**: your Slider drag next to a computer-generated one (Linear, Eased or Noisy), so you can see how they differ. It only describes differences. It does not give a "bot score".
+- **Learn**: a short explanation of how each challenge works, its strengths and weaknesses, and how behavioral ("invisible") CAPTCHA works.
+- **Behavioral Lab**: record an attempt, set it next to a computer-generated one on the very same challenge, and see which signals differ (timing, motion, corrections, rhythm). Works for Slider, Drag & Drop, Checkbox, Image Grid, Text and Rotation. An **experimental** rule-based classifier reads both as *Human-like*, *Synthetic-like* or *Uncertain* and shows its evidence. It is a lab toy for CaptchaLab's own data: it never gives a percentage and does not prove whether a real person is human or automated. See [docs/behavioral-lab.md](docs/behavioral-lab.md).
+- **Compare**: the side-by-side view of the Behavioral Lab, with a signal table, a path or timing view and optional generated reference runs.
+- **Behavioral demo**: a tiny click-the-target task that shows a *simulated* escalation suggestion. Nothing is ever blocked or redirected.
 
 ## Privacy
 
@@ -67,7 +69,7 @@ To check the project: `corepack pnpm -r run lint`, `corepack pnpm -r run typeche
 ## Known limitations
 
 - Drag & Drop has no keyboard alternative yet, and the Text challenge has no audio or text alternative.
-- Compare only uses the Slider.
+- The Behavioral Lab covers six of the twelve challenges, and its classifier is a hand-set baseline, not trained on real people.
 - The full list is in [docs/technical-debt.md](docs/technical-debt.md).
 
 ## Contributing

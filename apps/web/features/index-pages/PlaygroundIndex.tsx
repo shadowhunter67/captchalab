@@ -53,7 +53,11 @@ export function PlaygroundIndex() {
       </ul>
       <p className="text-sm">
         <Link href="/compare" className="underline">
-          {t("So sánh một lần kéo của người với một lần kéo tổng hợp", "Compare a human drag with a synthetic one")}
+          {t("So sánh một lần thử của người với một mẫu mô phỏng", "Compare a human attempt with a synthetic one")}
+        </Link>
+        {" · "}
+        <Link href="/behavior" className="underline" data-testid="playground-behavior-link">
+          {t("Phòng thí nghiệm hành vi", "Behavioral Lab")}
         </Link>
       </p>
     </main>

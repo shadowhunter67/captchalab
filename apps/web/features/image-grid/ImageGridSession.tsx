@@ -6,6 +6,7 @@ import { GRID_SIZE, makeCellTarget, registry, type ImageGridChallenge, type Imag
 import { useT } from "@/lib/i18n";
 import { toPointerSample, toRecorderEvent, type PointerKind } from "@/lib/pointer-adapter";
 import { ImageGridInspect } from "./ImageGridInspect";
+import type { SessionReport } from "@/lib/behavior/human";
 import { ImageGridTile } from "./ImageGridTile";
 import { moveFocus, toggleCell } from "./image-grid-view-data";
 
@@ -28,6 +29,12 @@ interface Completed {
 interface Props {
   challenge: ImageGridChallenge;
   onNewChallenge: () => void;
+  /** Called after each analyzed submission (used by the Behavioral Lab). */
+  onResult?: (report: SessionReport) => void;
+  /** Called when the shown result is discarded. */
+  onReset?: () => void;
+  /** Hide the Inspect panel (the Behavioral Lab shows its own view). Default true. */
+  showInspect?: boolean;
 }
 
 /**
@@ -35,7 +42,7 @@ interface Props {
  * (aria-pressed): the browser's click decides the selection, while pointer and Space/Enter events are
  * recorded separately. Arrow keys only move focus and are not recorded.
  */
-export function ImageGridSession({ challenge: initialChallenge, onNewChallenge }: Props) {
+export function ImageGridSession({ challenge: initialChallenge, onNewChallenge, onResult, onReset, showInspect = true }: Props) {
   const t = useT();
   const shapeName = (s: string): string => t(SHAPE_VI[s] ?? s, s);
   const [challenge] = useState(initialChallenge);
@@ -82,6 +89,7 @@ export function ImageGridSession({ challenge: initialChallenge, onNewChallenge }
       submissionsRef.current += 1;
       setCompleted({ submission: submissionsRef.current, session, verification, featureSet });
       setError(null);
+      onResult?.({ session, context: undefined, passed: verification.passed });
     } catch (err) {
       console.error("Image grid submission failed", err instanceof Error ? err.message : "unknown error");
       setError(t("Không phân tích được lần thử này. Hãy bắt đầu thử thách mới.", "Could not analyze this attempt. Start a new challenge."));
@@ -126,6 +134,7 @@ export function ImageGridSession({ challenge: initialChallenge, onNewChallenge }
                   setSelected((s) => toggleCell(s, cell.id));
                   setCompleted(null); // a changed selection makes a shown result stale
                   setError(null);
+                  onReset?.();
                 }}
                 className={`h-20 w-20 touch-manipulation rounded-md border-2 bg-bg p-2 sm:h-24 sm:w-24 ${
                   on ? "border-accent ring-2 ring-accent" : "border-line hover:bg-track"
@@ -156,7 +165,7 @@ export function ImageGridSession({ challenge: initialChallenge, onNewChallenge }
           {error}
         </p>
       )}
-      {completed && (
+      {completed && showInspect && (
         <ImageGridInspect key={completed.submission} verification={completed.verification} featureSet={completed.featureSet} session={completed.session} />
       )}
     </div>

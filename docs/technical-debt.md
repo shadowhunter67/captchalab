@@ -40,7 +40,7 @@ Not release blockers unless stated. Format: issue · impact · affected CAPTCHA 
 
 ## Compare
 - The Slider target is conveyed visually only, so the human half needs sight; the synthetic half works without an attempt · Compare · next accessibility pass
-- Only the Slider is supported as the reference CAPTCHA (Drag & Drop not wired) · Compare · later
+- Compare now covers six CAPTCHAs (see the v0.5 section); the other six are not wired · Compare · later
 
 - Language: Vietnamese by default, English via the VI/EN switch (`lib/i18n`, `?lang=` in the URL, nothing stored). The suite runs in English through `e2e/fixtures.ts`. Input-modality values (mouse/touch/keyboard) are shown untranslated.
 
@@ -57,7 +57,7 @@ Not release blockers unless stated. Format: issue · impact · affected CAPTCHA 
 - Math / Logic comparison asks for the larger value, not for a side; "type the larger value" could be mistaken for typing a side label · wording · Math / Logic · later
 - Number sequences are checked for a single answer only against four pattern families (arithmetic, geometric, alternating, interleaved), simplest first; other rules are not considered · documented in `sequence/rules.ts` · Sequence · later
 - Sequence visual patterns use shapes only (no colour or size patterns) · Sequence · later
-- Compare still supports only the Slider · all new CAPTCHAs · later
+- Compare and the Behavioral Lab do not cover these CAPTCHAs yet (v0.5 covers six others) · all new CAPTCHAs · later
 
 ## Memory, Proof of Work, Audio (v0.4)
 - Memory has no replay of the recall order · Memory · later
@@ -67,4 +67,16 @@ Not release blockers unless stated. Format: issue · impact · affected CAPTCHA 
 - Audio has no text or non-audio equivalent beyond the link to another challenge, by design; deaf and hard-of-hearing users cannot use it · Audio · documented limitation
 - Audio noise is plain white noise, mixed in the browser; no band-limiting or room effects · Audio · later
 - Browser-specific audio behaviour (autoplay policies, Safari AudioContext start) is not tested beyond Chromium · Audio · later
-- Compare still supports only the Slider · all new CAPTCHAs · later
+- Compare and the Behavioral Lab do not cover these CAPTCHAs yet (v0.5 covers six others) · all new CAPTCHAs · later
+
+## Behavioral Lab (v0.5)
+- The classifier ranges and weights are hand-set, not fitted to real people; there is no labeled human dataset, so no accuracy or confusion matrix can be shown · Behavioral Lab · needs opt-in data (v0.6+)
+- Noisy / Variable synthetic profiles read as Human-like by design of the baseline; a rule baseline cannot separate them · Classifier · later (shown in the evaluation panel)
+- Memory, Math, Sequence, Audio, Proof of Work and Shape Matching are not in the Behavioral Lab · Compare · later
+- Image Grid and Checkbox have few events, so rhythm signals are often missing (`null`) and the classifier leans on two or three signals · Classifier · later
+- The synthetic Drag & Drop, Image Grid and Rotation sessions assume a default layout when there is no human attempt (480x320 board, 3x3 pitch 100 px, object centre 120,120); with an attempt they use the human's layout · Compare · later
+- The Slider's Compare human side still needs sight (the target is visual); the Invisible demo is keyboard-usable, but a keyboard-only run has no motion signals · Accessibility · next pass
+- Text uses the character-key timing only; key hold time (dwell) is not a signal · Text · later
+- Invisible demo: one fixed task (four targets); no timing noise from slow devices is modelled · Invisible demo · later
+- The generated reference distribution is 30 runs on the main thread; it is fast today but would need a worker for heavier profiles · Compare · later
+- Signal definitions are versioned (`behavior-signals@1`) but there is no stored data to migrate yet · Behavioral Lab · when export arrives

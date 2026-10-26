@@ -8,7 +8,7 @@ test("home: picking a challenge on the left shows it on the right and keeps it i
   await expect(frame.getByTestId("image-grid")).toBeVisible();
   await expect(page).toHaveURL(/#image-grid$/);
   await page.getByTestId("pick-compare").click();
-  await expect(frame.getByTestId("compare-note")).toBeVisible();
+  await expect(frame.getByTestId("captcha-select")).toBeVisible();
 });
 
 test("home: a hash link opens that challenge", async ({ page }) => {

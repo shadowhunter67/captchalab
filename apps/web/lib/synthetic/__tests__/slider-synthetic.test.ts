@@ -44,4 +44,13 @@ describe("generateSyntheticSliderSession", () => {
     expect(noisy.overshoot ?? 0).toBeGreaterThan(0);
     expect(noisy.pointerDistance).toBeGreaterThan(linear.pointerDistance);
   });
+
+  it("stop-and-correct pauses (a long gap between two samples) and turns back once past the target", () => {
+    const s = generateSyntheticSliderSession({ profile: "stop-and-correct", challenge, seed: 2 });
+    const gaps = s.events.slice(1).map((e, i) => e.t - s.events[i]!.t);
+    expect(Math.max(...gaps)).toBeGreaterThanOrEqual(250);
+    const f = slider.extractFeatures(challenge, s, { layout: DEFAULT_SYNTHETIC_LAYOUT }).features;
+    expect(f.directionChanges).toBe(1);
+    expect(f.overshoot ?? 0).toBeGreaterThan(0);
+  });
 });
