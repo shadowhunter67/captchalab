@@ -1,7 +1,10 @@
 import { CHECKBOX_VARIANTS } from "./checkbox/variants";
 import { DRAG_DROP_VARIANTS } from "./drag-drop/variants";
 import { IMAGE_GRID_VARIANTS } from "./image-grid/variants";
+import { AUDIO_VARIANTS } from "./audio/variants";
 import { MATH_LOGIC_VARIANTS } from "./math-logic/variants";
+import { MEMORY_VARIANTS } from "./memory/variants";
+import { POW_VARIANTS } from "./proof-of-work/variants";
 import { ROTATION_VARIANTS } from "./rotation/variants";
 import { SEQUENCE_VARIANTS } from "./sequence/variants";
 import { SHAPE_MATCHING_VARIANTS } from "./shape-matching/variants";
@@ -19,4 +22,7 @@ export const VARIANT_SETS = {
   "shape-matching": SHAPE_MATCHING_VARIANTS,
   "math-logic": MATH_LOGIC_VARIANTS,
   sequence: SEQUENCE_VARIANTS,
+  memory: MEMORY_VARIANTS,
+  "proof-of-work": POW_VARIANTS,
+  audio: AUDIO_VARIANTS,
 } as const;

@@ -2,7 +2,10 @@ import { createPluginRegistry } from "@captchalab/captcha-core";
 import { checkboxPlugin } from "./checkbox";
 import { dragDropPlugin } from "./drag-drop";
 import { imageGridPlugin } from "./image-grid";
+import { audioPlugin } from "./audio";
 import { mathLogicPlugin } from "./math-logic";
+import { memoryPlugin } from "./memory";
+import { proofOfWorkPlugin } from "./proof-of-work";
 import { rotationPlugin } from "./rotation";
 import { sequencePlugin } from "./sequence";
 import { shapeMatchingPlugin } from "./shape-matching";
@@ -20,6 +23,9 @@ export const registry = createPluginRegistry({
   "shape-matching": shapeMatchingPlugin,
   "math-logic": mathLogicPlugin,
   sequence: sequencePlugin,
+  memory: memoryPlugin,
+  "proof-of-work": proofOfWorkPlugin,
+  audio: audioPlugin,
 });
 
 export type CaptchaRegistry = typeof registry;

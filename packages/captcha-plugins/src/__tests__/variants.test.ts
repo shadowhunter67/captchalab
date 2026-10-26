@@ -7,6 +7,9 @@ import {
   generateDragDropChallenge,
   generateImageGridChallenge,
   generateMathChallenge,
+  generateAudioChallenge,
+  generateMemoryChallenge,
+  generatePowChallenge,
   generateRotationChallenge,
   generateSequenceChallenge,
   generateShapeMatchingChallenge,
@@ -31,6 +34,9 @@ const generators: Record<keyof typeof VARIANT_SETS, Gen> = {
   "shape-matching": generateShapeMatchingChallenge,
   "math-logic": generateMathChallenge,
   sequence: generateSequenceChallenge,
+  memory: generateMemoryChallenge,
+  "proof-of-work": generatePowChallenge,
+  audio: generateAudioChallenge,
 };
 
 describe("every variant set", () => {
