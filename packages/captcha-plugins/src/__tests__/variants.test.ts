@@ -6,7 +6,10 @@ import {
   generateCheckboxChallenge,
   generateDragDropChallenge,
   generateImageGridChallenge,
+  generateMathChallenge,
   generateRotationChallenge,
+  generateSequenceChallenge,
+  generateShapeMatchingChallenge,
   generateSliderChallenge,
   generateTextChallenge,
   verifyCheckboxAnswer,
@@ -25,6 +28,9 @@ const generators: Record<keyof typeof VARIANT_SETS, Gen> = {
   rotation: generateRotationChallenge,
   text: generateTextChallenge,
   "image-grid": generateImageGridChallenge,
+  "shape-matching": generateShapeMatchingChallenge,
+  "math-logic": generateMathChallenge,
+  sequence: generateSequenceChallenge,
 };
 
 describe("every variant set", () => {
@@ -41,7 +47,7 @@ describe("every variant set", () => {
         for (const d of supportedDifficulties(v)) {
           const c = gen({ rng: createRng(3), variantId: v.id, difficulty: d });
           expect(c.config).toMatchObject({ variantId: v.id, difficulty: d });
-          expect(c.config?.parameters).toEqual(v.difficulties[d]);
+          expect(c.config?.parameters).toMatchObject(v.difficulties[d]!); // a generator may add what it actually chose
         }
       }
     });
