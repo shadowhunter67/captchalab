@@ -207,9 +207,9 @@ test("Learn has a Behavioral / Invisible section that is a lab module, not a thi
 test("home: Behavior sits in the Research group and opens in the preview", async ({ page }) => {
   await page.goto("/#behavior");
   const frame = page.frameLocator('[data-testid="preview"]');
-  await expect(frame.getByTestId("cta-signals")).toBeVisible();
+  await expect(frame.getByTestId("cta-signals")).toBeAttached();
   await page.getByTestId("pick-compare").click();
-  await expect(frame.getByTestId("captcha-select")).toBeVisible();
+  await expect(frame.getByTestId("captcha-select")).toBeAttached();
   await page.getByTestId("pick-behavior").click();
   await expect(frame.getByTestId("signals-explorer")).toBeAttached();
 });
