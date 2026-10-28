@@ -32,6 +32,9 @@ import { BEHAVIOR_CAPTCHAS, isBehaviorCaptcha, type BehaviorCaptchaId, type Beha
 import { catalogFor } from "@/lib/catalog";
 import { useT } from "@/lib/i18n";
 import { useSeededChallenge } from "@/lib/useSeededChallenge";
+import { AddToDataset } from "@/components/dataset/AddToDataset";
+import { recordedRecord, syntheticRecord } from "@/lib/dataset/records";
+import { definitionOfChallenge } from "@/lib/research/definition";
 import { HumanTask } from "./HumanTask";
 
 function CompareBody({ captchaId, challenge, onNewChallenge }: { captchaId: BehaviorCaptchaId; challenge: unknown; onNewChallenge: () => void }) {
@@ -81,6 +84,7 @@ function CompareBody({ captchaId, challenge, onNewChallenge }: { captchaId: Beha
   const notes = useMemo(() => (humanSample && synthetic ? observations(humanSample.vector, synthetic.vector) : []), [humanSample, synthetic]);
 
   const config = (challenge as { config?: ChallengeConfig }).config;
+  const definition = useMemo(() => definitionOfChallenge(captchaId, challenge), [captchaId, challenge]);
   const motion = MOTION_CAPTCHAS.includes(captchaId);
   const profiles = PROFILES_BY_CAPTCHA[captchaId];
   const randomProfile = profiles.find((p) => p.id === profile)?.random ?? false;
@@ -208,6 +212,27 @@ function CompareBody({ captchaId, challenge, onNewChallenge }: { captchaId: Beha
               {t("Tạo biến thể khác", "Generate another variation")}
             </button>
           )}
+        </div>
+      </section>
+
+      <section aria-labelledby="ds-add-h" className="space-y-3 rounded-lg border border-line bg-panel p-4" data-testid="compare-dataset">
+        <h2 id="ds-add-h" className="text-base font-semibold">{t("Thêm vào bộ dữ liệu có nhãn (tuỳ chọn)", "Add to the labeled dataset (optional)")}</h2>
+        <p className="text-xs text-muted">{t("Không có gì được thêm tự động. Phiên của bạn vào bộ dữ liệu với nhãn “Chưa rõ”; bạn có thể tự đổi thành “Người” ở trang bộ dữ liệu. Mẫu mô phỏng vào với nhãn “Mô phỏng” cố định.", "Nothing is added automatically. Your session enters the dataset as Unknown; you can set it to Human yourself on the dataset page. A synthetic sample enters as Synthetic, fixed.")}</p>
+        <div className="grid gap-4 md:grid-cols-2">
+          <AddToDataset
+            testId="add-recorded"
+            label={t("Thêm phiên của tôi vào bộ dữ liệu", "Add my session to the dataset")}
+            hint={t("Nhãn: Chưa rõ", "Label: Unknown")}
+            disabled={!human || !definition}
+            build={() => (human && definition ? recordedRecord({ definition, session: human.session, context: human.context, passed: human.passed }) : null)}
+          />
+          <AddToDataset
+            testId="add-synthetic"
+            label={t("Thêm mẫu mô phỏng vào bộ dữ liệu", "Add the synthetic sample to the dataset")}
+            hint={t("Nhãn: Mô phỏng (cố định)", "Label: Synthetic (fixed)")}
+            disabled={!synthetic || !definition}
+            build={() => (synthetic?.synthetic && definition ? syntheticRecord({ definition, session: synthetic.session, context: synthetic.context, meta: synthetic.synthetic }) : null)}
+          />
         </div>
       </section>
 

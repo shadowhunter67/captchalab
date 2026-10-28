@@ -80,3 +80,9 @@ Plugin `text`, route `/playground/text`: SVG distorted text deterministic, verif
 - Memory là CAPTCHA duy nhất cần context ngoài layout: `{recallStartMs}`; synthetic Memory luôn đo theo context CỦA CHÍNH NÓ (bỏ qua context người dùng truyền vào).
 - Biến thể thật: shape-matching `exact|pattern`, math `arithmetic|comparison`, sequence `number|visual`, memory `sequence|position`, audio `spoken-digits|noisy-digits`.
 
+## v0.8 Labeled dataset layer (2026-10-28)
+- `/experiments/dataset`, format `captchalab-labeled-dataset@1`. Code: `lib/dataset/{records,format,store}.ts`, `features/dataset/DatasetPage.tsx`, `components/dataset/AddToDataset.tsx`; "Add to dataset" trong Compare/Experiments/Builder. Docs: `docs/datasets.md`.
+- Quy tắc cứng: NHÃN ≠ kết quả classifier (hai khái niệm độc lập; không hàm nào đọc classifier để đặt nhãn, classifier không nhận nhãn — test); recorded mặc định `unknown`; synthetic do CaptchaLab sinh = `synthetic` + khoá nhãn; import: envelope all-or-nothing, record xét từng cái, tín hiệu + classifier LUÔN tính lại (claims chỉ để tham khảo), nhãn KHÔNG tính lại, provenance synthetic kiểm bằng sinh lại và so khớp, id trùng thì đổi id (không ghi đè), Memory dùng lại checkMemoryContext; session gõ chữ chỉ được chứa lớp phím (KeyA/Digit5 bị từ chối ở MỌI reader).
+- Classifier vẫn `behavioral-baseline@1`; checksum luật của cả 11 CAPTCHA được ghim trong `lib/dataset/__tests__/dataset.test.ts`. KHÔNG thêm accuracy/precision/recall/F1 — thuộc v0.9.
+- Store là singleton module trong 1 tab (không localStorage). Điều hướng client-side giữ dữ liệu, `page.goto`/reload thì mất → E2E dùng link trong trang và `dialog.accept` cho beforeunload; privacy E2E tách phần điều hướng (request RSC của Next) khỏi phần thao tác dữ liệu.
+

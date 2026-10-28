@@ -6,7 +6,7 @@ CaptchaLab is a small lab where you try different CAPTCHA challenges and then se
 
 **Live demo: https://shadowhunter67.github.io/captchalab/** (pick a challenge on the left, try it on the right)
 
-> **Status: Alpha (`0.7.0-alpha`).** Things may still change.
+> **Status: Alpha (`0.8.0-alpha`).** Things may still change.
 
 The site is in **Vietnamese by default**. Use the **VI / EN** button in the top-right corner to switch to English.
 
@@ -45,6 +45,7 @@ There are a few extra pages:
 - **Compare**: the side-by-side view of the Behavioral Lab, with a signal table, a path or timing view and optional generated reference runs.
 - **Challenge builder** (`/builder`): pick a CAPTCHA, variant, difficulty and seed, preview and try the exact challenge, and download it as a small versioned file.
 - **Experiments** (`/experiments`): record several local sessions on one challenge, add deterministic synthetic batches, compare signals and the classifier's evidence, then export the whole experiment to a file and import it again to reproduce it. Everything stays in your browser; nothing is saved unless you download it. See [docs/experiment-workbench.md](docs/experiment-workbench.md) and [docs/data-formats.md](docs/data-formats.md).
+- **Labeled dataset** (`/experiments/dataset`): add sessions you choose to a local dataset, give each a label you set yourself (human, synthetic or unknown), keep the source apart from the label, and export or import the set as a file. A label is user-provided, not verified ground truth, and it is never the classifier's output. The dataset lives only in your browser tab until you export it. See [docs/datasets.md](docs/datasets.md).
 - **Behavioral demo**: a tiny click-the-target task that shows a *simulated* escalation suggestion. Nothing is ever blocked or redirected.
 
 ## Privacy

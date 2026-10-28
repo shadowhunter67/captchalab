@@ -104,3 +104,14 @@ Not release blockers unless stated. Format: issue · impact · affected CAPTCHA 
 - Audio synthetic sessions assume clip lengths from the digit count and gap, not from the real audio duration · Audio · later
 - Shape Matching, Memory and Sequence have no path view; they compare timelines like Checkbox and Image Grid · Compare · by design
 
+## Labeled dataset (v0.8)
+- The dataset is in memory only and lost on reload unless exported; persistence would need an explicit, opt-in design · Dataset · later
+- A label is user-provided, never verified; there is no way to prove a session was made by a person · Dataset · by design
+- No accuracy, precision, recall, F1, ROC, AUC, confusion matrix or label/classifier agreement is computed; that is the evaluation step · Dataset · next release
+- Labels are one per session; no multiple annotators, no label history, no confidence, no bulk labeling · Dataset · later
+- Limits (500 records, 300,000 events, 25 MB, 2 million values): a long-session dataset can reach the value limit first; larger sets would need paging or a worker · Dataset · later
+- The store is shared by the pages of one tab only; the home page frames each page in its own document, so a dataset built inside a frame is not shared with other frames (open the pages directly) · Dataset · later
+- Imported synthetic records from another generator version cannot be regenerated, so their provenance is unchecked (a warning is shown) · Dataset · when `synthetic@2` exists
+- The Invisible demo and Proof of Work cannot be added (the first is not a CAPTCHA, the second has no behavioral reading) · Dataset · by design
+- Notes are free text (200 characters); a person can still type personal information into one, and the exported file keeps it · Dataset · by design (a warning is shown)
+

@@ -1,7 +1,7 @@
 import { SCHEMA_VERSION, inferModality, type InteractionEvent, type InteractionSession } from "@captchalab/captcha-core";
 import { analyzeSession } from "@/lib/behavior/analysis";
 import { CLASSIFIER_VERSION } from "@/lib/behavior/classifier";
-import { extractMemoryActivations, type MemoryChallenge } from "@captchalab/captcha-plugins";
+import { extractMemoryActivations, toTextKeyCode, type MemoryChallenge } from "@captchalab/captcha-plugins";
 import { SYNTHETIC_GENERATOR_VERSION, BEHAVIOR_FEATURE_SET, type BehaviorCaptchaId, type BehaviorContext, type MemoryContext } from "@/lib/behavior/types";
 import { profileDef } from "@/lib/behavior/synthetic";
 import { memoryContext } from "@/lib/behavior/synthetic/generators-more";
@@ -67,15 +67,26 @@ const TARGET = /^[A-Za-z0-9:_-]{1,64}$/;
 const KEY_CODE = /^[A-Za-z0-9]{1,24}$/;
 const COORD = 1_000_000;
 
-function readEvent(v: unknown, path: string): InteractionEvent {
+/** Fields that hold typed characters. Their key codes are stored by class only, so a file must carry nothing finer. */
+const TYPING_TARGETS = new Set(["text-input", "math-input", "audio-input", "sequence-input"]);
+const COARSE_CLASSES = new Set(["Letter", "Digit", "Other"]);
+const isCoarseKey = (code: string): boolean => COARSE_CLASSES.has(code) || toTextKeyCode(code) === code;
+
+const TYPING_CAPTCHAS = new Set(["text", "math-logic", "audio", "sequence"]);
+
+function readEvent(v: unknown, path: string, captcha: BehaviorCaptchaId): InteractionEvent {
   const base = typeof v === "object" && v !== null && !Array.isArray(v) ? (v as Rec) : undefined;
   const type = base?.["type"];
   if (typeof type === "string" && (KEY_KINDS as readonly string[]).includes(type)) {
     const o = readObject(v, path, ["t", "type", "code"], ["target"]);
+    const code = readString(o["code"], `${path}.code`, 24, KEY_CODE);
+    if ((TYPING_CAPTCHAS.has(captcha) || (typeof o["target"] === "string" && TYPING_TARGETS.has(o["target"]))) && !isCoarseKey(code)) {
+      throw new FormatError("invalid", `${path}.code: a typing field may only hold key classes (Letter, Digit, Other) and control keys, never which key was typed`);
+    }
     return {
       t: readNumber(o["t"], `${path}.t`, 0, 1e10),
       type: type as (typeof KEY_KINDS)[number],
-      code: readString(o["code"], `${path}.code`, 24, KEY_CODE),
+      code,
       ...(o["target"] === undefined ? {} : { target: readString(o["target"], `${path}.target`, 64, TARGET) }),
     };
   }
@@ -102,7 +113,7 @@ export function readSession(v: unknown, path: string, captcha: BehaviorCaptchaId
   if (o["schemaVersion"] !== SCHEMA_VERSION) throw new FormatError("unsupported-version", `${path}.schemaVersion ${String(o["schemaVersion"])} (this app reads ${SCHEMA_VERSION})`);
   const captchaId = readString(o["captchaId"], `${path}.captchaId`, 32);
   if (captchaId !== captcha) throw new FormatError("incompatible", `${path}: the session is from "${captchaId}" but the challenge is "${captcha}"`);
-  const events = readArray(o["events"], `${path}.events`, MAX_EVENTS_PER_SESSION).map((e, i) => readEvent(e, `${path}.events[${i}]`));
+  const events = readArray(o["events"], `${path}.events`, MAX_EVENTS_PER_SESSION).map((e, i) => readEvent(e, `${path}.events[${i}]`, captcha));
   let last = 0;
   events.forEach((e, i) => {
     if (e.t < last) throw new FormatError("invalid", `${path}.events[${i}].t goes back in time`);
@@ -196,7 +207,7 @@ const ISO_TIME = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d{1,3})?Z$/;
  * action; `null` only when there is no recall action at all. A session claiming a synthetic source must carry exactly
  * the clock the generator derives.
  */
-function checkMemoryContext(definition: ChallengeDefinition, session: InteractionSession, context: BehaviorContext, source: SessionSource, path: string): void {
+export function checkMemoryContext(definition: ChallengeDefinition, session: InteractionSession, context: BehaviorContext, source: SessionSource, path: string): void {
   if (definition.captcha !== "memory") return;
   const challenge = generateChallenge(definition) as MemoryChallenge;
   const recallStart = (context as MemoryContext).recallStartMs;

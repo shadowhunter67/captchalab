@@ -21,6 +21,9 @@ import { BEHAVIOR_CAPTCHAS, BEHAVIOR_FEATURE_SET, SIGNAL_GROUPS, SYNTHETIC_GENER
 import { catalogFor } from "@/lib/catalog";
 import { useT } from "@/lib/i18n";
 import { randomSeed } from "@/lib/seed";
+import { recordedRecord, syntheticRecord, type DatasetRecord } from "@/lib/dataset/records";
+import { verifySyntheticProvenance } from "@/lib/dataset/format";
+import { datasetStore, useDataset, useDatasetUnloadGuard } from "@/lib/dataset/store";
 import { approxSize, describeError, downloadText, jsonText, readFileText } from "@/lib/research/browser";
 import { MAX_SEED, generateChallenge, toDefinitionFile } from "@/lib/research/definition";
 import {
@@ -85,6 +88,8 @@ export function ExperimentWorkspace() {
   const [startCaptcha, setStartCaptcha] = useState<BehaviorCaptchaId>("slider");
   const [startSeed, setStartSeed] = useState("");
   const fileRef = useRef<HTMLInputElement>(null);
+  const dataset = useDataset();
+  useDatasetUnloadGuard();
   // The latest committed experiment, read when an import finishes (the file is read asynchronously).
   const expRef = useRef<Experiment | null>(null);
   expRef.current = exp;
@@ -280,6 +285,39 @@ export function ExperimentWorkspace() {
     }
   };
 
+  /** Adds one session of this experiment to the labeled dataset. Explicit, one at a time, never automatic. */
+  const addToDataset = (s: Sample): void => {
+    if (!exp) return;
+    try {
+      const entry = exp.recorded.find((r) => r.id === s.id);
+      let draft: Omit<DatasetRecord, "id">;
+      if (s.kind === "synthetic" && s.profile !== undefined && s.seed !== undefined) {
+        draft = syntheticRecord({ definition: exp.definition, session: s.session, context: s.context, meta: { profile: s.profile, generator: SYNTHETIC_GENERATOR_VERSION, seed: s.seed } });
+      } else if (!entry) {
+        return;
+      } else if (!entry.imported) {
+        draft = recordedRecord({ definition: exp.definition, session: entry.session, context: entry.context, ...(entry.passed === undefined ? {} : { passed: entry.passed }), note: "" });
+      } else {
+        // From a file: the file's own claim about how it was made is kept (and checked), and the label stays Unknown.
+        const claim = entry.source.kind === "synthetic" ? { profile: entry.source.profile, generator: entry.source.generator, seed: entry.source.seed } : null;
+        const checked = claim ? verifySyntheticProvenance(exp.definition, entry.session, entry.context, claim, "session") : false;
+        draft = {
+          definition: exp.definition,
+          source: { type: entry.source.kind === "synthetic" ? "synthetic" : "recorded", imported: true, ...(entry.source.kind === "synthetic" ? { synthetic: { profile: entry.source.profile, generator: entry.source.generator, seed: entry.source.seed }, provenanceChecked: checked } : {}) },
+          label: "unknown",
+          context: entry.context,
+          ...(entry.passed === undefined ? {} : { passed: entry.passed }),
+          note: "",
+          session: entry.session,
+        };
+      }
+      const id = datasetStore.add(draft);
+      say({ kind: "ok", text: t(`Đã thêm vào bộ dữ liệu (${id}).`, `Added to the dataset (${id}).`) });
+    } catch (err) {
+      fail(err);
+    }
+  };
+
   const toggle = (id: string): void => {
     const next = new Set(selected);
     if (next.has(id)) next.delete(id);
@@ -470,6 +508,10 @@ export function ExperimentWorkspace() {
 
           <section aria-labelledby="ses-h" className="space-y-3 rounded-lg border border-line bg-panel p-4" data-testid="exp-sessions">
             <h2 id="ses-h" className="text-base font-semibold">{t("4. Các phiên", "4. Sessions")}</h2>
+            <p className="text-xs text-muted" data-testid="exp-dataset-link">
+              <Link prefetch={false} href="/experiments/dataset" className="underline">{t(`Bộ dữ liệu có nhãn (${dataset.records.length} phiên)`, `Labeled dataset (${dataset.records.length} sessions)`)}</Link>
+              {" · "}{t("Thêm từng phiên vào đó bằng nút “Thêm vào bộ dữ liệu”; không có gì được thêm tự động.", "Add sessions one by one with the “Add to dataset” button; nothing is added automatically.")}
+            </p>
             <div className="flex flex-wrap gap-3" role="group" aria-label={t("Bộ lọc", "Filters")}>
               <div>
                 <label htmlFor="exp-filter-kind" className="mb-1 block text-xs font-semibold uppercase tracking-wide text-muted">{t("Loại", "Kind")}</label>
@@ -533,6 +575,7 @@ export function ExperimentWorkspace() {
                         <td className="py-1">
                           <div className="flex flex-wrap gap-2">
                             <button type="button" data-testid={`sample-inspect-${s.id}`} className={btn} onClick={() => setInspectId(s.id)} aria-pressed={inspectId === s.id}>{t("Xem bằng chứng", "Inspect evidence")}<span className="sr-only"> {s.label}</span></button>
+                            <button type="button" data-testid={`sample-dataset-${s.id}`} className={btn} onClick={() => addToDataset(s)}>{t("Thêm vào bộ dữ liệu", "Add to dataset")}<span className="sr-only"> {s.label}</span></button>
                             {s.kind === "recorded" && <button type="button" data-testid={`sample-remove-${s.id}`} className={btn} onClick={() => mutate((e) => withoutRecorded(e, s.id))}>{t("Xoá", "Remove")}<span className="sr-only"> {s.label}</span></button>}
                           </div>
                         </td>

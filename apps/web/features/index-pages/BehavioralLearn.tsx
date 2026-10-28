@@ -68,6 +68,13 @@ export function BehavioralLearn() {
           "Behavior monitoring can intrude on privacy when it follows a whole site or is kept long term. This lab records only inside one dedicated task, locally, stores nothing, sends nothing and uses no device fingerprint.",
         )}
       </p>
+      <h3 className="font-semibold">{t("Dữ liệu có nhãn và đánh giá", "Labeled data and evaluation")}</h3>
+      <p className="text-muted" data-testid="learn-labeled">
+        {t(
+          "Nhãn không phải là kết quả của bộ phân loại. Nhãn là điều một người nói về một phiên (người, mô phỏng hoặc chưa rõ); kết quả của bộ phân loại là một quan sát riêng. Chúng có thể khác nhau, và chính sự khác nhau đó là thứ cần đo. Chỉ khi có dữ liệu được gán nhãn một cách có chủ đích mới có thể nói về độ chính xác, và nhãn do người dùng đặt cũng chưa phải là sự thật đã được xác minh. Vì vậy CaptchaLab hiện chỉ chuẩn bị bộ dữ liệu, chưa tính độ chính xác.",
+          "A label is not the classifier's output. A label is what a person says about a session (human, synthetic or unknown); the classifier's reading is a separate observation. They can disagree, and that disagreement is exactly what needs measuring. Only data that was labeled on purpose can support any statement about accuracy, and a user-provided label is still not verified ground truth. So CaptchaLab for now only prepares the dataset and computes no accuracy.",
+        )}
+      </p>
       <h3 className="font-semibold">{t("Giới hạn", "Limitations")}</h3>
       <List
         items={[

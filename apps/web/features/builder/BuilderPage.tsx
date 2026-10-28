@@ -7,6 +7,9 @@ import { VARIANT_SETS } from "@captchalab/captcha-plugins";
 import { ChallengeConfigCard } from "@/components/inspect/ChallengeConfigCard";
 import { ResearchDisclaimer } from "@/components/behavior/Disclaimers";
 import { HumanTask } from "@/features/compare/HumanTask";
+import { AddToDataset } from "@/components/dataset/AddToDataset";
+import { recordedRecord } from "@/lib/dataset/records";
+import type { SessionReport } from "@/lib/behavior/human";
 import { BEHAVIOR_CAPTCHAS, isBehaviorCaptcha, type BehaviorCaptchaId } from "@/lib/behavior/types";
 import { catalogFor } from "@/lib/catalog";
 import { useT } from "@/lib/i18n";
@@ -61,6 +64,7 @@ export function BuilderPage() {
   const [form, setForm] = useState<Form | null>(null);
   const [notice, setNotice] = useState<{ kind: "ok" | "error"; text: string } | null>(null);
   const [tried, setTried] = useState<boolean | null>(null);
+  const [attempt, setAttempt] = useState<SessionReport | null>(null);
   const [previewKey, setPreviewKey] = useState(0);
   const fileRef = useRef<HTMLInputElement>(null);
   const names = useMemo(() => new Map(catalogFor(t).map((c) => [c.id, c.name])), [t]);
@@ -102,6 +106,7 @@ export function BuilderPage() {
   const set = (patch: Partial<Form>): void => {
     setNotice(null);
     setTried(null);
+    setAttempt(null);
     setForm({ ...form, ...patch });
   };
   const variantSet = VARIANT_SETS[form.captcha];
@@ -142,6 +147,7 @@ export function BuilderPage() {
         const d = imported.definition;
         setForm({ captcha: d.captcha, variant: d.variant, difficulty: d.difficulty, seedText: String(d.seed), name: d.name ?? "" });
         setTried(null);
+        setAttempt(null);
         setPreviewKey((k) => k + 1); // the same identity imported again still starts a fresh preview
         setNotice({ kind: "ok", text: t("Đã nhập định nghĩa thử thách.", "Challenge definition imported.") });
       } else {
@@ -288,14 +294,29 @@ export function BuilderPage() {
                 captchaId={definition.captcha}
                 challenge={challenge}
                 onNewChallenge={() => set({ seedText: String(randomSeed()) })}
-                onResult={(r) => setTried(r.passed)}
-                onReset={() => setTried(null)}
+                onResult={(r) => {
+                  setTried(r.passed);
+                  setAttempt(r);
+                }}
+                onReset={() => {
+                  setTried(null);
+                  setAttempt(null);
+                }}
               />
               {tried !== null && (
                 <p role="status" className="mt-3 text-sm text-muted" data-testid="builder-tried">
                   {tried ? t("Đã ghi một lần thử (đạt).", "One attempt recorded (passed).") : t("Đã ghi một lần thử (chưa đạt).", "One attempt recorded (not passed).")}
                 </p>
               )}
+              <div className="mt-3">
+                <AddToDataset
+                  testId="builder-add-dataset"
+                  label={t("Thêm lần thử này vào bộ dữ liệu", "Add this attempt to the dataset")}
+                  hint={t("Nhãn: Chưa rõ. Lưu cấu hình thử thách kèm theo.", "Label: Unknown. The challenge configuration is kept with it.")}
+                  disabled={!attempt}
+                  build={() => (attempt ? recordedRecord({ definition, session: attempt.session, context: attempt.context, passed: attempt.passed }) : null)}
+                />
+              </div>
             </div>
           </section>
 

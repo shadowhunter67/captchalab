@@ -139,3 +139,14 @@ function readParameters(v: unknown, path: string): Record<string, string | numbe
   }
   return out;
 }
+
+/**
+ * The definition a challenge object was generated from, read back from its own `config` (variant, level and the seed
+ * the playground stamped on it). null when the challenge carries no seed or the values are not a valid definition.
+ */
+export function definitionOfChallenge(captcha: BehaviorCaptchaId, challenge: unknown): ChallengeDefinition | null {
+  const config = (challenge as { config?: ChallengeConfig } | null)?.config;
+  if (!config || config.seed === undefined) return null;
+  const candidate = { captcha, variant: config.variantId, difficulty: config.difficulty, seed: Number(config.seed) };
+  return validateDefinition(candidate).length === 0 ? candidate : null;
+}

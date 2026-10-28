@@ -201,6 +201,7 @@ export function BehaviorHome() {
         </p>
         <div className="mt-3 flex flex-wrap gap-3">
           <Link href="/builder" data-testid="cta-builder" className={`${cta} border border-line bg-panel hover:bg-track`}>{t("Trình dựng thử thách", "Challenge builder")}</Link>
+          <Link href="/experiments/dataset" data-testid="cta-dataset" className={`${cta} border border-line bg-panel hover:bg-track`}>{t("Bộ dữ liệu có nhãn", "Labeled dataset")}</Link>
           <Link href="/experiments" data-testid="cta-experiments" className={`${cta} border border-line bg-panel hover:bg-track`}>{t("Thí nghiệm", "Experiments")}</Link>
         </div>
       </Card>

@@ -81,6 +81,10 @@ Synthetic batches are stored as **recipes**, not data: run `i` uses seed `(baseS
 
 What is exact after export and import: the challenge identity, every recorded event, the recipes, the notes and tags, and therefore every derived signal, classifier output and synthetic session. What is intentionally variable: `createdAt`, the file name, and the exported `startedAt` (always `0`).
 
+## `captchalab-labeled-dataset@1`
+
+A separate format for the local labeled dataset (user-provided labels, source, session, recomputed-on-import signals). It is not one of the formats above and has its own version. See [datasets.md](datasets.md).
+
 ## `experiment-summary@1`
 
 A compact, **one-way** description (it cannot be imported): the challenge definition, the pipeline versions and, per cohort (recorded sessions, each synthetic batch), the number of sessions, the **counts of classifier outputs** and per-signal descriptive statistics (`count`, `missing`, `min`, `max`, `mean`, `median`). No events, no coordinates. The classifier counts are counts of outputs; they are not accuracy and not probabilities.
@@ -91,6 +95,7 @@ An imported file is untrusted input and is only ever data.
 
 - Size is checked before reading (limit 25 MB). The text is then scanned once, before parsing, for nesting depth (16) and the number of values (2 million), so `JSON.parse` never sees a file built to blow up memory; the parsed tree is walked again iteratively for depth, node count and string length (20,000). A bundle may hold at most 150,000 events in total.
 - The keys `__proto__`, `constructor` and `prototype` are rejected anywhere in the file. Objects are rebuilt field by field; nothing is merged into an existing object.
+- A typing session (`text-input`, `math-input`, `audio-input`, `sequence-input`) may hold only key classes (`Letter`, `Digit`, `Other`) and control keys; a session that says which key was typed is refused (v0.8).
 - Every number must be finite and inside a range; events, arrays, tags and ids have length and character limits. Coordinates, times and counts are validated, not trusted.
 - Text fields (names, labels, notes, tags) are plain text, rejected if they contain control characters, and are rendered by React as text, never as HTML.
 - No part of a file is evaluated: no code, expressions, templates, callbacks or dynamic imports.
