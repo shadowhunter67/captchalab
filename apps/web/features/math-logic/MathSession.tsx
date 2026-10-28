@@ -4,6 +4,7 @@ import { useRef, useState, type FormEvent, type KeyboardEvent } from "react";
 import { createEventRecorder, type FeatureSet, type InteractionSession, type VerificationResult } from "@captchalab/captcha-core";
 import { MATH_TARGET, formatExpr, registry, toTextKeyCode, type MathChallenge, type MathLogicFeatures } from "@captchalab/captcha-plugins";
 import { useT } from "@/lib/i18n";
+import type { SessionReport } from "@/lib/behavior/human";
 import { MathInspect } from "./MathInspect";
 import { speakExpr } from "./math-view-data";
 
@@ -17,6 +18,12 @@ interface Completed {
 interface Props {
   challenge: MathChallenge;
   onNewChallenge: () => void;
+  /** Called after each analyzed submission (used by the Behavioral Lab). */
+  onResult?: (report: SessionReport) => void;
+  /** Called when the shown result is discarded. */
+  onReset?: () => void;
+  /** Hide the Inspect panel (the Behavioral Lab shows its own view). Default true. */
+  showInspect?: boolean;
 }
 
 /**
@@ -24,7 +31,7 @@ interface Props {
  * element and is read once, when verifying: it is not kept in React state, storage or the recording.
  * Key events are stored with coarsened codes (digits -> "Digit"). The prompt is drawn from the expression tree.
  */
-export function MathSession({ challenge: initialChallenge, onNewChallenge }: Props) {
+export function MathSession({ challenge: initialChallenge, onNewChallenge, onResult, onReset, showInspect = true }: Props) {
   const t = useT();
   const [challenge] = useState(initialChallenge);
   const plugin = registry.get("math-logic");
@@ -48,6 +55,7 @@ export function MathSession({ challenge: initialChallenge, onNewChallenge }: Pro
       submissionsRef.current += 1;
       setCompleted({ submission: submissionsRef.current, session, verification, featureSet });
       setError(null);
+      onResult?.({ session, context: undefined, passed: verification.passed });
       // The value is only needed to verify: once the challenge is passed, do not leave it in the field.
       if (verification.passed && inputRef.current) inputRef.current.value = "";
     } catch (err) {
@@ -116,6 +124,7 @@ export function MathSession({ challenge: initialChallenge, onNewChallenge }: Pro
               onChange={() => {
                 setCompleted(null);
                 setError(null);
+                onReset?.();
               }}
               onKeyDown={(e) => record("keydown", e)}
               onKeyUp={(e) => record("keyup", e)}
@@ -147,7 +156,7 @@ export function MathSession({ challenge: initialChallenge, onNewChallenge }: Pro
           {error}
         </p>
       )}
-      {completed && (
+      {completed && showInspect && (
         <MathInspect key={completed.submission} verification={completed.verification} featureSet={completed.featureSet} session={completed.session} />
       )}
     </div>

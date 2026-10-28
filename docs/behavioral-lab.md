@@ -15,7 +15,7 @@ It is not a bot detector. It never claims to tell a person from a program. See "
 | `/builder`, `/experiments` | v0.6: build a reproducible challenge; record, generate, compare, export and import experiments. |
 | `/behavior/invisible` | A neutral pointer task with an experimental classification and a **simulated** escalation suggestion. |
 
-Supported CAPTCHAs: Slider, Drag & Drop, Checkbox, Image Grid, Text, Rotation. Memory, Math, Sequence, Audio, Proof of Work and Shape Matching are not wired yet.
+Supported CAPTCHAs: Slider, Drag & Drop, Checkbox, Image Grid, Text, Rotation (v0.5) and Shape Matching, Math / Logic, Sequence, Memory, Audio (v0.7). **Proof of Work is excluded on purpose**: its measurements describe the device's computation, not an interaction, so a behavioral reading of it would mean nothing.
 
 ## Code map (all in `apps/web`)
 
@@ -52,6 +52,11 @@ A profile is a recipe for generated data on a CaptchaLab challenge. Nothing disp
 | Image Grid | Immediate selections, Uniform interval, Variable interval |
 | Text | Uniform typing, Variable typing, Correction typing |
 | Rotation | Direct, Eased, Overshoot-and-correct |
+| Shape Matching | Immediate, Uniform interval, Variable interval (one wrong pairing, replaced) |
+| Math / Logic | Uniform typing, Variable typing, Correction typing |
+| Sequence | Immediate, Uniform timing, Variable timing (number variant types the answer, visual variant clicks an option; the variable profile changes its mind once) |
+| Memory | Immediate recall, Uniform interval, Variable interval (one wrong pick taken back with Undo or deselect) |
+| Audio | Uniform typing, Variable typing, Correction typing (each plays the audio first; the variable ones replay once) |
 
 Same CAPTCHA, challenge, profile and synthetic seed give the same session. Only profiles marked random use the seed. Samples carry `{ profile, generator: "synthetic@1", seed }`. Text sessions keep the coarse key classes only (`Letter`, `Digit`, `Backspace`, `Enter`).
 
@@ -80,3 +85,15 @@ Everything is local: recording, signals, synthetic generation, classification. N
 ## What it does not claim
 
 CaptchaLab experiments with distinguishing lab-generated interaction patterns. It does not detect bots. Device, assistive tools, motor differences, network or render timing and the input method all change behavior, and a real person can look synthetic while a synthetic sample can look human-like. No health inference is drawn from any of it.
+
+## v0.7: five more CAPTCHAs (classifier unchanged)
+
+Shape Matching, Math / Logic, Sequence, Memory and Audio now report signals, have synthetic profiles and per-CAPTCHA rules. The classifier is **still `behavioral-baseline@1`**: the rules and normalization ranges of the six v0.5 CAPTCHAs are byte-identical to the release (a test pins their checksum), and the new rule sets are additive. Nothing about an existing result changed.
+
+- Two signals are new: `wrongAttempts` (choices that were wrong when made) and `playCount` (audio plays). `activationTime` now also covers "first selection" and "first play".
+- Click-style CAPTCHAs (Shape Matching, Sequence visual, Memory) use the same rhythm signals as Image Grid; typing-style ones (Math, Sequence number, Audio) the same as Text.
+- **Memory** is the one CAPTCHA whose analysis needs context beyond layout: when recall began (`recallStartMs`). Only actions after that moment count as recall; the Start press is not a rhythm. A synthetic Memory session is always measured in its **own** recall context, never in a recorded one, so the two cannot be compared on different clocks. The context is stored in session files and bundles as `{ "recallStartMs": <number or null> }`.
+- Shape Matching, Math / Logic, Sequence and Audio take no context; a file that carries one is refused.
+- Unmeasurable rhythm stays `null` (for example a one-digit Math answer has no typing rhythm); it is never 0.
+- As before, the baseline reads some generated profiles as Human-like and some as Uncertain; that is a finding shown on purpose, not something tuned away.
+

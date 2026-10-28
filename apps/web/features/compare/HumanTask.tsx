@@ -4,8 +4,13 @@ import { useCallback } from "react";
 import type {
   CheckboxChallenge,
   DragDropChallenge,
+  AudioChallenge,
   ImageGridChallenge,
+  MathChallenge,
+  MemoryChallenge,
   RotationChallenge,
+  SequenceChallenge,
+  ShapeMatchingChallenge,
   SliderChallenge,
   TextChallenge,
 } from "@captchalab/captcha-plugins";
@@ -17,6 +22,11 @@ import { ImageGridSession } from "@/features/image-grid/ImageGridSession";
 import { RotationSession } from "@/features/rotation/RotationSession";
 import { SliderSession, type SliderResult } from "@/features/slider/SliderSession";
 import { TextSession } from "@/features/text/TextSession";
+import { AudioSession } from "@/features/audio/AudioSession";
+import { MathSession } from "@/features/math-logic/MathSession";
+import { MemorySession } from "@/features/memory/MemorySession";
+import { SequenceSession } from "@/features/sequence/SequenceSession";
+import { ShapeMatchingSession } from "@/features/shape-matching/ShapeMatchingSession";
 
 interface Props {
   captchaId: BehaviorCaptchaId;
@@ -47,5 +57,15 @@ export function HumanTask({ captchaId, challenge, onNewChallenge, onResult, onRe
       return <TextSession challenge={challenge as TextChallenge} {...common} />;
     case "rotation":
       return <RotationSession challenge={challenge as RotationChallenge} {...common} />;
+    case "shape-matching":
+      return <ShapeMatchingSession challenge={challenge as ShapeMatchingChallenge} {...common} />;
+    case "math-logic":
+      return <MathSession challenge={challenge as MathChallenge} {...common} />;
+    case "sequence":
+      return <SequenceSession challenge={challenge as SequenceChallenge} {...common} />;
+    case "memory":
+      return <MemorySession challenge={challenge as MemoryChallenge} {...common} />;
+    case "audio":
+      return <AudioSession challenge={challenge as AudioChallenge} {...common} />;
   }
 }

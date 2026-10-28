@@ -49,4 +49,4 @@ Hard limits keep the page responsive: 100 recorded sessions, 300 synthetic runs,
 
 ## Not done (see technical-debt.md)
 
-Only six CAPTCHAs are covered; the classifier is still the hand-set `behavioral-baseline@1` and nothing in an experiment retunes it; no persistent workspace, no cloud sync, no labeled datasets, no statistical evaluation, no production anti-bot use.
+Eleven of the twelve CAPTCHAs are covered (not Proof of Work, by design); the classifier is still the hand-set `behavioral-baseline@1` and nothing in an experiment retunes it; no persistent workspace, no cloud sync, no labeled datasets, no statistical evaluation, no production anti-bot use.

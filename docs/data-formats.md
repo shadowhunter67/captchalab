@@ -20,7 +20,7 @@ The reproducible identity of one challenge.
 |---|---|---|
 | `format` | yes | `"challenge-definition"` |
 | `version` | yes | `1` |
-| `captcha` | yes | `slider`, `drag-drop`, `checkbox`, `image-grid`, `text` or `rotation` |
+| `captcha` | yes | `slider`, `drag-drop`, `checkbox`, `image-grid`, `text`, `rotation`, `shape-matching`, `math-logic`, `sequence`, `memory` or `audio` |
 | `pluginVersion` | yes | version of the plugin that generated it; a different plugin version is refused (it could build another challenge) |
 | `variant`, `difficulty` | yes | must exist for that CAPTCHA (a variant may not offer every level) |
 | `seed` | yes | whole number, 0 to 4294967295 |
@@ -55,7 +55,7 @@ One session on one challenge.
 | `challenge` | yes | a full `challenge-definition@1` object |
 | `source` | yes | `{ "kind": "recorded" }` or `{ "kind": "synthetic", "profile", "generator": "synthetic@N", "seed" }` |
 | `session` | yes | the lab's `InteractionSession` (schema 2): `id`, `captchaId`, `durationMs`, `events`, `inputModality`, `startedAt`, optional `viewport` |
-| `context` | per CAPTCHA | slider `{trackLeft, trackWidth, handleWidth}`, drag-drop `{width, height}`, rotation `{center:{x,y}}`; **absent** for checkbox, image-grid and text |
+| `context` | per CAPTCHA | slider `{trackLeft, trackWidth, handleWidth}`, drag-drop `{width, height}`, rotation `{center:{x,y}}`, memory `{recallStartMs: number or null}`; **absent** for the others |
 | `label`, `tags`, `passed`, `createdAt` | no | plain-text label (80), up to 12 tags, whether the challenge was passed, ISO time |
 
 `source.kind` is provenance, not a verdict: importing a file never makes a session "human". `startedAt` (a wall-clock time) is exported as `0` because analysis never uses it. Events keep coordinates relative to the challenge surface and, for Text, only the coarse key class (`Letter`, `Digit`, `Backspace`, `Enter`...), never the typed characters. The session must belong to the same CAPTCHA as its challenge and must be analysable against it, or it is refused.

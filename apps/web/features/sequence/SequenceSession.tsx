@@ -13,6 +13,7 @@ import {
 } from "@captchalab/captcha-plugins";
 import { ShapeGlyph } from "@/components/ShapeGlyph";
 import { useT } from "@/lib/i18n";
+import type { SessionReport } from "@/lib/behavior/human";
 import { toPointerSample, toRecorderEvent, type PointerKind } from "@/lib/pointer-adapter";
 import { SequenceInspect } from "./SequenceInspect";
 import { numberAnswer, optionAnswer, optionLabel, spokenNumberSequence, spokenShapeSequence, toggleOption } from "./sequence-view-data";
@@ -27,6 +28,12 @@ interface Completed {
 interface Props {
   challenge: SequenceChallenge;
   onNewChallenge: () => void;
+  /** Called after each analyzed submission (used by the Behavioral Lab). */
+  onResult?: (report: SessionReport) => void;
+  /** Called when the shown result is discarded. */
+  onReset?: () => void;
+  /** Hide the Inspect panel (the Behavioral Lab shows its own view). Default true. */
+  showInspect?: boolean;
 }
 
 /**
@@ -34,7 +41,7 @@ interface Props {
  * input element and is read once, on submit; key events are stored with coarsened codes. Visual: option
  * buttons are native toggle buttons; pointer and Space/Enter are recorded separately from the click.
  */
-export function SequenceSession({ challenge: initialChallenge, onNewChallenge }: Props) {
+export function SequenceSession({ challenge: initialChallenge, onNewChallenge, onResult, onReset, showInspect = true }: Props) {
   const t = useT();
   const [challenge] = useState(initialChallenge);
   const plugin = registry.get("sequence");
@@ -48,6 +55,7 @@ export function SequenceSession({ challenge: initialChallenge, onNewChallenge }:
   const stale = (): void => {
     setCompleted(null);
     setError(null);
+    onReset?.();
   };
 
   const optionsRef = useRef<HTMLDivElement>(null);
@@ -82,6 +90,7 @@ export function SequenceSession({ challenge: initialChallenge, onNewChallenge }:
       submissionsRef.current += 1;
       setCompleted({ submission: submissionsRef.current, session, verification, featureSet });
       setError(null);
+      onResult?.({ session, context: undefined, passed: verification.passed });
       return verification.passed;
     } catch (err) {
       console.error("Sequence submission failed", err instanceof Error ? err.message : "unknown error");
@@ -217,7 +226,7 @@ export function SequenceSession({ challenge: initialChallenge, onNewChallenge }:
           {error}
         </p>
       )}
-      {completed && (
+      {completed && showInspect && (
         <SequenceInspect key={completed.submission} kind={challenge.kind} verification={completed.verification} featureSet={completed.featureSet} session={completed.session} />
       )}
     </div>

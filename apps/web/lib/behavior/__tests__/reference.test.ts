@@ -42,6 +42,11 @@ describe("syntheticDistribution", () => {
       "image-grid": "variable-interval",
       text: "variable-typing",
       rotation: "overshoot-correct",
+      "shape-matching": "variable-interval",
+      "math-logic": "variable-typing",
+      sequence: "variable-timing",
+      memory: "variable-interval",
+      audio: "variable-typing",
     };
     for (const id of BEHAVIOR_CAPTCHAS) {
       const d = syntheticDistribution({ captchaId: id, profile: profile[id]!, challenge: challengeFor(id) }, 1, 8);

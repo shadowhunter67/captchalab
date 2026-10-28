@@ -49,7 +49,7 @@ test("builder: schema-driven controls; changing the CAPTCHA resets variant and l
   await page.goto("/builder?lang=en");
   await expect(page.getByTestId("builder-preview")).toBeVisible();
   const options = await page.getByTestId("builder-captcha").locator("option").allTextContents();
-  expect(options).toHaveLength(6);
+  expect(options).toHaveLength(11);
   await page.getByTestId("builder-seed").fill("12345");
   await page.getByTestId("builder-captcha").selectOption("text");
   await expect(page.getByTestId("builder-seed")).toHaveValue("12345");
@@ -134,7 +134,7 @@ test("builder: import a definition; reject wrong, hostile and oversized files wi
   await reject("{not json", /not valid JSON/);
   await reject(JSON.stringify({ ...JSON.parse(real.text), version: 2 }), /Unsupported format version/);
   await reject(JSON.stringify({ ...JSON.parse(real.text), extra: 1 }), /unknown field/);
-  await reject(JSON.stringify({ ...good, captcha: "audio" }), /not supported/);
+  await reject(JSON.stringify({ ...good, captcha: "proof-of-work" }), /not supported/);
   await reject('{"format":"challenge-definition","__proto__":{"x":1}}', /forbidden key/);
   await reject("[".repeat(100) + "]".repeat(100), /nested too deeply/);
   await reject(JSON.stringify({ format: "experiment-bundle" }), /experiment file/);

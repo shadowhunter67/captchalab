@@ -19,13 +19,13 @@ async function expectClassified(page: Page) {
   await expect(page.getByTestId("classifier-disclaimer")).toContainText("does not prove whether a real user is human or automated");
 }
 
-test("the selector offers exactly the six supported CAPTCHAs", async ({ page }) => {
+test("the selector offers exactly the eleven supported CAPTCHAs", async ({ page }) => {
   await page.goto("/compare");
   await expect(page.getByTestId("captcha-select").locator("option").first()).toHaveText("Slider"); // language applied
   const options = await page.getByTestId("captcha-select").locator("option").allTextContents();
-  expect(options).toHaveLength(6);
-  ["Slider", "Drag", "Checkbox", "Image", "Text", "Rotation"].forEach((name, i) => expect(options[i]).toContain(name));
-  for (const unsupported of ["Memory", "Audio", "Proof", "Sequence", "Math", "Shape"]) expect(options.join("|")).not.toContain(unsupported);
+  expect(options).toHaveLength(11);
+  ["Slider", "Drag", "Checkbox", "Image", "Text", "Rotation", "Shape", "Math", "Sequence", "Memory", "Audio"].forEach((name, i) => expect(options[i]).toContain(name));
+  for (const unsupported of ["Proof"]) expect(options.join("|")).not.toContain(unsupported);
 });
 
 test("checkbox: human click, generated comparison, timing view, signals and classification", async ({ page }) => {

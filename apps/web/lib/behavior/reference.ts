@@ -12,6 +12,11 @@ export const DISTRIBUTION_SIGNALS: Readonly<Record<BehaviorCaptchaId, readonly s
   "image-grid": ["completionTime", "interClickCv", "corrections", "interClickMean"],
   text: ["completionTime", "interKeyCv", "corrections", "interKeyMean"],
   rotation: ["completionTime", "angularSpeedCv", "corrections", "sampleIntervalCv"],
+  "shape-matching": ["completionTime", "interClickCv", "corrections", "interClickMean"],
+  "math-logic": ["completionTime", "interKeyCv", "corrections", "interKeyMean"],
+  sequence: ["completionTime", "reactionTime", "corrections", "activationCount"],
+  memory: ["completionTime", "interClickCv", "corrections", "interClickMean"],
+  audio: ["completionTime", "interKeyCv", "corrections", "playCount"],
 };
 
 export interface SignalSummary {

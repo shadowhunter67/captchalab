@@ -74,7 +74,7 @@ describe("challenge definition", () => {
   });
 
   it("validation names the problem and never repairs it", () => {
-    expect(validateDefinition({ captcha: "memory", variant: "x", difficulty: "easy", seed: 1 })[0]).toContain("not supported");
+    expect(validateDefinition({ captcha: "proof-of-work", variant: "x", difficulty: "easy", seed: 1 })[0]).toContain("not supported");
     expect(validateDefinition({ captcha: "text", variant: "nope", difficulty: "easy", seed: 1 })[0]).toContain('Variant "nope"');
     expect(validateDefinition({ captcha: "text", variant: "clean", difficulty: "extreme", seed: 1 })[0]).toContain("Difficulty");
     for (const seed of [-1, 1.5, MAX_SEED + 1, Number.NaN, Number.POSITIVE_INFINITY]) {
@@ -332,8 +332,8 @@ describe("experiment bundle round-trip", () => {
     const d = def(id, 42, { name: "round trip" });
     let exp: Experiment = { ...emptyExperiment(d, "Round trip"), notes: "A note with <b>markup</b> and\nnewlines." };
     const profiles = PROFILES_BY_CAPTCHA[id];
-    exp = withRecorded(exp, { label: "first", tags: ["run-1", "left hand"], context: defaultContext(id), passed: true, session: stand(d, profiles[0]!.id, 1) });
-    exp = withRecorded(exp, { label: "", tags: [], context: defaultContext(id), session: stand(d, profiles[1]!.id, 2) });
+    exp = withRecorded(exp, { label: "first", tags: ["run-1", "left hand"], context: defaultContext(id, generateChallenge(d)), passed: true, session: stand(d, profiles[0]!.id, 1) });
+    exp = withRecorded(exp, { label: "", tags: [], context: defaultContext(id, generateChallenge(d)), session: stand(d, profiles[1]!.id, 2) });
     exp = withSynthetic(exp, { profile: profiles[0]!.id, baseSeed: 100, runs: 7 });
     exp = withSynthetic(exp, { profile: profiles[1]!.id, baseSeed: 5, runs: 3 });
     return exp;
@@ -505,6 +505,46 @@ describe("memory and time are bounded before parsing", () => {
     for (let i = 0; i < 17; i++) exp = withRecorded(exp, { label: "", tags: [], context: undefined, session });
     const file = clone(toBundleFile(exp));
     expect(fail(() => importText(JSON.stringify(file))).detail).toContain("events in total");
+  });
+});
+
+describe("memory recall clock is checked against the events", () => {
+  const d = def("memory", 21, { variant: "sequence", difficulty: "easy" });
+  const sample = generateSyntheticSample({ captchaId: "memory", profile: "uniform-interval", challenge: generateChallenge(d), seed: 1 });
+  const goodStart = (sample.context as { recallStartMs: number }).recallStartMs;
+  const file = (ctx: unknown, source: unknown = { kind: "recorded" }) => {
+    const f = clone(toSessionFile(d, { kind: "recorded", session: sample.session, context: sample.context })) as unknown as Record<string, unknown>;
+    f["context"] = ctx;
+    f["source"] = source;
+    return () => readSessionFile(f);
+  };
+
+  it("accepts the clock the events imply", () => {
+    expect(() => file({ recallStartMs: goodStart })()).not.toThrow();
+    expect(() => file({ recallStartMs: goodStart + 40 })()).not.toThrow(); // later than the preview end, before the first recall action
+  });
+
+  it("rejects a clock that hides, moves or invents recall actions", () => {
+    expect(fail(file({ recallStartMs: null })).detail).toContain("recall actions");
+    expect(fail(file({ recallStartMs: 10 })).detail).toContain("earlier than the preview");
+    expect(fail(file({ recallStartMs: goodStart + 100000 })).detail).toContain("later than");
+    expect(fail(file({ recallStartMs: -1 })).code).toBe("invalid");
+    expect(fail(file({})).code).toBe("invalid");
+    expect(fail(file(undefined)).code).toBe("invalid");
+  });
+
+  it("a session that claims a synthetic source must carry the generator's own clock", () => {
+    const source = { kind: "synthetic", profile: "uniform-interval", generator: "synthetic@1", seed: 1 };
+    expect(() => file({ recallStartMs: goodStart }, source)()).not.toThrow();
+    expect(fail(file({ recallStartMs: goodStart + 40 }, source)).detail).toContain("generator");
+  });
+
+  it("null is fine when nothing was recalled, and unmeasurable counts stay missing", () => {
+    const empty = { ...sample.session, events: sample.session.events.slice(0, 2), durationMs: 400 };
+    const f = clone(toSessionFile(d, { kind: "recorded", session: empty, context: { recallStartMs: null } }));
+    expect(() => readSessionFile(f)).not.toThrow();
+    const v = generateSyntheticSample({ captchaId: "memory", profile: "immediate", challenge: generateChallenge(d), seed: 1 }).vector;
+    expect(v.values["activationCount"]).toBeGreaterThan(0);
   });
 });
 

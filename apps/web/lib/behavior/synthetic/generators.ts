@@ -29,10 +29,10 @@ export const SAMPLE_MS = 16;
 
 const easeInOutCubic = (p: number): number => (p < 0.5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2);
 const r1 = (n: number): number => Math.round(n * 10) / 10;
-const between = (rng: () => number, lo: number, hi: number): number => lo + rng() * (hi - lo);
+export const between = (rng: () => number, lo: number, hi: number): number => lo + rng() * (hi - lo);
 
 /** Append-only, time-ordered event list. Enforces non-decreasing times (the recorder guarantees it for real data). */
-class Events {
+export class Events {
   readonly list: InteractionEvent[] = [];
   private last = 0;
 
@@ -59,7 +59,7 @@ export interface SyntheticOutput {
   session: InteractionSession;
 }
 
-function toSession(captchaId: string, profile: string, ev: Events, tailMs = 100): InteractionSession {
+export function toSession(captchaId: string, profile: string, ev: Events, tailMs = 100): InteractionSession {
   return {
     schemaVersion: SCHEMA_VERSION,
     id: `synthetic-${captchaId}-${profile}`,

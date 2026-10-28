@@ -28,7 +28,8 @@ test("/behavior: what the lab is, what it is not, the three calls to action", as
   await expect(page.getByTestId("cta-signals")).toHaveAttribute("href", "#signals");
   await expect(page.getByTestId("research-disclaimer")).toContainText("must not be interpreted as proof that a person is human or automated");
   await expect(page.getByTestId("behavior-not")).toContainText("not a production authentication system");
-  await expect(page.getByTestId("behavior-supported").locator("li")).toHaveCount(6);
+  await expect(page.getByTestId("behavior-supported").locator("li")).toHaveCount(11);
+  await expect(page.getByTestId("behavior-excluded")).toContainText("Proof of Work")
   await expect(page.getByTestId("behavior-groups")).toContainText("Timing");
   for (const g of ["Timing", "Motion", "Correction", "Rhythm", "Attempts", "Input"]) await expect(page.getByTestId("behavior-groups")).toContainText(g);
   await expect(page.getByTestId("behavior-privacy")).toContainText("no device fingerprinting");

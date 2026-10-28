@@ -23,7 +23,7 @@ const s = (id: string, group: SignalGroup, unit: SignalUnit, label: string, labe
 export const SIGNAL_CATALOG: readonly SignalDef[] = [
   s("reactionTime", "timing", "ms", "Reaction time", "Thời gian phản ứng", "Time from the start to the first interaction.", "Thời gian từ lúc bắt đầu đến thao tác đầu tiên."),
   s("completionTime", "timing", "ms", "Completion time", "Thời gian hoàn thành", "Time from the start to the end of the session.", "Thời gian từ lúc bắt đầu đến khi kết thúc phiên."),
-  s("activationTime", "timing", "ms", "Time to first activation", "Thời gian tới lần kích hoạt đầu", "Time until the first completed activation.", "Thời gian tới lần kích hoạt hoàn chỉnh đầu tiên."),
+  s("activationTime", "timing", "ms", "Time to first activation", "Thời gian tới lần kích hoạt đầu", "Time until the first completed activation, selection or play.", "Thời gian tới lần kích hoạt, lựa chọn hoặc phát hoàn chỉnh đầu tiên."),
   s("pressDuration", "timing", "ms", "Press duration", "Thời gian giữ", "How long the activating press was held.", "Thời gian giữ lần nhấn kích hoạt."),
   s("interClickMean", "timing", "ms", "Mean time between selections", "Thời gian trung bình giữa các lần chọn", "Mean gap between consecutive selections.", "Khoảng cách trung bình giữa các lần chọn liên tiếp."),
   s("interKeyMean", "timing", "ms", "Mean time between keys", "Thời gian trung bình giữa các phím", "Mean gap between consecutive character keys.", "Khoảng cách trung bình giữa các phím ký tự liên tiếp."),
@@ -54,6 +54,8 @@ export const SIGNAL_CATALOG: readonly SignalDef[] = [
   s("attemptCount", "attempts", "count", "Attempts", "Số lần thử", "How many separate attempts the session contains.", "Phiên có bao nhiêu lần thử riêng biệt."),
   s("activationCount", "attempts", "count", "Activations", "Số lần kích hoạt", "Completed activations or selections.", "Số lần kích hoạt hoặc lựa chọn hoàn chỉnh."),
   s("failedDropCount", "attempts", "count", "Failed drops", "Số lần thả hỏng", "Drops that did not land on the matching area.", "Số lần thả không rơi đúng vùng."),
+  s("wrongAttempts", "attempts", "count", "Wrong attempts", "Số lần sai", "Choices that were not right when made (a wrong pairing or a wrong recalled item).", "Số lựa chọn sai ngay lúc chọn (ghép sai hoặc nhớ sai)."),
+  s("playCount", "attempts", "count", "Plays", "Số lần phát", "Times the audio was played or replayed.", "Số lần phát hoặc phát lại âm thanh."),
   s("cancelledDragCount", "attempts", "count", "Cancelled drags", "Số lần kéo bị huỷ", "Drags that ended without a release.", "Số lần kéo kết thúc mà không thả."),
 ];
 
@@ -81,6 +83,11 @@ export const SIGNALS_BY_CAPTCHA: Readonly<Record<LabTaskId, readonly string[]>> 
   checkbox: ["reactionTime", "activationTime", "pressDuration", "completionTime", "interClickMean", "interClickCv", "attemptCount", "activationCount"],
   "image-grid": ["reactionTime", "completionTime", "interClickMean", "corrections", "interClickCv", "pauseCount", "attemptCount", "activationCount"],
   text: ["reactionTime", "completionTime", "interKeyMean", "corrections", "interKeyCv", "pauseCount", "attemptCount", "activationCount"],
+  "shape-matching": ["reactionTime", "completionTime", "interClickMean", "corrections", "interClickCv", "pauseCount", "attemptCount", "activationCount", "wrongAttempts"],
+  "math-logic": ["reactionTime", "completionTime", "interKeyMean", "corrections", "interKeyCv", "pauseCount", "attemptCount", "activationCount"],
+  sequence: ["reactionTime", "completionTime", "interKeyMean", "interClickMean", "corrections", "interKeyCv", "interClickCv", "pauseCount", "attemptCount", "activationCount"],
+  memory: ["reactionTime", "activationTime", "completionTime", "interClickMean", "corrections", "interClickCv", "pauseCount", "activationCount", "wrongAttempts"],
+  audio: ["reactionTime", "activationTime", "completionTime", "interKeyMean", "corrections", "interKeyCv", "pauseCount", "attemptCount", "activationCount", "playCount"],
   rotation: ["reactionTime", "completionTime", "angularMeanVelocity", "angularMaxVelocity", "angularSpeedCv", "corrections", "finalAngularError", "sampleIntervalCv", "attemptCount"],
 };
 

@@ -1,8 +1,10 @@
 import { SCHEMA_VERSION, inferModality, type InteractionEvent, type InteractionSession } from "@captchalab/captcha-core";
 import { analyzeSession } from "@/lib/behavior/analysis";
 import { CLASSIFIER_VERSION } from "@/lib/behavior/classifier";
-import { SYNTHETIC_GENERATOR_VERSION, BEHAVIOR_FEATURE_SET, type BehaviorCaptchaId, type BehaviorContext } from "@/lib/behavior/types";
+import { extractMemoryActivations, type MemoryChallenge } from "@captchalab/captcha-plugins";
+import { SYNTHETIC_GENERATOR_VERSION, BEHAVIOR_FEATURE_SET, type BehaviorCaptchaId, type BehaviorContext, type MemoryContext } from "@/lib/behavior/types";
 import { profileDef } from "@/lib/behavior/synthetic";
+import { memoryContext } from "@/lib/behavior/synthetic/generators-more";
 import {
   CHALLENGE_DEFINITION_FORMAT,
   generateChallenge,
@@ -145,7 +147,7 @@ function sessionForExport(s: InteractionSession): InteractionSession {
 /** The geometry an extractor needs, strictly typed per CAPTCHA. The others must not carry one. */
 export function readContext(v: unknown, path: string, captcha: BehaviorCaptchaId): BehaviorContext {
   if (v === undefined) {
-    if (captcha === "slider" || captcha === "drag-drop" || captcha === "rotation") throw new FormatError("invalid", `${path}: ${captcha} needs its layout`);
+    if (captcha === "slider" || captcha === "drag-drop" || captcha === "rotation" || captcha === "memory") throw new FormatError("invalid", `${path}: ${captcha} needs its layout`);
     return undefined;
   }
   switch (captcha) {
@@ -165,6 +167,10 @@ export function readContext(v: unknown, path: string, captcha: BehaviorCaptchaId
       const c = readObject(o["center"], `${path}.center`, ["x", "y"]);
       return { center: { x: readNumber(c["x"], `${path}.center.x`, -COORD, COORD), y: readNumber(c["y"], `${path}.center.y`, -COORD, COORD) } };
     }
+    case "memory": {
+      const o = readObject(v, path, ["recallStartMs"]);
+      return { recallStartMs: o["recallStartMs"] === null ? null : readNumber(o["recallStartMs"], `${path}.recallStartMs`, 0, 1e10) };
+    }
     default:
       throw new FormatError("invalid", `${path}: ${captcha} takes no layout`);
   }
@@ -183,6 +189,31 @@ function readTags(v: unknown, path: string): string[] {
 }
 
 const ISO_TIME = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d{1,3})?Z$/;
+
+/**
+ * A Memory session's recall clock decides which actions count, so a forged value could hide or move actions. It must
+ * be consistent with the events: after a completed Start press plus the preview, and not after the first recall
+ * action; `null` only when there is no recall action at all. A session claiming a synthetic source must carry exactly
+ * the clock the generator derives.
+ */
+function checkMemoryContext(definition: ChallengeDefinition, session: InteractionSession, context: BehaviorContext, source: SessionSource, path: string): void {
+  if (definition.captcha !== "memory") return;
+  const challenge = generateChallenge(definition) as MemoryChallenge;
+  const recallStart = (context as MemoryContext).recallStartMs;
+  const acts = extractMemoryActivations(session);
+  const start = acts.find((a) => a.act.kind === "start");
+  const firstRecall = acts.find((a) => a.act.kind !== "start");
+  if (recallStart === null) {
+    if (firstRecall) throw new FormatError("incompatible", `${path}.context.recallStartMs is null but the session has recall actions`);
+  } else {
+    if (!start) throw new FormatError("incompatible", `${path}.context.recallStartMs is set but the session has no completed Start press`);
+    if (recallStart < start.t + challenge.previewMs - 100) throw new FormatError("incompatible", `${path}.context.recallStartMs is earlier than the preview allows`);
+    if (recallStart > session.durationMs || (firstRecall && recallStart > firstRecall.t)) throw new FormatError("incompatible", `${path}.context.recallStartMs is later than the recall actions it should include`);
+  }
+  if (source.kind === "synthetic" && recallStart !== memoryContext(challenge).recallStartMs) {
+    throw new FormatError("incompatible", `${path}.context.recallStartMs does not match the generator for this challenge`);
+  }
+}
 
 // ---------------------------------------------------------------------------------- interaction-session@1
 
@@ -267,6 +298,7 @@ export function readSessionFile(v: unknown): ParsedSession {
     ...(o["passed"] === undefined ? {} : { passed: readBoolean(o["passed"], "file.passed") }),
     session,
   };
+  checkMemoryContext(definition, session, context, source, "file");
   // It must be analysable against its own challenge; otherwise it cannot be used and is refused now.
   try {
     analyzeSession(definition.captcha, generateChallenge(definition), session, context);
@@ -379,6 +411,7 @@ export function readBundleFile(v: unknown): ParsedBundle {
     ids.add(id);
     const context = readContext(r["context"], `${path}.context`, definition.captcha);
     const session = readSession(r["session"], `${path}.session`, definition.captcha);
+    checkMemoryContext(definition, session, context, r["source"] === undefined ? { kind: "recorded" } : readSyntheticSource(r["source"], `${path}.source`, definition.captcha), path);
     eventTotal += session.events.length;
     if (eventTotal > MAX_EVENTS_TOTAL) throw new FormatError("too-large", `more than ${MAX_EVENTS_TOTAL} events in total`);
     try {

@@ -74,3 +74,9 @@ Plugin `text`, route `/playground/text`: SVG distorted text deterministic, verif
 - Checksum (sha256 canonical JSON) KHÔNG gồm `createdAt`; không phải chữ ký. `startedAt` xuất = 0.
 - Bẫy: `new Array(n).fill()` là any[] (lint unsafe); biến thể thật: checkbox `basic`, image-grid `basic-shapes`, drag-drop `shape-match`, text `clean|rotated|noisy`; URL builder sai biến thể -> rơi về mặc định (không sửa âm thầm).
 
+## v0.7 Eleven-CAPTCHA coverage (2026-10-27)
+- Thêm shape-matching, math-logic, sequence, memory, audio vào Behavioral Lab/Compare/Builder/Experiments (PoW loại có chủ đích: đo phép tính, không đo tương tác). Code: `lib/behavior/analysis.ts` (5 case), `synthetic/generators-more.ts`, `rules.ts` (khối "v0.7"), 5 Session thêm onResult/onReset/showInspect. Docs: mục "v0.7" trong `docs/behavioral-lab.md`.
+- Classifier VẪN `behavioral-baseline@1`: luật của 6 CAPTCHA v0.5 giữ nguyên từng byte (test `v07.test.ts` ghim checksum `968990f7…`); luật mới chỉ thêm. Muốn đổi luật cũ → bump version.
+- Memory là CAPTCHA duy nhất cần context ngoài layout: `{recallStartMs}`; synthetic Memory luôn đo theo context CỦA CHÍNH NÓ (bỏ qua context người dùng truyền vào).
+- Biến thể thật: shape-matching `exact|pattern`, math `arithmetic|comparison`, sequence `number|visual`, memory `sequence|position`, audio `spoken-digits|noisy-digits`.
+

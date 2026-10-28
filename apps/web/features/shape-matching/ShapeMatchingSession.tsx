@@ -16,6 +16,7 @@ import {
 } from "@captchalab/captcha-plugins";
 import { SHAPE_NAMES, ShapeGlyph } from "@/components/ShapeGlyph";
 import { useT } from "@/lib/i18n";
+import type { SessionReport } from "@/lib/behavior/human";
 import { toPointerSample, toRecorderEvent, type PointerKind } from "@/lib/pointer-adapter";
 import { ShapeMatchingInspect } from "./ShapeMatchingInspect";
 import { pairNumbers, sourceLabel, statusText, targetLabel } from "./shape-matching-view-data";
@@ -30,13 +31,19 @@ interface Completed {
 interface Props {
   challenge: ShapeMatchingChallenge;
   onNewChallenge: () => void;
+  /** Called after each analyzed submission (used by the Behavioral Lab). */
+  onResult?: (report: SessionReport) => void;
+  /** Called when the shown result is discarded. */
+  onReset?: () => void;
+  /** Hide the Inspect panel (the Behavioral Lab shows its own view). Default true. */
+  showInspect?: boolean;
 }
 
 /**
  * One challenge = one session (the parent keys it by challenge). Source and target buttons drive the plugin's
  * applyActivation rules on click; pointer and Space/Enter events are recorded separately for the feature extractor.
  */
-export function ShapeMatchingSession({ challenge: initialChallenge, onNewChallenge }: Props) {
+export function ShapeMatchingSession({ challenge: initialChallenge, onNewChallenge, onResult, onReset, showInspect = true }: Props) {
   const t = useT();
   const [challenge] = useState(initialChallenge);
   const plugin = registry.get("shape-matching");
@@ -76,6 +83,7 @@ export function ShapeMatchingSession({ challenge: initialChallenge, onNewChallen
     setState((s) => applyActivation(s, { kind, id }, challenge).state);
     setCompleted(null); // a changed matching makes a shown result stale
     setError(null);
+    onReset?.();
   };
 
   const onVerify = (): void => {
@@ -86,6 +94,7 @@ export function ShapeMatchingSession({ challenge: initialChallenge, onNewChallen
       submissionsRef.current += 1;
       setCompleted({ submission: submissionsRef.current, session, verification, featureSet });
       setError(null);
+      onResult?.({ session, context: undefined, passed: verification.passed });
     } catch (err) {
       console.error("Shape matching submission failed", err instanceof Error ? err.message : "unknown error");
       setError(t("Không phân tích được lần thử này. Hãy bắt đầu thử thách mới.", "Could not analyze this attempt. Start a new challenge."));
@@ -193,7 +202,7 @@ export function ShapeMatchingSession({ challenge: initialChallenge, onNewChallen
           {error}
         </p>
       )}
-      {completed && (
+      {completed && showInspect && (
         <ShapeMatchingInspect key={completed.submission} verification={completed.verification} featureSet={completed.featureSet} session={completed.session} />
       )}
     </div>

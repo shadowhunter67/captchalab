@@ -9,17 +9,29 @@ import {
   type TimedPoint,
 } from "@captchalab/captcha-core";
 import {
+  AUDIO_TARGET,
+  MATH_TARGET,
+  SEQUENCE_TARGET,
   TEXT_TARGET,
+  extractMatchActivations,
+  extractMemoryActivations,
+  extractOptionActivations,
+  extractPlayTimes,
   deriveDragAttempts,
   deriveRotation,
   extractCheckboxActivations,
   extractToggles,
   isCharacterKey,
   registry,
+  type AudioChallenge,
   type DragDropChallenge,
   type DragDropFeatures,
   type DragDropLayout,
   type ImageGridChallenge,
+  type MathChallenge,
+  type MemoryChallenge,
+  type SequenceChallenge,
+  type ShapeMatchingChallenge,
   type ImageGridFeatures,
   type RotationChallenge,
   type RotationFeatures,
@@ -38,6 +50,7 @@ import {
   type BehaviorContext,
   type BehavioralVector,
   type LabTaskId,
+  type MemoryContext,
   type SignalValues,
 } from "./types";
 
@@ -93,6 +106,21 @@ function pointerShape(session: InteractionSession, tracks: readonly (readonly Ti
     sampleIntervalCv: cv(intervals, 5),
   };
 }
+
+/** Times of the character keys typed into one field, from the coarse key classes only. */
+function charKeyTimes(session: InteractionSession, target: string): number[] {
+  return session.events.filter((e) => isKeyEvent(e) && e.type === "keydown" && e.target === target && isCharacterKey(e.code)).map((e) => e.t);
+}
+
+/** Rhythm signals of a run of timed activations (selections, matches, recall choices). */
+function activationRhythm(times: readonly number[]): { mean: number | null; cv: number | null; pauses: number | null } {
+  const g = gaps(times);
+  // With no gap there is nothing to call a pause or not: the count is missing, not zero.
+  return { mean: g.length > 0 ? g.reduce((a, b) => a + b, 0) / g.length : null, cv: cv(g, 2), pauses: g.length > 0 ? g.filter((x) => x > PAUSE_MS).length : null };
+}
+
+/** Pauses between keys for the CAPTCHAs added in v0.7: missing (not 0) when there is no gap to judge. */
+const keyPauses = (g: readonly number[]): number | null => (g.length > 0 ? g.filter((x) => x > PAUSE_MS).length : null);
 
 export interface BehaviorExtraction {
   /** Plugin feature schema, e.g. "slider@1". */
@@ -223,6 +251,130 @@ export function extractSignals(captchaId: BehaviorCaptchaId, challenge: unknown,
           pauseCount: g.filter((x) => x > PAUSE_MS).length,
           attemptCount: f.attemptCount,
           activationCount: f.keyCount,
+        },
+      };
+    }
+    case "shape-matching": {
+      const ch = challenge as ShapeMatchingChallenge;
+      const set = registry.get("shape-matching").extractFeatures(ch, session);
+      const f = set.features;
+      const acts = extractMatchActivations(session);
+      const r = activationRhythm(acts.map((a) => a.t));
+      return {
+        sourceSchema: set.schemaVersion,
+        values: {
+          reactionTime: f.reactionTime,
+          completionTime: f.completionTime,
+          interClickMean: f.interActionTimeMean,
+          corrections: f.correctionCount,
+          interClickCv: r.cv,
+          pauseCount: r.pauses,
+          attemptCount: f.matchAttempts,
+          activationCount: acts.length,
+          wrongAttempts: f.incorrectMatchCount,
+        },
+      };
+    }
+    case "math-logic": {
+      const set = registry.get("math-logic").extractFeatures(challenge as MathChallenge, session);
+      const f = set.features;
+      const g = gaps(charKeyTimes(session, MATH_TARGET));
+      return {
+        sourceSchema: set.schemaVersion,
+        values: {
+          reactionTime: f.reactionTime,
+          completionTime: f.completionTime,
+          interKeyMean: f.interKeyTimeMean,
+          corrections: f.correctionCount,
+          interKeyCv: cv(g, 3),
+          pauseCount: keyPauses(g),
+          attemptCount: f.attemptCount,
+          activationCount: f.keyCount,
+        },
+      };
+    }
+    case "sequence": {
+      const ch = challenge as SequenceChallenge;
+      const set = registry.get("sequence").extractFeatures(ch, session);
+      const f = set.features;
+      if (ch.kind === "number") {
+        const g = gaps(charKeyTimes(session, SEQUENCE_TARGET));
+        return {
+          sourceSchema: set.schemaVersion,
+          values: {
+            reactionTime: f.reactionTime,
+            completionTime: f.completionTime,
+            interKeyMean: f.interActionTimeMean,
+            interClickMean: null,
+            corrections: f.correctionCount,
+            interKeyCv: cv(g, 3),
+            interClickCv: null,
+            pauseCount: keyPauses(g),
+            attemptCount: f.attemptCount,
+            activationCount: f.keyCount,
+          },
+        };
+      }
+      const known = new Set(ch.options.map((o) => o.id));
+      const acts = extractOptionActivations(session).filter((a) => known.has(a.id));
+      const r = activationRhythm(acts.map((a) => a.t));
+      return {
+        sourceSchema: set.schemaVersion,
+        values: {
+          reactionTime: f.reactionTime,
+          completionTime: f.completionTime,
+          interKeyMean: null,
+          interClickMean: f.interActionTimeMean,
+          corrections: f.correctionCount,
+          interKeyCv: null,
+          interClickCv: r.cv,
+          pauseCount: r.pauses,
+          attemptCount: f.attemptCount,
+          activationCount: acts.length,
+        },
+      };
+    }
+    case "memory": {
+      const ch = challenge as MemoryChallenge;
+      const recallStartMs = (context as MemoryContext | undefined)?.recallStartMs ?? null;
+      const set = registry.get("memory").extractFeatures(ch, session, { recallStartMs });
+      const f = set.features;
+      // Recall actions only: what happens before recall begins (the Start press) is not a recall rhythm.
+      const recall = extractMemoryActivations(session).filter((a) => a.act.kind !== "start" && recallStartMs !== null && a.t >= recallStartMs);
+      const r = activationRhythm(recall.map((a) => a.t));
+      return {
+        sourceSchema: set.schemaVersion,
+        values: {
+          reactionTime: f.reactionTime,
+          activationTime: f.timeToFirstSelection,
+          completionTime: f.completionTime,
+          interClickMean: r.mean,
+          corrections: recallStartMs === null ? null : f.correctionCount,
+          interClickCv: r.cv,
+          pauseCount: r.pauses,
+          // Without a recall start nothing counts as recall: these are unmeasurable, not zero.
+          activationCount: recallStartMs === null ? null : f.selectionCount,
+          wrongAttempts: recallStartMs === null ? null : f.incorrectSelections,
+        },
+      };
+    }
+    case "audio": {
+      const set = registry.get("audio").extractFeatures(challenge as AudioChallenge, session);
+      const f = set.features;
+      const g = gaps(charKeyTimes(session, AUDIO_TARGET));
+      return {
+        sourceSchema: set.schemaVersion,
+        values: {
+          reactionTime: f.reactionTime,
+          activationTime: f.timeToFirstPlay,
+          completionTime: f.completionTime,
+          interKeyMean: g.length > 0 ? g.reduce((a, b) => a + b, 0) / g.length : null,
+          corrections: f.correctionCount,
+          interKeyCv: cv(g, 3),
+          pauseCount: keyPauses(g),
+          attemptCount: f.attemptCount,
+          activationCount: f.keyCount,
+          playCount: extractPlayTimes(session).length,
         },
       };
     }

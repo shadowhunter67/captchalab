@@ -18,6 +18,11 @@ const WHY: Record<BehaviorCaptchaId, readonly [string, string]> = {
   "image-grid": ["Nhiều lần bấm lặp lại", "Repeated clicks"],
   text: ["Nhịp gõ bàn phím", "Keyboard timing"],
   rotation: ["Tương tác theo góc", "Angular interaction"],
+  "shape-matching": ["Ghép cặp bằng hai lần bấm", "Pairing by two presses"],
+  "math-logic": ["Gõ đáp án sau khi suy nghĩ", "Typing after thinking"],
+  sequence: ["Gõ hoặc chọn đáp án", "Typed or chosen answer"],
+  memory: ["Nhớ lại sau khi xem", "Recall after a preview"],
+  audio: ["Phát âm thanh rồi gõ", "Play, then type"],
 };
 
 const cta = "inline-block rounded-md px-3 py-2 text-sm font-medium";
@@ -155,7 +160,7 @@ export function BehaviorHome() {
         </p>
       </Card>
 
-      <Card id="supported-h" title={t("Sáu CAPTCHA được hỗ trợ", "Six supported CAPTCHAs")}>
+      <Card id="supported-h" title={t("Mười một CAPTCHA được hỗ trợ", "Eleven supported CAPTCHAs")}>
         <ul className="grid gap-3 sm:grid-cols-2" data-testid="behavior-supported">
           {BEHAVIOR_CAPTCHAS.map((id) => (
             <li key={id} className="rounded-md border border-line p-3 text-sm">
@@ -167,7 +172,7 @@ export function BehaviorHome() {
             </li>
           ))}
         </ul>
-        <p className="mt-3 text-xs text-muted">{t("Các CAPTCHA còn lại (Ghi nhớ, Toán, Chuỗi, Âm thanh, Bằng chứng công việc, Ghép hình) có thể được thêm sau.", "The other CAPTCHAs (Memory, Math, Sequence, Audio, Proof of Work, Shape Matching) may be added later.")}</p>
+        <p className="mt-3 text-xs text-muted" data-testid="behavior-excluded">{t("Bằng chứng công việc không nằm trong phòng thí nghiệm: các số đo của nó mô tả phép tính của thiết bị, không phải một tương tác.", "Proof of Work is not in the lab: its measurements describe the device's computation, not an interaction.")}</p>
       </Card>
 
       <Card id="groups-h" title={t("Các nhóm tín hiệu", "Signal groups")}>

@@ -46,6 +46,31 @@ export const PROFILES_BY_CAPTCHA: Readonly<Record<BehaviorCaptchaId, readonly Pr
     p("variable-typing", "Variable typing", "Gõ thay đổi", "Types with uneven gaps and key hold times.", "Gõ với khoảng cách giữa các phím và thời gian giữ phím không đều.", true),
     p("correction-typing", "Correction typing", "Gõ có sửa", "Uneven typing with one wrong key that is deleted and retyped.", "Gõ không đều, có một phím sai được xoá rồi gõ lại.", true),
   ],
+  "shape-matching": [
+    p("immediate", "Immediate", "Ngay lập tức", "Pairs every shape almost at once, in quick succession.", "Ghép mọi hình gần như ngay, liên tiếp rất nhanh."),
+    p("uniform-interval", "Uniform interval", "Khoảng đều", "Presses at exactly equal intervals.", "Nhấn ở những khoảng cách đều tuyệt đối."),
+    p("variable-interval", "Variable interval", "Khoảng thay đổi", "Uneven pauses, with one wrong pairing that is replaced.", "Khoảng dừng không đều, kèm một lần ghép sai rồi thay lại.", true),
+  ],
+  "math-logic": [
+    p("uniform-typing", "Uniform typing", "Gõ đều", "Types the answer with exactly equal gaps between keys.", "Gõ đáp án với khoảng cách giữa các phím đều tuyệt đối."),
+    p("variable-typing", "Variable typing", "Gõ thay đổi", "Types with uneven gaps and key hold times.", "Gõ với khoảng cách giữa các phím và thời gian giữ phím không đều.", true),
+    p("correction-typing", "Correction typing", "Gõ có sửa", "Uneven typing with one wrong key that is deleted and retyped.", "Gõ không đều, có một phím sai được xoá rồi gõ lại.", true),
+  ],
+  sequence: [
+    p("immediate", "Immediate", "Ngay lập tức", "Answers almost at once, with fast, equal key or click gaps.", "Trả lời gần như ngay, các phím hoặc lần bấm cách nhau ngắn và bằng nhau."),
+    p("uniform-timing", "Uniform timing", "Nhịp đều", "A steady start and exactly equal gaps.", "Bắt đầu đều và các khoảng cách bằng nhau tuyệt đối."),
+    p("variable-timing", "Variable timing", "Nhịp thay đổi", "Uneven gaps; the visual variant picks a wrong option first and changes it.", "Khoảng cách không đều; biến thể hình chọn sai một đáp án rồi đổi.", true),
+  ],
+  memory: [
+    p("immediate", "Immediate recall", "Nhớ lại ngay", "Starts recalling the moment the preview ends and recalls in quick succession.", "Bắt đầu nhớ lại ngay khi hết phần xem trước và nhớ liên tiếp rất nhanh."),
+    p("uniform-interval", "Uniform interval", "Khoảng đều", "Recalls at exactly equal intervals.", "Nhớ lại ở những khoảng cách đều tuyệt đối."),
+    p("variable-interval", "Variable interval", "Khoảng thay đổi", "Uneven pauses, with one wrong pick that is taken back.", "Khoảng dừng không đều, kèm một lựa chọn sai được thu hồi.", true),
+  ],
+  audio: [
+    p("uniform-typing", "Uniform typing", "Gõ đều", "Plays once, then types with exactly equal gaps between keys.", "Phát một lần rồi gõ với khoảng cách giữa các phím đều tuyệt đối."),
+    p("variable-typing", "Variable typing", "Gõ thay đổi", "Plays, replays once, then types with uneven gaps.", "Phát, phát lại một lần rồi gõ với khoảng cách không đều.", true),
+    p("correction-typing", "Correction typing", "Gõ có sửa", "Plays, replays, then types with one wrong key deleted and retyped.", "Phát, phát lại rồi gõ có một phím sai được xoá và gõ lại.", true),
+  ],
   rotation: [
     p("direct", "Direct rotation", "Xoay thẳng", "Turns at constant angular speed straight to upright.", "Xoay với tốc độ góc không đổi thẳng tới vị trí đứng."),
     p("eased", "Eased rotation", "Xoay mượt dần", "Turns with a slow-fast-slow angular speed.", "Xoay với tốc độ góc chậm - nhanh - chậm."),

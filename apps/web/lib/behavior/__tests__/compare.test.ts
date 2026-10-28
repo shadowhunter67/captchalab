@@ -61,6 +61,11 @@ describe("observations", () => {
       "image-grid": "variable-interval",
       text: "correction-typing",
       rotation: "overshoot-correct",
+      "shape-matching": "variable-interval",
+      "math-logic": "correction-typing",
+      sequence: "variable-timing",
+      memory: "variable-interval",
+      audio: "correction-typing",
     };
     const regularProfile: Record<string, string> = {
       slider: "linear",
@@ -69,6 +74,11 @@ describe("observations", () => {
       "image-grid": "uniform-interval",
       text: "uniform-typing",
       rotation: "direct",
+      "shape-matching": "uniform-interval",
+      "math-logic": "uniform-typing",
+      sequence: "uniform-timing",
+      memory: "uniform-interval",
+      audio: "uniform-typing",
     };
     for (const id of BEHAVIOR_CAPTCHAS) {
       for (const o of observations(synth(id, humanProfile[id]!), synth(id, regularProfile[id]!))) {

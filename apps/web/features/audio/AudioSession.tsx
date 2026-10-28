@@ -5,6 +5,7 @@ import { useEffect, useRef, useState, type FormEvent, type KeyboardEvent, type P
 import { createEventRecorder, type FeatureSet, type InteractionSession, type VerificationResult } from "@captchalab/captcha-core";
 import { AUDIO_PLAY_TARGET, AUDIO_TARGET, registry, toTextKeyCode, type AudioChallenge, type AudioFeatures } from "@captchalab/captcha-plugins";
 import { useT } from "@/lib/i18n";
+import type { SessionReport } from "@/lib/behavior/human";
 import { toPointerSample, toRecorderEvent, type PointerKind } from "@/lib/pointer-adapter";
 import { AudioInspect } from "./AudioInspect";
 import { createAudioPlayer, type AudioPlayer, type PlayerState } from "./audio-player";
@@ -20,6 +21,12 @@ interface Completed {
 interface Props {
   challenge: AudioChallenge;
   onNewChallenge: () => void;
+  /** Called after each analyzed submission (used by the Behavioral Lab). */
+  onResult?: (report: SessionReport) => void;
+  /** Called when the shown result is discarded. */
+  onReset?: () => void;
+  /** Hide the Inspect panel (the Behavioral Lab shows its own view). Default true. */
+  showInspect?: boolean;
 }
 
 /**
@@ -28,7 +35,7 @@ interface Props {
  * state, storage or the recording. Key events are stored with coarsened codes (digits -> "Digit"). The digits
  * are never shown as text. The microphone is never used.
  */
-export function AudioSession({ challenge: initialChallenge, onNewChallenge }: Props) {
+export function AudioSession({ challenge: initialChallenge, onNewChallenge, onResult, onReset, showInspect = true }: Props) {
   const t = useT();
   const [challenge] = useState(initialChallenge);
   const plugin = registry.get("audio");
@@ -95,6 +102,7 @@ export function AudioSession({ challenge: initialChallenge, onNewChallenge }: Pr
       submissionsRef.current += 1;
       setCompleted({ submission: submissionsRef.current, session, verification, featureSet });
       setError(null);
+      onResult?.({ session, context: undefined, passed: verification.passed });
       // The value is only needed to verify: once the challenge is passed, do not leave it in the field.
       if (verification.passed && inputRef.current) inputRef.current.value = "";
     } catch (err) {
@@ -162,6 +170,7 @@ export function AudioSession({ challenge: initialChallenge, onNewChallenge }: Pr
               onChange={() => {
                 setCompleted(null);
                 setError(null);
+                onReset?.();
               }}
               onKeyDown={(e) => record("keydown", e)}
               onKeyUp={(e) => record("keyup", e)}
@@ -200,7 +209,7 @@ export function AudioSession({ challenge: initialChallenge, onNewChallenge }: Pr
           {error}
         </p>
       )}
-      {completed && <AudioInspect key={completed.submission} verification={completed.verification} featureSet={completed.featureSet} session={completed.session} />}
+      {completed && showInspect && <AudioInspect key={completed.submission} verification={completed.verification} featureSet={completed.featureSet} session={completed.session} />}
     </div>
   );
 }

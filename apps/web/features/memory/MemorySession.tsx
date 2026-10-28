@@ -19,6 +19,7 @@ import {
 } from "@captchalab/captcha-plugins";
 import { ShapeGlyph } from "@/components/ShapeGlyph";
 import { useT } from "@/lib/i18n";
+import type { SessionReport } from "@/lib/behavior/human";
 import { toPointerSample, toRecorderEvent, type PointerKind } from "@/lib/pointer-adapter";
 import { MemoryInspect } from "./MemoryInspect";
 import {
@@ -45,6 +46,12 @@ interface Completed {
 interface Props {
   challenge: MemoryChallenge;
   onNewChallenge: () => void;
+  /** Called after each analyzed submission (used by the Behavioral Lab). */
+  onResult?: (report: SessionReport) => void;
+  /** Called when the shown result is discarded. */
+  onReset?: () => void;
+  /** Hide the Inspect panel (the Behavioral Lab shows its own view). Default true. */
+  showInspect?: boolean;
 }
 
 const btn = "touch-manipulation rounded-md border border-line bg-panel px-3 py-1.5 text-sm font-medium hover:bg-track disabled:cursor-not-allowed disabled:opacity-60";
@@ -54,7 +61,7 @@ const btn = "touch-manipulation rounded-md border border-line bg-panel px-3 py-1
  * challenge.previewMs, one timer) -> recall (content gone). All timer callbacks check a run token, and the timer is
  * cleared when the phase leaves "preview" and on unmount, so a new challenge never inherits an old run.
  */
-export function MemorySession({ challenge: initialChallenge, onNewChallenge }: Props) {
+export function MemorySession({ challenge: initialChallenge, onNewChallenge, onResult, onReset, showInspect = true }: Props) {
   const t = useT();
   const [challenge] = useState(initialChallenge);
   const plugin = registry.get("memory");
@@ -118,6 +125,7 @@ export function MemorySession({ challenge: initialChallenge, onNewChallenge }: P
   const stale = (): void => {
     setCompleted(null);
     setError(null);
+    onReset?.();
   };
 
   const start = (): void => {
@@ -177,6 +185,7 @@ export function MemorySession({ challenge: initialChallenge, onNewChallenge }: P
       submissionsRef.current += 1;
       setCompleted({ submission: submissionsRef.current, session, verification, featureSet });
       setError(null);
+      onResult?.({ session, context: { recallStartMs: recallStartRef.current }, passed: verification.passed });
     } catch (err) {
       console.error("Memory submission failed", err instanceof Error ? err.message : "unknown error");
       setError(t("Không phân tích được lần thử này. Hãy bắt đầu thử thách mới.", "Could not analyze this attempt. Start a new challenge."));
@@ -375,7 +384,7 @@ export function MemorySession({ challenge: initialChallenge, onNewChallenge }: P
           {error}
         </p>
       )}
-      {completed && <MemoryInspect key={completed.submission} verification={completed.verification} featureSet={completed.featureSet} session={completed.session} />}
+      {completed && showInspect && <MemoryInspect key={completed.submission} verification={completed.verification} featureSet={completed.featureSet} session={completed.session} />}
     </div>
   );
 }

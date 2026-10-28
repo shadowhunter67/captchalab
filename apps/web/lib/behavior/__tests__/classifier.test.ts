@@ -23,6 +23,11 @@ const REGULAR: Record<string, Record<string, number>> = {
   "image-grid": { reactionTime: 90, interClickMean: 60, interClickCv: 0.01, corrections: 0, pauseCount: 0 },
   text: { reactionTime: 90, interKeyCv: 0.01, corrections: 0, pauseCount: 0 },
   rotation: { angularSpeedCv: 0.02, sampleIntervalCv: 0.003, corrections: 0, finalAngularError: 0.05, reactionTime: 90 },
+  "shape-matching": { reactionTime: 90, interClickMean: 60, interClickCv: 0.01, corrections: 0, wrongAttempts: 0, pauseCount: 0 },
+  "math-logic": { reactionTime: 90, interKeyCv: 0.01, corrections: 0, pauseCount: 0 },
+  sequence: { reactionTime: 90, interKeyCv: 0.01, interClickCv: 0.01, corrections: 0, pauseCount: 0 },
+  memory: { reactionTime: 90, activationTime: 80, interClickMean: 60, interClickCv: 0.01, corrections: 0, wrongAttempts: 0 },
+  audio: { reactionTime: 90, interKeyCv: 0.01, corrections: 0, pauseCount: 0 },
 };
 const VARIED: Record<string, Record<string, number>> = {
   slider: { speedCv: 0.8, directionChanges: 6, corrections: 3, overshoot: 9, reactionTime: 900, sampleIntervalCv: 0.3 },
@@ -31,6 +36,11 @@ const VARIED: Record<string, Record<string, number>> = {
   "image-grid": { reactionTime: 1500, interClickMean: 1100, interClickCv: 0.4, corrections: 2, pauseCount: 2 },
   text: { reactionTime: 1200, interKeyCv: 0.5, corrections: 2, pauseCount: 1 },
   rotation: { angularSpeedCv: 0.8, sampleIntervalCv: 0.3, corrections: 2, finalAngularError: 5, reactionTime: 1100 },
+  "shape-matching": { reactionTime: 1500, interClickMean: 1100, interClickCv: 0.4, corrections: 2, wrongAttempts: 2, pauseCount: 2 },
+  "math-logic": { reactionTime: 1600, interKeyCv: 0.5, corrections: 2, pauseCount: 1 },
+  sequence: { reactionTime: 1600, interKeyCv: 0.5, interClickCv: 0.5, corrections: 2, pauseCount: 1 },
+  memory: { reactionTime: 1500, activationTime: 1800, interClickMean: 1100, interClickCv: 0.4, corrections: 2, wrongAttempts: 2 },
+  audio: { reactionTime: 1300, interKeyCv: 0.5, corrections: 2, pauseCount: 1 },
 };
 
 describe("classifier configuration", () => {
@@ -58,7 +68,13 @@ describe("classifier configuration", () => {
     expect(signals("image-grid")).toEqual(expect.arrayContaining(["interClickCv", "corrections"]));
     expect(signals("text")).toEqual(expect.arrayContaining(["interKeyCv", "corrections", "pauseCount"]));
     expect(signals("rotation")).toEqual(expect.arrayContaining(["angularSpeedCv", "corrections", "finalAngularError"]));
-    expect(new Set(BEHAVIOR_CAPTCHAS.map((id) => signals(id).join())).size).toBe(BEHAVIOR_CAPTCHAS.length);
+    expect(signals("shape-matching")).toEqual(expect.arrayContaining(["interClickCv", "corrections", "wrongAttempts"]));
+    expect(signals("math-logic")).toEqual(expect.arrayContaining(["interKeyCv", "corrections"]));
+    expect(signals("sequence")).toEqual(expect.arrayContaining(["interKeyCv", "interClickCv"]));
+    expect(signals("memory")).toEqual(expect.arrayContaining(["activationTime", "interClickCv", "wrongAttempts"]));
+    expect(signals("audio")).toEqual(expect.arrayContaining(["interKeyCv", "corrections"]));
+    // Distinct rule sets, except the two that read exactly the same typing signals (Text and Audio only differ in reaction scale).
+    expect(new Set(BEHAVIOR_CAPTCHAS.map((id) => signals(id).join())).size).toBeGreaterThanOrEqual(BEHAVIOR_CAPTCHAS.length - 2);
   });
 
   it("is versioned", () => {

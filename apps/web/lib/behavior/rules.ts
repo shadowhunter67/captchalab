@@ -79,6 +79,42 @@ export const RULES_BY_CAPTCHA: Readonly<Record<LabTaskId, readonly SignalRule[]>
     r("corrections", 0, 1, 1, ["no character was deleted", "không xoá ký tự nào"], ["a character was deleted and retyped", "có ký tự bị xoá và gõ lại"], { oneSided: "human" }),
     r("pauseCount", 0, 1, 0.5, ["no long pause while typing", "không dừng lâu khi gõ"], ["a pause of over a second while typing", "có lúc dừng hơn một giây khi gõ"], { oneSided: "human" }),
   ],
+  // Rules for the CAPTCHAs added in v0.7. The six sets above are frozen exactly as released in v0.5 (a test pins them).
+  "shape-matching": [
+    REACTION(150, 1000, 0.75),
+    r("interClickMean", 100, 800, 1, ["presses follow each other very quickly", "các lần nhấn nối nhau rất nhanh"], ["presses are spaced further apart", "các lần nhấn cách nhau xa hơn"]),
+    r("interClickCv", 0.03, 0.3, 1.25, ["presses arrive at almost exactly equal intervals", "các lần nhấn đến ở những khoảng gần như bằng nhau"], ["the gaps between presses differ", "khoảng cách giữa các lần nhấn khác nhau"]),
+    r("corrections", 0, 2, 0.75, ["no pairing was replaced", "không có cặp nào bị thay"], ["a pairing was replaced or removed", "có cặp bị thay hoặc bỏ"], { oneSided: "human" }),
+    r("wrongAttempts", 0, 2, 0.5, ["every pairing was right when made", "mọi cặp đều đúng ngay lúc ghép"], ["some pairings were wrong when made", "có cặp sai ngay lúc ghép"], { oneSided: "human" }),
+    r("pauseCount", 0, 2, 0.5, ["no long pause between presses", "không dừng lâu giữa các lần nhấn"], ["pauses of over a second between presses", "có khoảng dừng hơn một giây giữa các lần nhấn"], { oneSided: "human" }),
+  ],
+  "math-logic": [
+    REACTION(200, 1500),
+    r("interKeyCv", 0.03, 0.3, 1.5, ["keys are struck at almost exactly equal intervals", "các phím được gõ ở những khoảng gần như bằng nhau"], ["the gaps between keys differ", "khoảng cách giữa các phím khác nhau"]),
+    r("corrections", 0, 1, 1, ["no character was deleted", "không xoá ký tự nào"], ["a character was deleted and retyped", "có ký tự bị xoá và gõ lại"], { oneSided: "human" }),
+    r("pauseCount", 0, 1, 0.5, ["no long pause while typing", "không dừng lâu khi gõ"], ["a pause of over a second while typing", "có lúc dừng hơn một giây khi gõ"], { oneSided: "human" }),
+  ],
+  sequence: [
+    REACTION(150, 1500),
+    r("interKeyCv", 0.03, 0.3, 1.5, ["keys are struck at almost exactly equal intervals", "các phím được gõ ở những khoảng gần như bằng nhau"], ["the gaps between keys differ", "khoảng cách giữa các phím khác nhau"]),
+    r("interClickCv", 0.03, 0.3, 1.25, ["presses arrive at almost exactly equal intervals", "các lần nhấn đến ở những khoảng gần như bằng nhau"], ["the gaps between presses differ", "khoảng cách giữa các lần nhấn khác nhau"]),
+    r("corrections", 0, 1, 1, ["no answer was changed or deleted", "không đổi hay xoá đáp án nào"], ["an answer was changed or a character deleted", "có đáp án bị đổi hoặc ký tự bị xoá"], { oneSided: "human" }),
+    r("pauseCount", 0, 1, 0.5, ["no long pause", "không dừng lâu"], ["a pause of over a second", "có lúc dừng hơn một giây"], { oneSided: "human" }),
+  ],
+  memory: [
+    REACTION(150, 1200),
+    r("activationTime", 150, 1500, 0.75, ["recall started the moment the preview ended", "bắt đầu nhớ lại ngay khi hết phần xem trước"], ["a pause before the first recalled item", "dừng trước món đầu tiên được nhớ lại"]),
+    r("interClickMean", 100, 800, 1, ["recalled items follow each other very quickly", "các món nhớ lại nối nhau rất nhanh"], ["recalled items are spaced further apart", "các món nhớ lại cách nhau xa hơn"]),
+    r("interClickCv", 0.03, 0.3, 1.25, ["recall actions arrive at almost exactly equal intervals", "các thao tác nhớ lại đến ở những khoảng gần như bằng nhau"], ["the gaps between recall actions differ", "khoảng cách giữa các thao tác nhớ lại khác nhau"]),
+    r("corrections", 0, 2, 0.75, ["nothing was undone or deselected", "không hoàn tác hay bỏ chọn gì"], ["a choice was undone or deselected", "có lựa chọn bị hoàn tác hoặc bỏ chọn"], { oneSided: "human" }),
+    r("wrongAttempts", 0, 2, 0.5, ["every recalled item was right when chosen", "mọi món nhớ lại đều đúng lúc chọn"], ["some recalled items were wrong when chosen", "có món nhớ lại sai lúc chọn"], { oneSided: "human" }),
+  ],
+  audio: [
+    REACTION(150, 1200),
+    r("interKeyCv", 0.03, 0.3, 1.5, ["keys are struck at almost exactly equal intervals", "các phím được gõ ở những khoảng gần như bằng nhau"], ["the gaps between keys differ", "khoảng cách giữa các phím khác nhau"]),
+    r("corrections", 0, 1, 1, ["no character was deleted", "không xoá ký tự nào"], ["a character was deleted and retyped", "có ký tự bị xoá và gõ lại"], { oneSided: "human" }),
+    r("pauseCount", 0, 1, 0.5, ["no long pause while typing", "không dừng lâu khi gõ"], ["a pause of over a second while typing", "có lúc dừng hơn một giây khi gõ"], { oneSided: "human" }),
+  ],
   rotation: [
     r("angularSpeedCv", 0.1, 0.6, 1, ["angular speed barely changes", "tốc độ góc gần như không đổi"], ["angular speed varies a lot", "tốc độ góc thay đổi nhiều"]),
     SAMPLE_CV(),

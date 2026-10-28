@@ -82,7 +82,7 @@ Not release blockers unless stated. Format: issue · impact · affected CAPTCHA 
 - Signal definitions are versioned (`behavior-signals@1`) but there is no stored data to migrate yet · Behavioral Lab · when export arrives
 
 ## Challenge builder and experiments (v0.6)
-- Only the six Behavioral Lab CAPTCHAs are supported by the builder and the workspace; the other six have no behavioral coverage · Builder / Experiments · later
+- Eleven of the twelve CAPTCHAs are supported by the builder and the workspace (Proof of Work is excluded by design) · Builder / Experiments · by design
 - There are no custom challenge parameters beyond variant, difficulty and seed, because the plugins take none; real custom parameters need a declarative parameter schema in the plugin contract · Builder · later
 - Nothing persists (by design): reloading loses an experiment that was not exported; a persistent workspace would need an explicit, opt-in design · Experiments · later
 - One challenge per experiment; cross-challenge or cross-CAPTCHA grouping is not supported · Experiments · later
@@ -95,4 +95,12 @@ Not release blockers unless stated. Format: issue · impact · affected CAPTCHA 
 - Import accepts only version 1 of each format; migrations will be needed when a version 2 exists · Data formats · later
 - The tag and note fields are plain text only; there is no Markdown · Experiments · by design
 - The download uses a Blob URL and an anchor; browsers that block programmatic downloads would need a manual save-as fallback · Experiments · later
+
+## Eleven-CAPTCHA coverage (v0.7)
+- Proof of Work is excluded from the Behavioral Lab by design (its features describe the computation); it is the only CAPTCHA without behavioral coverage · Behavioral Lab · by design
+- The rules for the five new CAPTCHAs are hand-set like the others, with the same ranges for the shared signals; typing speed for Math / Audio (where people stop to think or listen) may deserve its own ranges once real data exists · Classifier · later
+- Memory's recorded recall start comes from the page's own clock mark; a session imported without it (`null`) has no recall actions at all, so its recall signals are missing · Memory · later
+- Synthetic Sequence profiles are about timing, not about keys versus clicks, so the number and visual variants share names but differ in the events they write · Sequence · later
+- Audio synthetic sessions assume clip lengths from the digit count and gap, not from the real audio duration · Audio · later
+- Shape Matching, Memory and Sequence have no path view; they compare timelines like Checkbox and Image Grid · Compare · by design
 

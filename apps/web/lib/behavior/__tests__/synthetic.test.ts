@@ -43,7 +43,7 @@ describe.each(BEHAVIOR_CAPTCHAS)("synthetic %s", (id) => {
           expect(isKeyEvent(e)).toBe(true);
         }
       }
-      expect(["mouse", "keyboard"]).toContain(s.inputModality);
+      expect(["mouse", "keyboard", "mixed"]).toContain(s.inputModality);
     }
   });
 

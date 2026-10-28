@@ -85,7 +85,7 @@ const nextId = (prefix: string, used: readonly string[]): string => {
 export function withRecorded(exp: Experiment, entry: Omit<RecordedEntry, "id" | "imported" | "source"> & { id?: string; imported?: boolean; source?: SessionSource }): Experiment {
   if (exp.recorded.length >= MAX_RECORDED) throw new FormatError("too-large", `an experiment holds at most ${MAX_RECORDED} recorded sessions`);
   if (entry.session.captchaId !== exp.definition.captcha) throw new FormatError("incompatible", `the session is from "${entry.session.captchaId}", the experiment is "${exp.definition.captcha}"`);
-  const needsLayout = exp.definition.captcha === "slider" || exp.definition.captcha === "drag-drop" || exp.definition.captcha === "rotation";
+  const needsLayout = exp.definition.captcha === "slider" || exp.definition.captcha === "drag-drop" || exp.definition.captcha === "rotation" || exp.definition.captcha === "memory";
   if (needsLayout && entry.context === undefined) throw new FormatError("invalid", `a ${exp.definition.captcha} session needs the layout it was recorded in`);
   if (!needsLayout && entry.context !== undefined) throw new FormatError("invalid", `${exp.definition.captcha} sessions take no layout`);
   const id = entry.id ?? nextId("r", exp.recorded.map((r) => r.id));
@@ -107,7 +107,12 @@ export function withSynthetic(exp: Experiment, spec: { profile: string; baseSeed
   if (syntheticTotal(exp) + spec.runs > MAX_SYNTHETIC_TOTAL) throw new FormatError("too-large", `an experiment holds at most ${MAX_SYNTHETIC_TOTAL} synthetic runs in total`);
   const id = spec.id ?? nextId("s", exp.synthetic.map((s) => s.id));
   if (exp.synthetic.some((s) => s.id === id) || id === RECORDED_COHORT) throw new FormatError("invalid", `duplicate synthetic batch id "${id}"`);
-  const context = spec.context ?? exp.recorded[0]?.context ?? defaultContext(captcha);
+  // Memory's context is derived from the challenge (a synthetic session has its own recall clock); the others follow
+  // the first recorded session's layout when there is one.
+  const context =
+    captcha === "memory"
+      ? defaultContext(captcha, generateChallenge(exp.definition))
+      : (spec.context ?? exp.recorded[0]?.context ?? defaultContext(captcha));
   return { ...exp, synthetic: [...exp.synthetic, { id, profile: spec.profile, baseSeed: spec.baseSeed, runs: spec.runs, context }] };
 }
 

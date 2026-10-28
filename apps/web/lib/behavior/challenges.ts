@@ -26,4 +26,9 @@ export const CHALLENGE_GENERATORS: Readonly<Record<BehaviorCaptchaId, Generate>>
   "image-grid": gen("image-grid"),
   text: gen("text"),
   rotation: gen("rotation"),
+  "shape-matching": gen("shape-matching"),
+  "math-logic": gen("math-logic"),
+  sequence: gen("sequence"),
+  memory: gen("memory"),
+  audio: gen("audio"),
 };
