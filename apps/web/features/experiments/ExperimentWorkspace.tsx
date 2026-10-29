@@ -510,6 +510,7 @@ export function ExperimentWorkspace() {
             <h2 id="ses-h" className="text-base font-semibold">{t("4. Các phiên", "4. Sessions")}</h2>
             <p className="text-xs text-muted" data-testid="exp-dataset-link">
               <Link prefetch={false} href="/experiments/dataset" className="underline">{t(`Bộ dữ liệu có nhãn (${dataset.records.length} phiên)`, `Labeled dataset (${dataset.records.length} sessions)`)}</Link>
+              {" · "}<Link prefetch={false} href="/experiments/evaluation" className="underline" data-testid="exp-evaluation-link">{t("Đánh giá bộ phân loại", "Classifier evaluation")}</Link>
               {" · "}{t("Thêm từng phiên vào đó bằng nút “Thêm vào bộ dữ liệu”; không có gì được thêm tự động.", "Add sessions one by one with the “Add to dataset” button; nothing is added automatically.")}
             </p>
             <div className="flex flex-wrap gap-3" role="group" aria-label={t("Bộ lọc", "Filters")}>

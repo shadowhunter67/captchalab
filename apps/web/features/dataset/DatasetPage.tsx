@@ -113,7 +113,8 @@ export function DatasetPage() {
   return (
     <main className="mx-auto max-w-5xl space-y-6 px-4 py-8 sm:px-6">
       <header>
-        <Link prefetch={false} href="/experiments" className="text-sm text-muted underline">{t("Thí nghiệm", "Experiments")}</Link>
+        
+        {" · "}<Link prefetch={false} href="/experiments/evaluation" className="text-sm text-muted underline" data-testid="ds-to-evaluation">{t("Đánh giá bộ phân loại", "Classifier evaluation")}</Link>
         <h1 className="mt-2 text-2xl font-semibold tracking-tight">{t("Bộ dữ liệu có nhãn", "Labeled dataset")}</h1>
         <p className="mt-1 text-sm text-muted">
           {t(
