@@ -156,8 +156,8 @@ export function catalogFor(t: Translate = EN): readonly CatalogEntry[] {
           t("Bản demo này không có cách dùng bàn phím thay thế.", "No keyboard alternative in this demo."),
         ],
         accessibility: t(
-          "Người chỉ dùng bàn phím không dùng được bản demo này; hạn chế này được ghi rõ trên trang.",
-          "Not usable by keyboard-only users in this demo; this limitation is documented on the page.",
+          "Có thể kéo bằng con trỏ hoặc hoàn thành chỉ bằng bàn phím: Enter hoặc Space để chọn hình, rồi Enter hoặc Space trên vùng thả; Escape để bỏ chọn. Chưa kiểm tra với mọi trình đọc màn hình.",
+          "Drag with a pointer, or finish with the keyboard alone: Enter or Space selects a shape, then Enter or Space on a drop area places it; Escape unselects. Not checked with every screen reader.",
         ),
         automation: `${t(
           "Có thể tạo các lần kéo từ hình học của ô đích.",

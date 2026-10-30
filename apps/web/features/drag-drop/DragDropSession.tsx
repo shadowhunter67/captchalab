@@ -31,7 +31,7 @@ interface Completed {
   layoutChanged: boolean;
 }
 
-const INITIAL_VIEW: DragDropViewState = { ready: false, activeItemId: null, placements: {}, allPlaced: false, lastDrop: null };
+const INITIAL_VIEW: DragDropViewState = { ready: false, activeItemId: null, selectedItemId: null, keyNotice: null, placements: {}, allPlaced: false, lastDrop: null };
 
 interface Props {
   challenge: DragDropChallenge;
@@ -78,8 +78,8 @@ export function DragDropSession({ challenge: initialChallenge, onNewChallenge, o
       },
       onState: (s) => {
         setView(s);
-        if (s.activeItemId !== null) {
-          setCompleted(null); // a held item means the old result no longer describes the board
+        if (s.activeItemId !== null || s.selectedItemId !== null) {
+          setCompleted(null); // a held or selected item means the old result no longer describes the board
           setError(null);
           onResetRef.current?.();
         }
@@ -126,6 +126,15 @@ export function DragDropSession({ challenge: initialChallenge, onNewChallenge, o
         : `${shapeName(kindOf(drop.itemId), t)}: ${t("không nằm trên vùng thả nào nên đã quay về.", "not on a drop area, so it went back.")}`
     : "";
 
+  const selectedText =
+    view.selectedItemId !== null
+      ? t(`Đã chọn: ${shapeName(kindOf(view.selectedItemId), t)}. Hãy chọn một vùng thả (Enter hoặc Space), hoặc nhấn Escape để bỏ chọn.`, `Selected: ${shapeName(kindOf(view.selectedItemId), t)}. Choose a drop area (Enter or Space), or press Escape to unselect.`)
+      : view.keyNotice === "deselected"
+        ? t("Đã bỏ chọn.", "Selection cancelled.")
+        : view.keyNotice === "needs-selection"
+          ? t("Hãy chọn một hình trước (Enter hoặc Space), rồi chọn vùng thả.", "Select a shape first (Enter or Space), then choose a drop area.")
+          : "";
+
   return (
     <div className="space-y-6">
       <section aria-labelledby="try-h" className="rounded-lg border border-line bg-panel p-4">
@@ -134,16 +143,16 @@ export function DragDropSession({ challenge: initialChallenge, onNewChallenge, o
         </h2>
         <p className="mb-4 text-sm text-muted">
           {t(
-            `Kéo từng hình vào vùng nét đứt có cùng đường viền. Khi cả ${challenge.items.length} hình đã được đặt, hãy nhấn Xác minh. Hình thả ra ngoài mọi vùng sẽ quay về; thả vào vùng đã có hình sẽ đẩy hình đang ở đó về chỗ cũ; bạn có thể kéo lại hình đã đặt.`,
-            `Drag each shape onto the dashed area with the same outline. When all ${challenge.items.length} shapes are placed, press Verify. A shape dropped away from any area goes back; one dropped on an occupied area sends the shape there back; you can drag a placed shape again.`,
+            `Kéo từng hình vào vùng nét đứt có cùng đường viền; hoặc dùng bàn phím: Tab tới một hình, nhấn Enter hoặc Space để chọn, Tab tới vùng thả rồi nhấn Enter hoặc Space để đặt (Escape để bỏ chọn). Khi cả ${challenge.items.length} hình đã được đặt, hãy nhấn Xác minh. Hình thả ra ngoài mọi vùng sẽ quay về; đặt vào vùng đã có hình sẽ đẩy hình đang ở đó về chỗ cũ; bạn có thể chọn hoặc kéo lại hình đã đặt để sửa.`,
+            `Drag each shape onto the dashed area with the same outline; or use the keyboard: Tab to a shape, press Enter or Space to select it, Tab to a drop area and press Enter or Space to place it (Escape unselects). When all ${challenge.items.length} shapes are placed, press Verify. A shape dropped away from any area goes back; placing on an occupied area sends the shape there back; you can select or drag a placed shape again to correct it.`,
           )}
         </p>
         <DragDropSurface challenge={challenge} controller={controller} view={view} applyItemRef={applyItemRef} />
         <p role="status" className="mt-3 min-h-5 text-sm" data-testid="drag-status">
           {view.ready
             ? t(
-                `Đã đặt ${placedCount}/${challenge.items.length} hình. ${dropText}`,
-                `${placedCount} of ${challenge.items.length} shapes placed. ${dropText}`,
+                `Đã đặt ${placedCount}/${challenge.items.length} hình. ${selectedText || dropText}`,
+                `${placedCount} of ${challenge.items.length} shapes placed. ${selectedText || dropText}`,
               )
             : t("Đang đo bảng…", "Measuring the board…")}
         </p>
@@ -167,8 +176,8 @@ export function DragDropSession({ challenge: initialChallenge, onNewChallenge, o
         </div>
         <p className="mt-3 text-xs text-muted">
           {t(
-            "Khả năng tiếp cận: thử thách này cần con trỏ (chuột, cảm ứng hoặc bút) để kéo. Hiện chưa có cách thay thế bằng bàn phím, nên người chỉ dùng bàn phím hoặc nhiều người dùng công nghệ hỗ trợ không dùng được. Các hình và vùng thả có tên bằng chữ, và trạng thái được nêu bằng lời chứ không chỉ bằng màu. Đây là thử thách minh họa, không thay thế được một CAPTCHA thực tế có khả năng tiếp cận tốt.",
-            "Accessibility: this challenge needs a pointer (mouse, touch or pen) to drag. There is no keyboard alternative yet, so it is not accessible to keyboard-only or many assistive-technology users. Shapes and drop areas have text names, and state is given in words, not only color. This is a demonstration challenge and is not a substitute for an accessible production CAPTCHA.",
+            "Khả năng tiếp cận: có thể kéo bằng con trỏ (chuột, cảm ứng hoặc bút) hoặc hoàn thành chỉ bằng bàn phím (chọn hình rồi chọn vùng thả). Các hình và vùng thả có tên bằng chữ, và trạng thái được nêu bằng lời chứ không chỉ bằng màu. Cách dùng bàn phím chưa được kiểm tra với mọi trình đọc màn hình. Đây là thử thách minh họa, không thay thế được một CAPTCHA thực tế có khả năng tiếp cận tốt.",
+            "Accessibility: you can drag with a pointer (mouse, touch or pen) or finish with the keyboard alone (select a shape, then choose a drop area). Shapes and drop areas have text names, and state is given in words, not only color. The keyboard flow has not been checked with every screen reader. This is a demonstration challenge and is not a substitute for an accessible production CAPTCHA.",
           )}
         </p>
       </section>

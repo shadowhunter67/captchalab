@@ -72,8 +72,8 @@ export function DragDropLearn() {
       <h3 className="font-semibold">{t("Khả năng tiếp cận", "Accessibility")}</h3>
       <p className="text-muted">
         {t(
-          "Thử thách này cần con trỏ. Phiên bản này chưa có cách thay thế bằng bàn phím, nên người chỉ dùng bàn phím không thể hoàn thành, và trình đọc màn hình chỉ nghe được tên và trạng thái bằng lời chứ không di chuyển được các hình. Một thiết kế bàn phím (chọn hình, chuyển giữa các vùng, đặt xuống) nằm trong danh sách cần làm; nó cần mô hình tương tác riêng chứ không bắt chước việc kéo.",
-          "This challenge depends on a pointer. There is no keyboard alternative in this version, so keyboard-only users cannot complete it, and screen readers get names and state in words but no way to move the shapes. A keyboard design (select a shape, move between areas, place it) is on the backlog; it would need its own interaction model rather than imitating dragging.",
+          "Có thể kéo bằng con trỏ, hoặc hoàn thành chỉ bằng bàn phím: Tab tới một hình, nhấn Enter hoặc Space để chọn, Tab tới vùng thả rồi nhấn Enter hoặc Space để đặt; Escape bỏ chọn, và chọn lại một hình đã đặt để sửa. Bàn phím dùng cùng quy tắc đặt hình như kéo thả (vùng đã có hình thì hình cũ quay về), chỉ khác cách nhập. Trạng thái được thông báo bằng lời. Cách này chưa được kiểm tra với mọi trình đọc màn hình.",
+          "You can drag with a pointer, or finish with the keyboard alone: Tab to a shape and press Enter or Space to select it, Tab to a drop area and press Enter or Space to place it; Escape unselects, and selecting a placed shape again corrects it. The keyboard uses the same placement rule as a drag (an occupied area sends its shape back); only the input differs. State is announced in words. The flow has not been checked with every screen reader.",
         )}
       </p>
 

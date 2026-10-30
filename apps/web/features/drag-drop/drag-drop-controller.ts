@@ -7,6 +7,7 @@ import {
   heldCenterOf,
   isValidLayout,
   makeDragItemTarget,
+  makeDropTarget,
   normalizedToPx,
   resolveDrop,
   type DragDropAnswer,
@@ -26,11 +27,17 @@ export interface LastDrop {
   bumpedItemId: string | null;
 }
 
+/** What the last keyboard action did, for the status line. Pointer drags never set it. */
+export type KeyNotice = "selected" | "deselected" | "needs-selection" | null;
+
 /** Coarse state for rendering. Emitted only when it changes (lift, drop, cancel), never per pointermove. */
 export interface DragDropViewState {
   ready: boolean;
   /** Item currently held, or null. */
   activeItemId: string | null;
+  /** Item picked with the keyboard and waiting for a drop area, or null. Independent of the pointer drag. */
+  selectedItemId: string | null;
+  keyNotice: KeyNotice;
   /** Target of each item at rest; a held item shows null (it is in the air). */
   placements: Readonly<Record<string, string | null>>;
   allPlaced: boolean;
@@ -75,6 +82,8 @@ export class DragDropController {
   private state: DragDropState;
   private active: ActiveDrag | null = null;
   private lastDrop: LastDrop | null = null;
+  private selected: string | null = null;
+  private keyNotice: KeyNotice = null;
   private readonly ignored = new Set<number>();
   private disposed = false;
   /** Set by the DOM layer so an aborted drag also releases pointer capture. */
@@ -110,6 +119,8 @@ export class DragDropController {
     const center = this.state.centers[itemId];
     if (!center) return false;
     this.ignored.delete(sample.pointerId); // a new press on a pointer that was ignored after an abort
+    this.selected = null; // a pointer drag replaces a pending keyboard selection
+    this.keyNotice = null;
     this.opts.recorder.record(toRecorderEvent("pointerdown", sample, makeDragItemTarget(itemId)));
     this.active = { pointerId: sample.pointerId, itemId, grabOffset: grabOffsetOf(normalizedToPx(center, this.layout), sample), last: sample };
     this.lastDrop = null;
@@ -160,6 +171,56 @@ export class DragDropController {
     this.opts.onVerify(buildAnswer(this.opts.challenge, this.state), this.layout);
   }
 
+  /**
+   * Keyboard input: Enter or Space on a shape selects it (again: unselects); Enter or Space on a drop area places the
+   * selected shape there; Escape unselects. Placement goes through the SAME `resolveDrop` as a pointer release, with the
+   * center of the chosen drop area as the release point, so a wrong area, an occupied area (the occupant goes back) and
+   * a correction (the shape leaves its old area) behave exactly as they do for a drag. Ignored during a pointer drag.
+   * Only the control key (`code`: Enter, Space or Escape) and the semantic target are recorded, never anything typed.
+   */
+  keySelect(itemId: string, code: string): void {
+    if (this.disposed || this.layout === null || this.active !== null || !(itemId in this.state.centers)) return;
+    this.opts.recorder.record({ type: "keydown", code, target: makeDragItemTarget(itemId) });
+    this.lastDrop = null;
+    if (this.selected === itemId) {
+      this.selected = null;
+      this.keyNotice = "deselected";
+    } else {
+      this.selected = itemId;
+      this.keyNotice = "selected";
+    }
+    this.emit();
+  }
+
+  keyPlace(targetId: string, code: string): void {
+    if (this.disposed || this.layout === null || this.active !== null) return;
+    const target = this.opts.challenge.targets.find((t) => t.id === targetId);
+    if (!target) return;
+    this.opts.recorder.record({ type: "keydown", code, target: makeDropTarget(targetId) });
+    const itemId = this.selected;
+    if (itemId === null) {
+      this.keyNotice = "needs-selection";
+      this.emit();
+      return;
+    }
+    const res = resolveDrop(this.opts.challenge, this.layout, this.state, itemId, normalizedToPx(target.position, this.layout));
+    this.state = res.state;
+    this.selected = null;
+    this.keyNotice = null;
+    this.lastDrop = { itemId, outcome: res.outcome, targetId: res.targetId, bumpedItemId: res.bumpedItemId };
+    this.paintAll();
+    this.emit();
+  }
+
+  keyCancel(code: string): void {
+    if (this.disposed || this.layout === null || this.active !== null || this.selected === null) return;
+    this.opts.recorder.record({ type: "keydown", code, target: makeDragItemTarget(this.selected) });
+    this.selected = null;
+    this.keyNotice = "deselected";
+    this.lastDrop = null;
+    this.emit();
+  }
+
   /** Reverses dispose(); React StrictMode runs effect cleanup then setup on the same instance. */
   activate(): void {
     this.disposed = false;
@@ -169,6 +230,7 @@ export class DragDropController {
     if (this.active) this.releasePointer(this.active.pointerId); // never leave a captured pointer behind
     this.disposed = true;
     this.active = null;
+    this.selected = null;
     this.ignored.clear();
   }
 
@@ -204,6 +266,8 @@ export class DragDropController {
     this.opts.onState({
       ready: this.layout !== null,
       activeItemId: this.active?.itemId ?? null,
+      selectedItemId: this.selected,
+      keyNotice: this.keyNotice,
       placements,
       allPlaced: this.active === null && allPlaced(this.opts.challenge, this.state),
       lastDrop: this.lastDrop,

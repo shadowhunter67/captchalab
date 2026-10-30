@@ -9,6 +9,8 @@ import {
   type DragDropLayout,
 } from "@captchalab/captcha-plugins";
 import type { PointerSample } from "@/lib/pointer-adapter";
+import { analyzeSession } from "@/lib/behavior/analysis";
+import { classify } from "@/lib/behavior/classifier";
 import { DragDropController, type DragDropViewState } from "../drag-drop-controller";
 
 const layout: DragDropLayout = { width: 400, height: 300 };
@@ -261,5 +263,121 @@ describe("DragDropController", () => {
     const set = registry.get("drag-drop").extractFeatures(challenge, session, { layout });
     expect(set.features).toMatchObject({ successfulDropCount: 2, failedDropCount: 2, cancelledDragCount: 1, numberOfDragAttempts: 5 });
     expect(extractDragDropFeatures(challenge, session, { layout }).features.timeToAllCorrect).not.toBeNull();
+  });
+});
+
+describe("DragDropController: keyboard input", () => {
+  it("select, then place on the matching area: same rule and answer as a drag; selection is cleared", () => {
+    const { controller, last, verifies } = setup();
+    controller.keySelect("item-a", "Enter");
+    expect(last()).toMatchObject({ selectedItemId: "item-a", keyNotice: "selected", activeItemId: null });
+    controller.keyPlace("target-a", "Space");
+    expect(last().selectedItemId).toBeNull();
+    expect(last().placements["item-a"]).toBe("target-a");
+    expect(last().lastDrop).toMatchObject({ itemId: "item-a", outcome: "correct", targetId: "target-a", bumpedItemId: null });
+    controller.keySelect("item-b", "Enter");
+    controller.keyPlace("target-b", "Enter");
+    expect(last().allPlaced).toBe(true);
+    controller.verify();
+    expect(verifies[0]).toEqual({ placements: { "item-a": "target-a", "item-b": "target-b" } });
+  });
+
+  it("a wrong area is a wrong-target outcome; an occupied area sends its shape back; a placed shape can be moved", () => {
+    const { controller, last, positions } = setup();
+    controller.keySelect("item-a", "Enter");
+    controller.keyPlace("target-b", "Enter");
+    expect(last().lastDrop).toMatchObject({ outcome: "wrong-target", targetId: "target-b" });
+    controller.keySelect("item-b", "Enter");
+    controller.keyPlace("target-b", "Enter");
+    expect(last().lastDrop).toMatchObject({ outcome: "correct", bumpedItemId: "item-a" });
+    expect(last().placements).toEqual({ "item-a": null, "item-b": "target-b" });
+    expect(positions["item-a"]).toEqual({ x: 100, y: 240 }); // back at its start
+    controller.keySelect("item-b", "Enter"); // correction: pick the placed shape up again
+    controller.keyPlace("target-a", "Enter");
+    expect(last().placements).toEqual({ "item-a": null, "item-b": "target-a" });
+  });
+
+  it("selecting the same shape again, or Escape, unselects without touching placements", () => {
+    const { controller, last } = setup();
+    controller.keySelect("item-a", "Enter");
+    controller.keySelect("item-a", "Enter");
+    expect(last()).toMatchObject({ selectedItemId: null, keyNotice: "deselected" });
+    controller.keySelect("item-b", "Space");
+    controller.keyCancel("Escape");
+    expect(last()).toMatchObject({ selectedItemId: null, keyNotice: "deselected" });
+    expect(last().placements).toEqual({ "item-a": null, "item-b": null });
+    controller.keyCancel("Escape"); // nothing selected: nothing happens
+    expect(last().keyNotice).toBe("deselected");
+  });
+
+  it("a drop area with nothing selected places nothing and says why", () => {
+    const { controller, last } = setup();
+    controller.keyPlace("target-a", "Enter");
+    expect(last()).toMatchObject({ keyNotice: "needs-selection", selectedItemId: null });
+    expect(last().placements).toEqual({ "item-a": null, "item-b": null });
+  });
+
+  it("records only control keys with semantic targets, never anything typed", () => {
+    const { controller, recorder } = setup();
+    controller.keySelect("item-a", "Enter");
+    controller.keyPlace("target-a", "Space");
+    controller.keySelect("item-b", "Space");
+    controller.keyCancel("Escape");
+    expect(recorder.snapshot().events).toEqual([
+      expect.objectContaining({ type: "keydown", code: "Enter", target: "drag-item:item-a" }),
+      expect.objectContaining({ type: "keydown", code: "Space", target: "drop-target:target-a" }),
+      expect.objectContaining({ type: "keydown", code: "Space", target: "drag-item:item-b" }),
+      expect.objectContaining({ type: "keydown", code: "Escape", target: "drag-item:item-b" }),
+    ]);
+    expect(recorder.snapshot().inputModality).toBe("keyboard");
+  });
+
+  it("is ignored while a pointer drag is active, and a pointer drag clears a pending selection", () => {
+    const { controller, last, recorder } = setup();
+    controller.keySelect("item-a", "Enter");
+    expect(controller.pointerDown(at(300, 240), "item-b")).toBe(true);
+    expect(last().selectedItemId).toBeNull();
+    const before = recorder.size;
+    controller.keySelect("item-a", "Enter");
+    controller.keyPlace("target-a", "Enter");
+    expect(recorder.size).toBe(before);
+    expect(last().placements["item-a"]).toBeNull();
+  });
+
+  it("does nothing without a measurable layout, for an unknown id, or after dispose", () => {
+    const noLayout = setup({ layout: null });
+    noLayout.controller.keySelect("item-a", "Enter");
+    expect(noLayout.states.at(-1)?.selectedItemId ?? null).toBeNull();
+    const s = setup();
+    s.controller.keySelect("nope", "Enter");
+    s.controller.keyPlace("nope", "Enter");
+    expect(s.recorder.size).toBe(0);
+    s.controller.dispose();
+    s.controller.keySelect("item-a", "Enter");
+    expect(s.recorder.size).toBe(0);
+  });
+
+  it("the feature extractor accepts a keyboard-only session: modality keyboard, no drag attempts, nothing thrown", () => {
+    const { controller, recorder } = setup();
+    controller.keySelect("item-a", "Enter");
+    controller.keyPlace("target-a", "Enter");
+    const session = recorder.snapshot();
+    const f = extractDragDropFeatures(challenge, session, { layout }).features;
+    expect(f.inputModality).toBe("keyboard");
+    expect(f.numberOfDragAttempts).toBe(0);
+    expect(deriveDragAttempts(challenge, layout, session).attempts).toEqual([]);
+  });
+
+  it("the Behavioral Lab reads a keyboard-only drag & drop session without throwing: pointer signals are missing, not zero", () => {
+    const { controller, recorder } = setup();
+    controller.keySelect("item-a", "Enter");
+    controller.keyPlace("target-a", "Enter");
+    controller.keySelect("item-b", "Enter");
+    controller.keyPlace("target-b", "Enter");
+    const vector = analyzeSession("drag-drop", challenge, recorder.snapshot(), layout);
+    expect(vector.inputModality).toBe("keyboard");
+    expect(vector.values.pointerDistance).toBeNull();
+    expect(vector.values.meanVelocity).toBeNull();
+    expect(["human-like", "synthetic-like", "uncertain"]).toContain(classify(vector).label);
   });
 });

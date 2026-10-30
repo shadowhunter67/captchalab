@@ -261,8 +261,8 @@ test("New challenge resets the board, result, selection and replay", async ({ pa
   for (const it of challenge.items) await expect(page.getByTestId(`item-${it.id}`)).toHaveAttribute("data-placement", "");
 });
 
-test("accessibility: named shapes and areas, status in words, honest pointer-only note, Learn", async ({ page }) => {
-  await expect(page.getByTestId(`item-${A}`)).toHaveAttribute("aria-label", /draggable with a pointer\. Not placed/);
+test("accessibility: named shapes and areas, status in words, keyboard note, Learn", async ({ page }) => {
+  await expect(page.getByTestId(`item-${A}`)).toHaveAttribute("aria-label", /select with Enter \/ Space\. Not placed/);
   await expect(page.getByTestId(`drop-${targetOf(A).id}`)).toHaveAttribute("aria-label", /Drop area for the .*Empty/);
   await dropOnOwnTarget(page, A);
   await expect(page.getByTestId(`item-${A}`)).toHaveAttribute("aria-label", /On the .* drop area/);
@@ -270,10 +270,10 @@ test("accessibility: named shapes and areas, status in words, honest pointer-onl
   await solveAll(page);
   await verify(page);
   await expect(page.getByTestId("result")).toContainText("Result: Passed");
-  await expect(page.getByText(/no keyboard\s+alternative yet/i).first()).toBeVisible();
+  await expect(page.getByText(/finish with the keyboard alone/i).first()).toBeVisible();
   const learn = page.getByTestId("learn");
   await expect(learn).toContainText("does not claim to reproduce the complete internal mechanisms");
-  await expect(learn).toContainText("no keyboard alternative");
+  await expect(learn).toContainText("finish with the keyboard alone");
   await expect(learn).toContainText("does not integrate with or automate any third-party service");
 });
 
@@ -313,4 +313,122 @@ test.describe("touch device", () => {
     const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
     expect(overflow).toBe(0);
   });
+});
+
+// ---- keyboard-only flow (v0.11) ----
+
+const itemEl = (page: Page, id: string) => page.getByTestId(`item-${id}`);
+const dropEl = (page: Page, itemId: string) => page.getByTestId(`drop-${targetOf(itemId).id}`);
+
+/** Select a shape and place it on a drop area, with the keyboard only. */
+async function keyPlace(page: Page, id: string, onTargetOf: string, key = "Enter") {
+  await itemEl(page, id).focus();
+  await page.keyboard.press(key);
+  await expect(itemEl(page, id)).toHaveAttribute("aria-pressed", "true");
+  await dropEl(page, onTargetOf).focus();
+  await page.keyboard.press(key);
+}
+
+test("keyboard only: select each shape and place it, then verify with the keyboard; the same verifier passes it", async ({ page }) => {
+  const assertNoDataLeft = await watchPrivacy(page);
+  await expect(page.getByTestId("verify")).toBeDisabled();
+  for (const id of [A, B, C]) {
+    await itemEl(page, id).focus();
+    await page.keyboard.press("Space");
+    await expect(page.getByTestId("drag-status")).toContainText("Selected:");
+    await expect(itemEl(page, id)).toHaveAttribute("data-selected", "true");
+    await dropEl(page, id).focus();
+    await page.keyboard.press("Enter");
+    await expect(itemEl(page, id)).toHaveAttribute("data-placement", targetOf(id).id);
+    await expect(itemEl(page, id)).toHaveAttribute("aria-pressed", "false");
+  }
+  await expect(page.getByTestId("drag-status")).toContainText("3 of 3 shapes placed");
+  await page.getByTestId("verify").focus();
+  await page.keyboard.press("Enter");
+  await expect(page.getByTestId("result")).toContainText("Passed");
+  await expect(page.getByTestId("metric-inputModality")).toHaveText("keyboard");
+  await expect(page.getByTestId("inspect")).not.toContainText(/Key[A-Z]|Digit\d/);
+  await assertNoDataLeft();
+});
+
+test("keyboard: Tab reaches every shape before any drop area", async ({ page }) => {
+  await itemEl(page, A).focus();
+  await page.keyboard.press("Tab");
+  await expect(itemEl(page, B)).toBeFocused();
+  await page.keyboard.press("Tab");
+  await expect(itemEl(page, C)).toBeFocused();
+  await page.keyboard.press("Tab");
+  await expect(page.getByTestId(`drop-${challenge.targets[0]!.id}`)).toBeFocused();
+});
+
+test("keyboard: Escape unselects and changes nothing; a drop area with nothing selected explains itself", async ({ page }) => {
+  await itemEl(page, A).focus();
+  await page.keyboard.press("Enter");
+  await expect(itemEl(page, A)).toHaveAttribute("aria-pressed", "true");
+  await page.keyboard.press("Escape");
+  await expect(itemEl(page, A)).toHaveAttribute("aria-pressed", "false");
+  await expect(page.getByTestId("drag-status")).toContainText("Selection cancelled");
+  await expect(page.getByTestId("drag-status")).toContainText("0 of 3 shapes placed");
+  await dropEl(page, A).focus();
+  await page.keyboard.press("Enter");
+  await expect(page.getByTestId("drag-status")).toContainText("Select a shape first");
+  await expect(itemEl(page, A)).toHaveAttribute("data-placement", "");
+  // Pressing Enter on the selected shape again also unselects it.
+  await itemEl(page, A).focus();
+  await page.keyboard.press("Enter");
+  await page.keyboard.press("Enter");
+  await expect(itemEl(page, A)).toHaveAttribute("aria-pressed", "false");
+});
+
+test("keyboard: a wrong area is reported, an occupied area sends its shape back, and a shape can be moved to correct it", async ({ page }) => {
+  await keyPlace(page, A, B); // A on B's area: wrong
+  await expect(itemEl(page, A)).toHaveAttribute("data-placement", targetOf(B).id);
+  await expect(page.getByTestId("drag-status")).toContainText("not its match");
+  await keyPlace(page, B, B); // B onto the area A is on: A goes back
+  await expect(itemEl(page, B)).toHaveAttribute("data-placement", targetOf(B).id);
+  await expect(itemEl(page, A)).toHaveAttribute("data-placement", "");
+  await expect(page.getByTestId("drag-status")).toContainText("went back");
+  await keyPlace(page, B, C); // correction: move B (already placed) elsewhere
+  await expect(itemEl(page, B)).toHaveAttribute("data-placement", targetOf(C).id);
+  await expect(dropEl(page, B)).toHaveAttribute("data-held", "");
+  for (const [id] of [[A], [B], [C]] as const) await keyPlace(page, id, id);
+  await page.getByTestId("verify").focus();
+  await page.keyboard.press("Space");
+  await expect(page.getByTestId("result")).toContainText("Passed");
+});
+
+test("keyboard: selecting after a result discards it, like lifting a shape does", async ({ page }) => {
+  for (const id of [A, B, C]) await keyPlace(page, id, id);
+  await page.getByTestId("verify").click();
+  await expect(page.getByTestId("result")).toBeVisible();
+  await itemEl(page, A).focus();
+  await page.keyboard.press("Enter");
+  await expect(page.getByTestId("inspect")).toHaveCount(0);
+});
+
+test("mixed pointer and keyboard in one session; a held key does not repeat; other keys are ignored", async ({ page }) => {
+  await keyPlace(page, A, A);
+  await dropOnOwnTarget(page, B);
+  await itemEl(page, C).focus();
+  await page.keyboard.down("Enter");
+  await page.keyboard.down("Enter"); // auto-repeat of a held key: must not toggle the selection off
+  await page.keyboard.up("Enter");
+  await expect(itemEl(page, C)).toHaveAttribute("aria-pressed", "true");
+  await page.keyboard.press("KeyA"); // not a control key of this flow: no effect, never recorded
+  await expect(itemEl(page, C)).toHaveAttribute("aria-pressed", "true");
+  await dropEl(page, C).focus();
+  await page.keyboard.press("Enter");
+  await page.getByTestId("verify").click();
+  await expect(page.getByTestId("result")).toContainText("Passed");
+  await expect(page.getByTestId("metric-inputModality")).toHaveText("mixed");
+  await expect(page.getByTestId("inspect")).not.toContainText(/KeyA/);
+});
+
+test("a pointer drag cancels a pending keyboard selection", async ({ page }) => {
+  await itemEl(page, A).focus();
+  await page.keyboard.press("Enter");
+  await expect(itemEl(page, A)).toHaveAttribute("aria-pressed", "true");
+  await dropOnOwnTarget(page, B);
+  await expect(itemEl(page, A)).toHaveAttribute("aria-pressed", "false");
+  await expect(itemEl(page, B)).toHaveAttribute("data-placement", targetOf(B).id);
 });
