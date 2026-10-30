@@ -304,3 +304,34 @@ test("Dataset: a file chosen for import is read locally and a bad file is reject
   await expect(page.getByTestId("ds-notice")).toBeVisible(); // a rejected file explains itself
   await expect(page.getByText(/Application error|TypeError/)).toHaveCount(0);
 });
+
+// ---------------------------------------------------------------------------------------- MatchKey and Tile Game
+// The default variant and difficulty are used on purpose: the page is opened with only a seed, and the same generator call
+// (no variant given) makes the same challenge, so the test does not depend on the UI to learn the answer.
+const MT_SEED = 31;
+const matchKey = registry.get("match-key").generate({ rng: createRng(MT_SEED) });
+const tileGame = registry.get("tile-game").generate({ rng: createRng(MT_SEED) });
+
+test("MatchKey (default variant): select the matching option, Verify, Passed; a new challenge is usable", async ({ page }) => {
+  await page.goto(`/playground/match-key?seed=${MT_SEED}`);
+  await expect(page.getByTestId("match-key")).toBeVisible();
+  await page.getByTestId(`option-${matchKey.correctId}`).click();
+  await expect(page.getByTestId(`option-${matchKey.correctId}`)).toHaveAttribute("aria-pressed", "true");
+  await page.getByTestId("verify").click();
+  await expect(page.getByTestId("result")).toContainText("Passed");
+  await page.getByRole("button", { name: "New challenge" }).click();
+  await expect(page.getByTestId("inspect")).toHaveCount(0);
+  await expect(page.getByTestId("verify")).toBeVisible();
+});
+
+test("Tile Game (default variant): select the required tiles, Verify, Passed; a new challenge is usable", async ({ page }) => {
+  await page.goto(`/playground/tile-game?seed=${MT_SEED}`);
+  await expect(page.getByTestId("tile-game")).toBeVisible();
+  for (const id of tileGame.answerIds) await page.getByTestId(`tile-${id}`).click();
+  await expect(page.getByTestId("tile-status")).toContainText(`${tileGame.required} of ${tileGame.required}`);
+  await page.getByTestId("verify").click();
+  await expect(page.getByTestId("result")).toContainText("Passed");
+  await page.getByRole("button", { name: "New challenge" }).click();
+  await expect(page.getByTestId("inspect")).toHaveCount(0);
+  await expect(page.getByTestId("verify")).toBeVisible();
+});

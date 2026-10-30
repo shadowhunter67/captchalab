@@ -113,3 +113,7 @@ Plugin `text`, route `/playground/text`: SVG distorted text deterministic, verif
 - Chỉ audit + đóng băng, KHÔNG thêm tính năng. Đã quét: secret/tracked files (sạch), license Apache-2.0 (LICENSE + mọi package.json), link markdown tương đối (không hỏng), build Pages 3,25 MB (không map/log/test), CI `permissions: contents: read` (pages.yml cần pages+id-token write để deploy). Sửa wording còn "alpha/beta" (README, SECURITY.md, docs/limitations.md).
 - Test mới: `stability.spec.ts` crawl mọi link nội bộ + #anchor (fail nếu 404/thiếu id); `evaluate.test.ts` quét mọi tổ hợp nhãn/kết quả → không NaN/Infinity.
 - Phát hành: `docs/releases/v1.0.0-rc.1.md`; tag + GitHub prerelease. Nếu có P0/P1 → rc.2; nếu ổn → 1.0.0 (không thêm tính năng giữa RC và final).
+
+## v1.0.0 Stable (2026-10-30)
+- Nâng RC lên stable, KHÔNG đổi mã sản phẩm (diff rc.1..HEAD chỉ gồm wording trạng thái + release notes). Điều kiện: không còn P0/P1, smoke production có MatchKey và Tile Game hoàn thành thật (chọn -> Verify -> Passed), Codex không P0/P1.
+- Sau 1.0: đừng tự mở phase mới; việc tiếp theo chỉ do phản hồi người dùng, lỗi đã xác nhận, dữ liệu nghiên cứu hoặc quyết định roadmap có chủ đích.

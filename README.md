@@ -8,7 +8,7 @@ It is not a bot-detection product, not a production anti-bot solution and not a 
 
 **Live demo: https://shadowhunter67.github.io/captchalab/** (pick a challenge on the left, try it on the right)
 
-> **Status: Release candidate (`1.0.0-rc.1`).** A freeze of behavior for 1.0: no new challenge families, and the classifier (`behavioral-baseline@1`), the dataset format and the evaluation math are unchanged since 0.10. See the [release notes](docs/releases/v1.0.0-rc.1.md), the [known limitations](docs/limitations.md) and the [privacy notes](docs/privacy.md).
+> **Status: 1.0.0 (stable).** The first stable release. It is the tested `1.0.0-rc.1` code promoted after a final production check; the classifier (`behavioral-baseline@1`), the dataset format and the evaluation math are unchanged since 0.10. Stable means the behavior is frozen and documented, not that the classifier is a validated detector. See the [release notes](docs/releases/v1.0.0.md), the [known limitations](docs/limitations.md) and the [privacy notes](docs/privacy.md).
 
 The site is in **Vietnamese by default**. Use the **VI / EN** button in the top-right corner to switch to English.
 
