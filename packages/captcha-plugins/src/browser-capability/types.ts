@@ -34,9 +34,11 @@ export interface BcFeatureContext {
 }
 
 /**
- * BROWSER CAPABILITY METRICS (schema browser-capability@1). They describe which APIs exist, not the person and not the
+ * BROWSER CAPABILITY METRICS (schema browser-capability@2). They describe which APIs exist, not the person and not the
  * device: counts of yes/no answers only. There is deliberately no timing here (a duration is device-performance
- * information), no score, no hash and no identifier.
+ * information), no score, no hash and no identifier. Schema @2: v0.10 removed reactionTime, probeTime and computeTime from
+ * @1. The shared base features (completionTime, eventCount) are the same on every page and describe the person's own
+ * session on the page, not the device.
  *
  * runCount          Presses of Run.
  * attemptCount      Same as runCount (common feature name).
@@ -51,5 +53,5 @@ export interface BcFeatures extends BaseCaptchaFeatures {
   inputModality: InputModality;
 }
 
-export const BC_FEATURES_SCHEMA = "browser-capability@1";
-export const BC_EXTRACTOR = "browser-capability@1";
+export const BC_FEATURES_SCHEMA = "browser-capability@2";
+export const BC_EXTRACTOR = "browser-capability@2";

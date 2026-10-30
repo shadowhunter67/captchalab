@@ -107,7 +107,7 @@ describe("feature extractor", () => {
   it("counts presses and capability answers (golden)", () => {
     const f = extractBcFeatures(c, session(press(120)), { supported: 4 });
     expect(f.features).toMatchObject({ runCount: 1, attemptCount: 1, checkCount: 4, supportedCount: 4 });
-    expect(f.schemaVersion).toBe("browser-capability@1");
+    expect(f.schemaVersion).toBe("browser-capability@2");
   });
   it("exposes no timing or device-performance field, in the types, the features or the view", () => {
     const f = extractBcFeatures(c, session(press(120)), { supported: 4 });
