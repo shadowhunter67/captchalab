@@ -141,19 +141,26 @@ describe("evaluate: every number is finite or null, whatever the mix", () => {
   const labels: GroundTruthLabel[] = ["human", "synthetic", "unknown"];
   const outputs: ClassificationLabel[] = ["human-like", "synthetic-like", "uncertain"];
   const finiteOrNull = (v: unknown): boolean => v === null || (typeof v === "number" && Number.isFinite(v));
-  it("sweeps 0..3 records of each (label, output) pair in several combinations", () => {
+  it("sweeps independent counts 0..3 for each of the 9 (label, output) cells (a 4^9 space, sampled with a coprime stride)", () => {
     const cells = labels.flatMap((l) => outputs.map((o) => [l, o] as const));
-    for (let mask = 0; mask < 1 << 9; mask += 7) {
+    const space = 4 ** cells.length;
+    let vectors = 0;
+    for (let idx = 0; idx < space; idx += 41) {
       const input: EvalInput[] = [];
       cells.forEach(([l, o], i) => {
-        const k = (mask >> (i % 9)) & 3;
+        const k = Math.floor(idx / 4 ** i) % 4; // each cell has its own base-4 digit
         for (let j = 0; j < k; j++) input.push(rec(l, o));
       });
       const e = evaluate(input);
-      expect(Object.values(e.metrics).every(finiteOrNull), `mask ${mask}`).toBe(true);
+      expect(Object.values(e.metrics).every(finiteOrNull), `vector ${idx}`).toBe(true);
       expect([e.eligible, e.decided, e.excludedUnknown].every(Number.isFinite)).toBe(true);
       expect(e.decided).toBeLessThanOrEqual(e.eligible);
-      for (const g of evaluateBy(input, (r) => r.captcha)) expect(Object.values(g.evaluation.metrics).every(finiteOrNull)).toBe(true);
+      vectors++;
     }
+    expect(vectors).toBeGreaterThan(6000);
+  });
+  it("grouped evaluation is finite too", () => {
+    const input = [...many(3, "human", "human-like"), ...many(2, "synthetic", "uncertain"), ...many(1, "unknown", "synthetic-like"), ...many(6, "synthetic", "synthetic-like")];
+    for (const g of evaluateBy(input, (r) => r.captcha)) expect(Object.values(g.evaluation.metrics).every(finiteOrNull)).toBe(true);
   });
 });

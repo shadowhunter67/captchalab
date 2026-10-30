@@ -4,6 +4,7 @@ import { expectValidIds, idProblems } from "./a11y";
 import { TAXONOMY } from "../lib/taxonomy";
 
 const PAGES = [
+  "/",
   "/playground",
   "/learn",
   "/behavior",
@@ -206,6 +207,7 @@ test("no broken internal link: every same-site link on every public page answers
   const entry = ["/", "/playground", "/learn", "/behavior", "/compare", "/builder", "/experiments", "/experiments/dataset", "/experiments/evaluation", "/behavior/invisible", ...TAXONOMY.map((e) => e.route)];
   const links = new Map<string, string>(); // "pathname+search" -> first page it was seen on
   const anchors = new Map<string, string>(); // "pathname#id" -> page
+  const rootAnchors = new Map<string, string>(); // "#id" on "/" -> page
   for (const route of entry) {
     await page.goto(route);
     await page.waitForLoadState("networkidle");
@@ -218,7 +220,9 @@ test("no broken internal link: every same-site link on every public page answers
     for (const l of found) {
       if (!l) continue;
       if (!links.has(l.path)) links.set(l.path, route);
-      if (l.hash && l.path.split("?")[0] !== "/") anchors.set(`${l.path}#${l.hash}`, route);
+      if (!l.hash) continue;
+      if (l.path.split("?")[0] === "/") rootAnchors.set(l.hash, route); // the home shell opens the item named by the hash
+      else anchors.set(`${l.path}#${l.hash}`, route);
     }
   }
   const dead: string[] = [];
@@ -233,6 +237,8 @@ test("no broken internal link: every same-site link on every public page answers
     await page.waitForLoadState("networkidle");
     if ((await page.locator(`[id="${id}"]`).count()) === 0) missing.push(`${key} (from ${from})`);
   }
+  const shellItems = new Set<string>([...TAXONOMY.map((e) => e.id as string), "behavior", "builder", "experiments", "compare", "learn"]);
+  for (const [id, from] of rootAnchors) if (!shellItems.has(id)) missing.push(`/#${id} (from ${from}) is not a home item`);
   expect(dead).toEqual([]);
   expect(missing).toEqual([]);
   expect(links.size).toBeGreaterThan(20);
