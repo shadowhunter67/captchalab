@@ -6,7 +6,7 @@ import { isReportMessage, type SessionReport } from "@/lib/embed-report";
 import { useLang, useT } from "@/lib/i18n";
 import { translateReason } from "@/lib/i18n/reasons";
 
-type ItemId = "slider" | "checkbox" | "text" | "drag-drop" | "rotation" | "image-grid" | "shape-matching" | "math-logic" | "sequence" | "memory" | "proof-of-work" | "audio" | "match-key" | "tile-game" | "behavior" | "builder" | "experiments" | "compare" | "learn";
+type ItemId = "slider" | "checkbox" | "text" | "drag-drop" | "rotation" | "image-grid" | "shape-matching" | "math-logic" | "sequence" | "memory" | "proof-of-work" | "audio" | "match-key" | "tile-game" | "proof-of-space" | "behavior" | "builder" | "experiments" | "compare" | "learn";
 type Tab = "experience" | "events" | "analysis" | "access";
 type SideTab = "summary" | "log" | "features";
 
@@ -19,7 +19,7 @@ const GROUPS: readonly Group[] = [
   { title: ["Cơ bản", "Basics"], items: ["slider", "checkbox", "text"] },
   { title: ["Tư duy", "Reasoning"], items: ["math-logic", "sequence", "shape-matching", "memory"] },
   { title: ["Ghép & chọn", "Match & pick"], items: ["match-key", "tile-game"] },
-  { title: ["Khác", "Other"], items: ["proof-of-work", "audio"] },
+  { title: ["Khác", "Other"], items: ["proof-of-work", "proof-of-space", "audio"] },
   { title: ["Tương tác không gian", "Spatial interaction"], items: ["drag-drop", "rotation", "image-grid"] },
   { title: ["Nghiên cứu", "Research"], items: ["behavior", "builder", "experiments", "compare", "learn"] },
 ];
@@ -40,6 +40,7 @@ const PATHS: Record<ItemId, string> = {
   audio: "playground/audio/",
   "match-key": "playground/match-key/",
   "tile-game": "playground/tile-game/",
+  "proof-of-space": "playground/proof-of-space/",
   behavior: "behavior/",
   builder: "builder/",
   experiments: "experiments/",
@@ -67,6 +68,7 @@ function Icon({ id }: { id: ItemId | "logo" | "clock" | "pulse" | "pointer" | "t
     case "audio": return <svg {...common}><path d="M4 10v4h3.5l5 4V6l-5 4Z" /><path d="M16 9a4 4 0 0 1 0 6M18.5 6.5a8 8 0 0 1 0 11" /></svg>;
     case "match-key": return <svg {...common}><circle cx="7" cy="7" r="3.5" /><rect x="13" y="4" width="7" height="7" rx="1.5" /><rect x="4" y="14" width="7" height="6" rx="1.5" /><path d="m14 17 2 2 4-4" /></svg>;
     case "tile-game": return <svg {...common}><rect x="4" y="4" width="7" height="7" rx="1.5" /><rect x="13" y="4" width="7" height="7" rx="1.5" /><rect x="4" y="13" width="7" height="7" rx="1.5" /><rect x="13" y="13" width="7" height="7" rx="1.5" /></svg>;
+    case "proof-of-space": return <svg {...common}><rect x="4" y="5" width="16" height="14" rx="2" /><path d="M8 9v6M12 9v6M16 9v6" /></svg>;
     case "behavior": return <svg {...common}><path d="M3 12h3l2.5-6 4 12 2.5-7 1.5 3H21" /></svg>;
     case "builder": return <svg {...common}><path d="M4 7h10M18 7h2M4 17h2M10 17h10" /><circle cx="16" cy="7" r="2" /><circle cx="8" cy="17" r="2" /></svg>;
     case "experiments": return <svg {...common}><path d="M9 3h6M10 3v6l-5 9a2 2 0 0 0 2 3h10a2 2 0 0 0 2-3l-5-9V3" /></svg>;

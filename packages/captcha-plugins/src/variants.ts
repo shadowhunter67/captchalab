@@ -5,6 +5,7 @@ import { AUDIO_VARIANTS } from "./audio/variants";
 import { MATH_LOGIC_VARIANTS } from "./math-logic/variants";
 import { MATCH_KEY_VARIANTS } from "./match-key/variants";
 import { MEMORY_VARIANTS } from "./memory/variants";
+import { POS_VARIANTS } from "./proof-of-space/variants";
 import { POW_VARIANTS } from "./proof-of-work/variants";
 import { ROTATION_VARIANTS } from "./rotation/variants";
 import { SEQUENCE_VARIANTS } from "./sequence/variants";
@@ -29,4 +30,5 @@ export const VARIANT_SETS = {
   audio: AUDIO_VARIANTS,
   "match-key": MATCH_KEY_VARIANTS,
   "tile-game": TILE_GAME_VARIANTS,
+  "proof-of-space": POS_VARIANTS,
 } as const;

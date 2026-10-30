@@ -7,7 +7,7 @@ import { EN, type Translate } from "@/lib/i18n";
  */
 
 export interface CatalogEntry {
-  id: "slider" | "checkbox" | "drag-drop" | "rotation" | "text" | "image-grid" | "shape-matching" | "math-logic" | "sequence" | "memory" | "proof-of-work" | "audio" | "match-key" | "tile-game";
+  id: "slider" | "checkbox" | "drag-drop" | "rotation" | "text" | "image-grid" | "shape-matching" | "math-logic" | "sequence" | "memory" | "proof-of-work" | "audio" | "match-key" | "tile-game" | "proof-of-space";
   name: string;
   route: string;
   summary: string;
@@ -644,6 +644,51 @@ export function catalogFor(t: Translate = EN): readonly CatalogEntry[] {
         automation: `${t(
           "Chương trình so khớp thuộc tính rất dễ. CaptchaLab không cài bộ giải nào.",
           "A program matches attributes easily. CaptchaLab ships no solver.",
+        )} ${automationNote}`,
+      },
+    },
+    {
+      id: "proof-of-space",
+      name: t("Bằng chứng không gian", "Proof of Space"),
+      route: "/playground/proof-of-space",
+      summary: t("Thiết bị của bạn điền một vùng nhớ nhỏ để tạo bằng chứng.", "Your device fills a small memory region to make a proof."),
+      variantsNote: t(
+        "Hai biến thể: Bằng chứng lấy mẫu (báo lại các byte tại vị trí do thử thách chọn) và Mã kiểm tra toàn bộ. Ba mức khó là 256 KB, 1 MB và 4 MB: luôn nhỏ, chạy từng đoạn và có thể Huỷ.",
+        "Two variants: Sampled proof (report the bytes at positions the challenge picks) and Full checksum. The three levels are 256 KB, 1 MB and 4 MB: always small, run in chunks and can be cancelled.",
+      ),
+      learn: {
+        howItWorks: t(
+          "Bạn bấm Bắt đầu. Trình duyệt cấp phát một vùng nhớ cố định, điền nó theo một hàm xác định từ seed, rồi đọc lại để lập bằng chứng. Bạn có thể Huỷ giữa chừng; vùng nhớ được giải phóng.",
+          "You press Start. The browser allocates one fixed region, fills it with a function fixed by the seed, then reads it back to make the proof. You can Cancel at any time; the region is released.",
+        ),
+        generation: t(
+          "Bộ sinh theo seed chỉ chọn seed của vùng nhớ, kích thước và (với bằng chứng lấy mẫu) số vị trí. Nó không cấp phát hay tính gì: phần việc là do thiết bị của bạn làm.",
+          "A seeded generator only picks the region's seed, its size and (for a sampled proof) the number of positions. It allocates and computes nothing: the work is what your device does.",
+        ),
+        verification: t(
+          "Trình xác minh tự tính lại byte hoặc mã kiểm tra từ seed bằng hàm truy cập ngẫu nhiên, không cấp phát vùng nhớ và không tin kết quả của giao diện. Thử thách có kích thước ngoài giới hạn bị loại.",
+          "The verifier recomputes the bytes or the checksum from the seed with a random-access function, allocating no region and not trusting what the page found. A challenge whose size is out of bounds fails.",
+        ),
+        signals: [
+          t("Đây là số đo của phép tính, không phải tín hiệu \"giống người\": bộ nhớ cấp phát, thời gian điền, thời gian xác minh, số thao tác.", "These measure the computation, not human-like signals: allocated bytes, fill time, verification time, operations."),
+          t("Số lần bấm Bắt đầu và Huỷ.", "How many times Start and Cancel were pressed."),
+          t("Chỉ ghi vài sự kiện bấm nút, không bao giờ ghi từng thao tác bộ nhớ.", "Only a few button presses are recorded, never one event per memory operation."),
+        ],
+        strengths: [
+          t("Không cần người dùng suy nghĩ hay thao tác thêm.", "Needs no thinking or extra action from the user."),
+          t("Đòi hỏi một lượng bộ nhớ, không chỉ thời gian CPU.", "Asks for an amount of memory, not only CPU time."),
+        ],
+        weaknesses: [
+          t("Bằng chứng không gian không chứng minh người dùng là con người: máy nào cũng làm được.", "Proof-of-Space does not prove a human user: any machine can do it."),
+          t("Bản mô phỏng này dùng hàm xác định và rất nhỏ nên không phải giao thức lưu trữ thật.", "This simulation uses a deterministic function and is tiny, so it is not a real storage-hard protocol."),
+        ],
+        accessibility: t(
+          "Không cần nhìn, nghe hay thao tác chính xác. Thiết bị yếu có thể chờ lâu hơn; luôn có nút Huỷ và vùng nhớ lớn nhất chỉ 4 MB.",
+          "No sight, hearing or precise movement is needed. Weak devices may wait longer; Cancel is always there and the largest region is only 4 MB.",
+        ),
+        automation: `${t(
+          "Một chương trình tự điền vùng nhớ và tính bằng chứng. Mục đích của kiểu thử thách này là làm cho việc gửi hàng loạt tốn tài nguyên.",
+          "A program simply fills the region and computes the proof. The aim of this kind of challenge is to make bulk requests cost resources.",
         )} ${automationNote}`,
       },
     },

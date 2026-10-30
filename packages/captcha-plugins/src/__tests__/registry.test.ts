@@ -9,7 +9,7 @@ import {
   type FeaturesOf,
   type InteractionSession,
 } from "@captchalab/captcha-core";
-import { checkboxPlugin, dragDropPlugin, audioPlugin, matchKeyPlugin, tileGamePlugin, imageGridPlugin, mathLogicPlugin, memoryPlugin, proofOfWorkPlugin, registry, rotationPlugin, sequencePlugin, shapeMatchingPlugin, sliderPlugin, textPlugin } from "../index";
+import { checkboxPlugin, dragDropPlugin, audioPlugin, matchKeyPlugin, tileGamePlugin, proofOfSpacePlugin, imageGridPlugin, mathLogicPlugin, memoryPlugin, proofOfWorkPlugin, registry, rotationPlugin, sequencePlugin, shapeMatchingPlugin, sliderPlugin, textPlugin } from "../index";
 import type { SliderAnswer, SliderChallenge, SliderFeatureContext, SliderFeatures } from "../slider";
 import type { CheckboxAnswer, CheckboxChallenge, CheckboxFeatures } from "../checkbox";
 import type { DragDropAnswer, DragDropChallenge, DragDropFeatureContext, DragDropFeatures } from "../drag-drop";
@@ -42,7 +42,7 @@ const twoPlugins = createPluginRegistry({ slider: sliderPlugin, "fake-text": fak
 describe("typed registry (runtime)", () => {
   it("returns the plugin for a known id and lists ids", () => {
     expect(registry.get("slider")).toBe(sliderPlugin);
-    expect(registry.ids).toEqual(["slider", "checkbox", "drag-drop", "rotation", "text", "image-grid", "shape-matching", "math-logic", "sequence", "memory", "proof-of-work", "audio", "match-key", "tile-game"]);
+    expect(registry.ids).toEqual(["slider", "checkbox", "drag-drop", "rotation", "text", "image-grid", "shape-matching", "math-logic", "sequence", "memory", "proof-of-work", "audio", "match-key", "tile-game", "proof-of-space"]);
     expect(twoPlugins.ids).toEqual(["slider", "fake-text"]);
   });
 
@@ -140,7 +140,7 @@ describe("typed registry (compile time)", () => {
       [SliderChallenge, InteractionSession, SliderFeatureContext]
     >();
     expectTypeOf(registry.find("x")).toEqualTypeOf<
-      typeof sliderPlugin | typeof checkboxPlugin | typeof dragDropPlugin | typeof rotationPlugin | typeof textPlugin | typeof imageGridPlugin | typeof shapeMatchingPlugin | typeof mathLogicPlugin | typeof sequencePlugin | typeof memoryPlugin | typeof proofOfWorkPlugin | typeof audioPlugin | typeof matchKeyPlugin | typeof tileGamePlugin | undefined
+      typeof sliderPlugin | typeof checkboxPlugin | typeof dragDropPlugin | typeof rotationPlugin | typeof textPlugin | typeof imageGridPlugin | typeof shapeMatchingPlugin | typeof mathLogicPlugin | typeof sequencePlugin | typeof memoryPlugin | typeof proofOfWorkPlugin | typeof audioPlugin | typeof matchKeyPlugin | typeof tileGamePlugin | typeof proofOfSpacePlugin | undefined
     >();
     const dd = registry.get("drag-drop");
     expectTypeOf(dd).toEqualTypeOf<typeof dragDropPlugin>();

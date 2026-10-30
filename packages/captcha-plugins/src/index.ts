@@ -13,5 +13,6 @@ export * from "./proof-of-work";
 export * from "./audio";
 export * from "./match-key";
 export * from "./tile-game";
+export * from "./proof-of-space";
 export * from "./shared/glyph";
 export * from "./variants";

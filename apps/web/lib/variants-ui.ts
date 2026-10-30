@@ -6,7 +6,7 @@ import type { Translate } from "@/lib/i18n";
  * generated challenge's own `config.parameters`, so what is shown is what was actually applied.
  */
 
-export type CaptchaKey = "slider" | "checkbox" | "drag-drop" | "rotation" | "text" | "image-grid" | "shape-matching" | "math-logic" | "sequence" | "memory" | "proof-of-work" | "audio" | "match-key" | "tile-game";
+export type CaptchaKey = "slider" | "checkbox" | "drag-drop" | "rotation" | "text" | "image-grid" | "shape-matching" | "math-logic" | "sequence" | "memory" | "proof-of-work" | "audio" | "match-key" | "tile-game" | "proof-of-space";
 
 export const difficultyLabel = (d: CaptchaDifficulty, t: Translate): string =>
   d === "easy" ? t("Dễ", "Easy") : d === "medium" ? t("Vừa", "Medium") : t("Khó", "Hard");
@@ -39,6 +39,8 @@ const VARIANT_NAMES: Record<string, [vi: string, en: string]> = {
   "match-key:attribute": ["Khớp theo thuộc tính", "Attribute Match"],
   "tile-game:pair": ["Tìm cặp giống nhau", "Pair Match"],
   "tile-game:pattern": ["Khớp theo quy tắc", "Pattern Match"],
+  "proof-of-space:sampled": ["Bằng chứng lấy mẫu", "Sampled proof"],
+  "proof-of-space:checksum": ["Mã kiểm tra toàn bộ", "Full checksum"],
 };
 
 const VARIANT_DESCRIPTIONS: Record<string, [vi: string, en: string]> = {
@@ -68,6 +70,8 @@ const VARIANT_DESCRIPTIONS: Record<string, [vi: string, en: string]> = {
   "match-key:attribute": ["Chọn lựa chọn có chung hai thuộc tính với hình mẫu; thuộc tính còn lại và cỡ được phép khác.", "Pick the option that shares two attributes with the key; the third attribute and the size may differ."],
   "tile-game:pair": ["Đúng hai ô trông giống hệt nhau: chọn cả hai.", "Exactly two tiles look identical: select both."],
   "tile-game:pattern": ["Chọn các ô có cùng một thuộc tính được nêu với ô mẫu.", "Select the tiles that share one named attribute with the reference tile."],
+  "proof-of-space:sampled": ["Điền vùng nhớ rồi báo lại các byte tại vị trí do thử thách chọn.", "Fill the region, then report the bytes at positions the challenge picks."],
+  "proof-of-space:checksum": ["Điền vùng nhớ rồi báo lại mã kiểm tra của toàn bộ vùng.", "Fill the region, then report a checksum of all of it."],
   "audio:noisy-digits": ["Cùng các chữ số nhưng có tiếng ồn nền ở mọi mức.", "The same digits over background noise at every level."],
 };
 
@@ -198,6 +202,11 @@ export function parameterRows(captcha: CaptchaKey, p: Readonly<Record<string, Pa
         { id: "tiles", label: t("Số ô", "Tiles"), value: String(num(p.tiles)) },
         { id: "required", label: t("Số ô cần chọn", "Tiles to select"), value: String(num(p.required)) },
         { id: "similarity", label: t("Độ giống của các ô nhiễu", "Distractor similarity"), value: p.similarity === "far" ? t("thấp", "Low") : p.similarity === "mixed" ? t("vừa", "Medium") : t("cao", "High") },
+      ];
+    case "proof-of-space":
+      return [
+        { id: "bytes", label: t("Kích thước vùng nhớ", "Memory region"), value: num(p.bytes) >= 1048576 ? `${num(p.bytes) / 1048576} MB` : `${num(p.bytes) / 1024} KB` },
+        ...(num(p.sampleCount) > 0 ? [{ id: "sampleCount", label: t("Số byte lấy mẫu", "Sampled bytes"), value: String(num(p.sampleCount)) }] : []),
       ];
     case "checkbox":
       return [{ id: "activation", label: t("Cách kích hoạt", "Activation"), value: p.activation === "single press" ? t("một lần bấm", "single press") : String(p.activation) }];

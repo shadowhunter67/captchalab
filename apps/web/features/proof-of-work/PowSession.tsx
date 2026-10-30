@@ -18,6 +18,8 @@ interface Completed {
 interface Props {
   challenge: PowChallenge;
   onNewChallenge: () => void;
+  /** Called once when the run finished and was verified (used by the Hybrid lab). */
+  onResult?: (result: { challengeId: string; passed: boolean }) => void;
 }
 
 /**
@@ -25,7 +27,7 @@ interface Props {
  * created per Start and disposed on Cancel and on unmount; `runIdRef` makes any late result from an old run harmless.
  * Only presses of the Start and Cancel buttons are recorded, never anything per hash.
  */
-export function PowSession({ challenge: initialChallenge, onNewChallenge }: Props) {
+export function PowSession({ challenge: initialChallenge, onNewChallenge, onResult }: Props) {
   const t = useT();
   const [challenge] = useState(initialChallenge);
   const plugin = registry.get("proof-of-work");
@@ -76,6 +78,7 @@ export function PowSession({ challenge: initialChallenge, onNewChallenge }: Prop
       setProgress(found.iterations);
       setCompleted({ session, verification, featureSet });
       setStatus("done");
+      onResult?.({ challengeId: challenge.id, passed: verification.passed });
     } catch (err) {
       console.error("Proof of work analysis failed", err instanceof Error ? err.message : "unknown error");
       setError(t("Không phân tích được lần chạy này. Hãy bắt đầu thử thách mới.", "Could not analyze this run. Start a new challenge."));

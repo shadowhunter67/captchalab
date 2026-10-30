@@ -6,6 +6,7 @@ import { audioPlugin } from "./audio";
 import { mathLogicPlugin } from "./math-logic";
 import { matchKeyPlugin } from "./match-key";
 import { memoryPlugin } from "./memory";
+import { proofOfSpacePlugin } from "./proof-of-space";
 import { proofOfWorkPlugin } from "./proof-of-work";
 import { rotationPlugin } from "./rotation";
 import { sequencePlugin } from "./sequence";
@@ -30,6 +31,7 @@ export const registry = createPluginRegistry({
   audio: audioPlugin,
   "match-key": matchKeyPlugin,
   "tile-game": tileGamePlugin,
+  "proof-of-space": proofOfSpacePlugin,
 });
 
 export type CaptchaRegistry = typeof registry;
