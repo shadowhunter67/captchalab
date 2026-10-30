@@ -20,10 +20,12 @@ interface Props {
   /** What this computation does and does not show; always visible next to the numbers. */
   disclaimer: string;
   eventsNote: string;
+  /** Heading of the metrics card. Computation by default; Environment capabilities for a capability check. */
+  metricsTitle?: string;
 }
 
 /** Inspect for computation CAPTCHAs (Proof of Space): result, computation metrics and the few recorded presses. */
-export function ComputationInspect({ verification, featureSet, session, metrics, heading, disclaimer, eventsNote }: Props) {
+export function ComputationInspect({ verification, featureSet, session, metrics, heading, disclaimer, eventsNote, metricsTitle }: Props) {
   useEmbedReport(verification, session, featureSet);
   const t = useT();
   const selection = useEventSelection(session);
@@ -32,7 +34,7 @@ export function ComputationInspect({ verification, featureSet, session, metrics,
       <h2 id="inspect-h" className="text-base font-semibold">{t("Phân tích", "Inspect")}</h2>
       <VerificationSummary passed={verification.passed} reason={verification.reason} />
       <ChallengeConfigSlot />
-      <Card id="metrics-h" title={t("Chỉ số phép tính", "Computation metrics")}>
+      <Card id="metrics-h" title={metricsTitle ?? t("Chỉ số phép tính", "Computation metrics")}>
         <div className="space-y-4">
           <MetricTable heading={heading} metrics={metrics} />
           <p className="text-xs text-muted">

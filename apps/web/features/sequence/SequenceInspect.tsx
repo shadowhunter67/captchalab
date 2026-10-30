@@ -34,7 +34,7 @@ export function SequenceInspect({ kind, verification, featureSet, session }: Pro
       <VerificationSummary passed={verification.passed} reason={verification.reason} />
 
       <ChallengeConfigSlot />
-      <Card id="metrics-h" title={t("Chỉ số", "Metrics")}>
+      <Card id="metrics-h" title={t("Chỉ số hành vi", "Behavioral metrics")}>
         <div className="space-y-4">
           <MetricTable heading={kind === "number" ? t("Gõ phím", "Typing") : t("Lựa chọn", "Selection")} metrics={metrics} />
           <p className="text-xs text-muted">{t("Các chỉ số không áp dụng cho biến thể này không được hiển thị.", "Measures that do not apply to this variant are not shown.")}</p>

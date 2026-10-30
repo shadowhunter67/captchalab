@@ -94,7 +94,7 @@ export function DragDropInspect({ challenge, verification, featureSet, session, 
         <Card id="replay-h" title={t("Phát lại", "Replay")}>
           <DragDropReplay challenge={challenge} layout={layout} session={session} />
         </Card>
-        <Card id="metrics-h" title={t("Chỉ số", "Metrics")}>
+        <Card id="metrics-h" title={t("Chỉ số hành vi", "Behavioral metrics")}>
           <div className="space-y-4">
             <MetricTable heading={t("Kéo thả", "Drag & drop")} metrics={metrics} />
             <p className="text-xs text-muted">

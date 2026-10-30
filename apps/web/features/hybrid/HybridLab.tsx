@@ -54,7 +54,7 @@ function HybridBoard({ pair, onNewChallenge }: { pair: Pair; onNewChallenge: () 
   return (
     <div className="space-y-6">
       <Card id="hybrid-verdict-h" title={t("Kết quả cuối (thử nghiệm)", "Final result (experimental)")}>
-        <div data-testid="hybrid-verdict" data-passed={verdict.passed ? "true" : "false"} data-reason={verdict.reason} className="space-y-1 text-sm">
+        <div role="status" aria-live="polite" data-testid="hybrid-verdict" data-passed={verdict.passed ? "true" : "false"} data-reason={verdict.reason} className="space-y-1 text-sm">
           <p className="font-medium" data-testid="hybrid-result">{verdict.passed ? t("Đã đạt cả hai chặng", "Both stages passed") : t("Chưa đạt", "Not passed")}</p>
           <p className="text-muted">{t(...REASON[verdict.reason])}</p>
           <ul className="list-disc pl-5 text-muted">

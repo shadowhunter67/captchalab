@@ -47,7 +47,7 @@ export function RotationInspect({ challenge, verification, featureSet, session, 
         <Card id="replay-h" title={t("Phát lại", "Replay")}>
           <RotationReplay challenge={challenge} center={center} session={session} />
         </Card>
-        <Card id="metrics-h" title={t("Chỉ số", "Metrics")}>
+        <Card id="metrics-h" title={t("Chỉ số hành vi", "Behavioral metrics")}>
           <div className="space-y-4">
             <MetricTable heading={t("Xoay ảnh", "Rotation")} metrics={metrics} />
             <p className="text-xs text-muted">

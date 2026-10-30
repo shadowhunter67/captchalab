@@ -33,7 +33,7 @@ export function TextInspect({ verification, featureSet, session }: Props) {
       <VerificationSummary passed={verification.passed} reason={verification.reason} />
 
       <ChallengeConfigSlot />
-      <Card id="metrics-h" title={t("Chỉ số", "Metrics")}>
+      <Card id="metrics-h" title={t("Chỉ số hành vi", "Behavioral metrics")}>
         <div className="space-y-4">
           <MetricTable heading={t("Gõ phím", "Typing")} metrics={metrics} />
           <p className="text-xs text-muted">

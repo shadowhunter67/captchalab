@@ -124,7 +124,7 @@ export function PosSession({ challenge: initialChallenge, onNewChallenge }: { ch
           </button>
         </div>
         <div className="mt-4 space-y-2 text-sm">
-          <p data-testid="pos-status" data-state={status}>{posStatusText(status, t)}</p>
+          <p role="status" aria-live="polite" data-testid="pos-status" data-state={status}>{posStatusText(status, t)}</p>
           <p data-testid="pos-progress" aria-live="polite" aria-atomic="true" className="font-mono">
             {t("Đã điền: ", "Filled: ")}{formatBytes(filled)} / {formatBytes(challenge.bytes)}
           </p>

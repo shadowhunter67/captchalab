@@ -94,3 +94,10 @@ Plugin `text`, route `/playground/text`: SVG distorted text deterministic, verif
 - Taxonomy: `lib/taxonomy.ts` là danh sách trung tâm (family, kind captcha/lab/system, cờ hỗ trợ SUY RA từ `BEHAVIOR_CAPTCHAS`/VARIANT_SETS, không gõ tay). Playground/Learn/sidebar/ma trận phủ (`components/CoverageMatrix.tsx`, `/learn#coverage`) đều đọc từ đó; số đếm trong E2E lấy từ `TAXONOMY`, đừng hardcode. Câu trung thực: "covers major ... families through generic educational implementations", không bao giờ ghi 100%.
 - Bẫy: heredoc dài trong bash hay lỗi (dùng Write tool); nhiều file là CRLF (python helper phải giữ `
 `); Next điều hướng client sinh request RSC nên `watchPrivacy` chỉ gọi trên trang đứng yên.
+
+## v0.10 Stabilization + beta prep (2026-10-30)
+- Không thêm CAPTCHA, không đổi classifier (`behavioral-baseline@1`), không đổi schema. Browser Capability BỎ HẲN mọi thời lượng (probeTime/computeTime/reactionTime): chỉ boolean + đếm; test cấm `performance.now`/`Date.now` trong module. Hybrid: `lib/id-scope.tsx` (`IdScope` + `useScopedId`) cho Card và Session/Inspect của PoW/Slider/Audio, tiền tố `${kind}-pow-` / `${kind}-child-`.
+- `e2e/a11y.ts` (`idProblems`, `expectValidIds`) + `e2e/stability.spec.ts`: mọi route ở 1000/400/390/360px không trùng id, không ARIA hỏng, không tràn ngang, không console error. Trang mới mount 2 session → phải bọc `IdScope`.
+- Tên Inspect: "Behavioral metrics" (CAPTCHA tương tác), "Computation metrics" (PoW/PoS), "Environment capabilities" (Browser Capability) — `ComputationInspect` có prop `metricsTitle`.
+- Learn cho Hybrid/Invisible/Adaptive: `lib/lab-learn.ts`. Docs mới: `docs/privacy.md`, `docs/limitations.md`, `docs/releases/v0.10.0-beta.md`.
+- Drag & Drop keyboard vẫn là nợ (quyết định: không viết lại controller trong beta).

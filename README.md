@@ -2,13 +2,28 @@
 
 **Explore. Interact. Understand.**
 
-CaptchaLab is a small lab where you try different CAPTCHA challenges and then see what your own interaction looked like: the events, the speed and path of your mouse, and a replay of your attempt. It is made for learning and research. Everything runs in your browser.
+CaptchaLab is an **educational and research platform**. It offers generic CAPTCHA implementations in a controlled environment, so you can try a challenge and then see what your own interaction looked like: the events, the speed and path of your mouse, and a replay of your attempt. It also includes an **experimental** behavioral classifier for studying interaction signals. Everything runs in your browser.
+
+It is not a bot-detection product, not a production anti-bot solution and not a replacement for any commercial CAPTCHA.
 
 **Live demo: https://shadowhunter67.github.io/captchalab/** (pick a challenge on the left, try it on the right)
 
-> **Status: Alpha (`0.8.0-alpha`).** Things may still change.
+> **Status: Beta (`0.10.0-beta`).** The first beta: stabilization, accessibility, privacy hardening and documentation. The classifier did not change. See [known limitations](docs/limitations.md) and the [privacy notes](docs/privacy.md).
 
 The site is in **Vietnamese by default**. Use the **VI / EN** button in the top-right corner to switch to English.
+
+## Product map
+
+| Area | Where | What it is for |
+|---|---|---|
+| **Playground** | `/playground` | Try each challenge and lab, grouped by family, and inspect your own interaction. |
+| **Behavior** | `/behavior` | The behavioral signals and the experimental classifier. |
+| **Compare** | `/compare` | A recorded attempt next to a generated one, signal by signal. |
+| **Builder** | `/builder` | Define a reproducible challenge (variant, difficulty, seed) and save it as a small file. |
+| **Experiments** | `/experiments` | Several local sessions and synthetic batches, exported to a file and imported again. |
+| **Dataset** | `/experiments/dataset` | A local dataset with labels you set yourself. |
+| **Evaluation** | `/experiments/evaluation` | How the classifier's reading compares with those labels (read-only, with a local threshold sandbox). |
+| **Learn** | `/learn` | How each challenge works, what it does not prove, and the coverage matrix. |
 
 ## What you can try
 
@@ -57,7 +72,7 @@ There are a few extra pages:
 
 ## Privacy
 
-Your interaction data stays in your browser tab. It is not uploaded, not saved, and there are no analytics. Typed letters are never recorded: for the Text challenge only the kind of key (letter, digit, backspace...) is kept. An automated test checks that no network requests or storage writes happen while you play.
+Your interaction data stays in your browser tab. It is not uploaded, not saved, and there are no analytics. Typed letters are never recorded: for the Text challenge only the kind of key (letter, digit, backspace...) is kept. The Audio challenge uses no microphone, and Browser Capability answers only yes or no per API (no timing, no fingerprint). The dataset is in memory only and exports are always user-triggered. An automated test checks that no network requests or storage writes happen while you play. Details: [docs/privacy.md](docs/privacy.md).
 
 ## What this is not
 
@@ -80,7 +95,8 @@ To check the project: `corepack pnpm -r run lint`, `corepack pnpm -r run typeche
 
 - Drag & Drop has no keyboard alternative yet, and the Text challenge has no audio or text alternative.
 - The Behavioral Lab leaves out Proof of Work, Proof of Space, Browser Capability, MatchKey and Tile Game; the matrix on the Learn page shows each gap, and its classifier is a hand-set baseline, not trained on real people.
-- The full list is in [docs/technical-debt.md](docs/technical-debt.md).
+- Audio, replay and timing behavior are tested mostly in Chromium; Firefox and Safari are not in the automated suite.
+- The consolidated beta limits are in [docs/limitations.md](docs/limitations.md); the full itemized list is in [docs/technical-debt.md](docs/technical-debt.md).
 
 ## Contributing
 

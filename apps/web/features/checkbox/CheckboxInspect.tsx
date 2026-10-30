@@ -50,7 +50,7 @@ export function CheckboxInspect({ verification, featureSet, session, size }: Pro
           <CheckboxReplay session={session} size={size} />
         </Card>
 
-        <Card id="metrics-h" title={t("Chỉ số", "Metrics")}>
+        <Card id="metrics-h" title={t("Chỉ số hành vi", "Behavioral metrics")}>
           <div className="space-y-4">
             <MetricTable
               heading={t("Kích hoạt", "Activation")}

@@ -169,7 +169,7 @@ export function PowSession({ challenge: initialChallenge, onNewChallenge, onResu
           </button>
         </div>
         <div className="mt-4 space-y-2 text-sm">
-          <p data-testid="pow-status" data-state={status}>
+          <p role="status" aria-live="polite" data-testid="pow-status" data-state={status}>
             {powStatusText(status, t)}
           </p>
           <p data-testid="pow-progress" aria-live="polite" aria-atomic="true" className="font-mono">

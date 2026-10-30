@@ -87,7 +87,7 @@ export function SliderInspect({ verification, featureSet, session, markers, layo
           />
         </Card>
 
-        <Card id="metrics-h" title={t("Chỉ số", "Metrics")}>
+        <Card id="metrics-h" title={t("Chỉ số hành vi", "Behavioral metrics")}>
           <div className="space-y-4">
             <MetricTable
               heading={t("Lần thử thanh trượt (lần kéo hoàn tất cuối cùng)", "Slider attempt (final completed drag)")}

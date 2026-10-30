@@ -48,7 +48,7 @@ export function PlaygroundIndex() {
                       {t("Mở ", "Open ")}
                       {c.name}
                     </Link>
-                    <Link href={c.kind === "lab" ? "/learn#coverage" : `/learn#${c.id}`} className="py-1.5 underline">
+                    <Link href={`/learn#${c.id}`} className="py-1.5 underline">
                       {t("Tìm hiểu", "Learn")}
                     </Link>
                   </div>

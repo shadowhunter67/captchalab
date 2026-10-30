@@ -94,6 +94,7 @@ export function BcSession({ challenge: initialChallenge, onNewChallenge }: { cha
             featureSet={completed.featureSet}
             session={completed.session}
             metrics={bcMetrics(completed.featureSet.features, t)}
+            metricsTitle={t("Khả năng của môi trường", "Environment capabilities")}
             heading={t("Kiểm tra", "Checks")}
             disclaimer={t("Kiểm tra khả năng trình duyệt không chứng minh người dùng là con người: trình duyệt tự động cũng có đủ các API này.", "A browser capability check does not prove a human user: automated browsers offer these APIs too.")}
             eventsNote={t("Chỉ lần bấm Chạy kiểm tra được ghi lại.", "Only the press of Run checks is recorded.")}

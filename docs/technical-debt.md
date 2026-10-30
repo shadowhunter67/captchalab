@@ -126,4 +126,9 @@ Not release blockers unless stated. Format: issue · impact · affected CAPTCHA 
 - The taxonomy is hand-assigned (one family per entry); an entry that spans families (a Hybrid, Checkbox) sits in one · Taxonomy · by design
 - Not built: Distorted Text as a separate challenge, a 4x4 Image Grid, Memory replay, extra Audio voices · Challenges · later
 - Hybrid and the labs have no Learn section of their own, only a short card; the sidebar entries are available from the home page · Learn · later
-- In Hybrid, the two stages are mounted together and reuse the sessions' fixed element ids (for example `try-h`, `inspect-h`), so a heading id can appear twice on that page and `aria-labelledby` may point at the wrong stage; fixing it needs an id prefix passed through every session and Inspect component · Hybrid / a11y · later
+
+## Beta stabilization (v0.10)
+- Drag & Drop still has no complete keyboard alternative (a select-source / select-target fallback needs a new controller path); the limitation is stated on its page, in Learn and in `docs/limitations.md`, and keyboard-operable challenges exist · Drag & Drop · later
+- Radio buttons in Compare and the native file inputs measure under 24 px as controls; their labels or the browser's own control make the effective target larger · Compare / import · later
+- Firefox and Safari are not in the automated suite; Audio, replay and timing are checked mostly in Chromium · Platform · later
+- Hybrid stage ids are scoped with `IdScope` (`lib/id-scope.tsx`); other pages still use fixed ids, which is safe because only one session is mounted per page; a new page that mounts two sessions must wrap each in an `IdScope` · Hybrid / a11y · by design
