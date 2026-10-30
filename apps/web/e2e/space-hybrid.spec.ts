@@ -34,8 +34,9 @@ test("Proof of Space: the checksum variant passes too", async ({ page }) => {
 
 test("Proof of Space: Cancel stops the run, shows no result, and New challenge starts clean", async ({ page }) => {
   await page.goto(`/playground/proof-of-space?seed=${SEED}&variant=checksum&difficulty=hard`);
+  await expect(page.getByTestId("pos-start")).toBeEnabled(); // hydrated before the CPU is slowed
   const cdp = await page.context().newCDPSession(page);
-  await cdp.send("Emulation.setCPUThrottlingRate", { rate: 20 }); // keep the 4 MB run slow enough to cancel
+  await cdp.send("Emulation.setCPUThrottlingRate", { rate: 40 }); // keep the 4 MB run slow enough to cancel, even on a busy machine
   await page.getByTestId("pos-start").click();
   await expect(page.getByTestId("pos-status")).toHaveAttribute("data-state", "running");
   await page.getByTestId("pos-cancel").click();
