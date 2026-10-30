@@ -1,12 +1,12 @@
 import { expect, test } from "./fixtures";
 import { watchPrivacy } from "./privacy";
 
-const IDS = ["slider", "checkbox", "drag-drop", "rotation", "text", "image-grid", "shape-matching", "math-logic", "sequence", "memory", "proof-of-work", "audio"];
+const IDS = ["slider", "checkbox", "drag-drop", "rotation", "text", "image-grid", "shape-matching", "math-logic", "sequence", "memory", "proof-of-work", "audio", "match-key", "tile-game"];
 
-test("playground index lists twelve cards that open their playgrounds", async ({ page }) => {
+test("playground index lists fourteen cards that open their playgrounds", async ({ page }) => {
   await page.goto("/playground");
   const assertNoDataLeft = await watchPrivacy(page);
-  await expect(page.getByTestId("playground-cards").getByRole("listitem")).toHaveCount(12);
+  await expect(page.getByTestId("playground-cards").getByRole("listitem")).toHaveCount(14);
   for (const id of IDS) await expect(page.getByTestId(`open-${id}`)).toHaveAttribute("href", `/playground/${id}`);
   await assertNoDataLeft();
   await page.getByTestId("open-image-grid").click();

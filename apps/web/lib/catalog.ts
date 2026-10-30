@@ -7,7 +7,7 @@ import { EN, type Translate } from "@/lib/i18n";
  */
 
 export interface CatalogEntry {
-  id: "slider" | "checkbox" | "drag-drop" | "rotation" | "text" | "image-grid" | "shape-matching" | "math-logic" | "sequence" | "memory" | "proof-of-work" | "audio";
+  id: "slider" | "checkbox" | "drag-drop" | "rotation" | "text" | "image-grid" | "shape-matching" | "math-logic" | "sequence" | "memory" | "proof-of-work" | "audio" | "match-key" | "tile-game";
   name: string;
   route: string;
   summary: string;
@@ -558,6 +558,92 @@ export function catalogFor(t: Translate = EN): readonly CatalogEntry[] {
         automation: `${t(
           "Nhận dạng giọng nói có thể giải thử thách âm thanh đơn giản. CaptchaLab không cài bộ giải nào và không dùng micro.",
           "Speech recognition can solve simple audio challenges. CaptchaLab implements no solver and never uses the microphone.",
+        )} ${automationNote}`,
+      },
+    },
+    {
+      id: "match-key",
+      name: "MatchKey",
+      route: "/playground/match-key",
+      summary: t("Chọn lựa chọn khớp với hình mẫu.", "Pick the option that matches the key."),
+      variantsNote: t(
+        "Hai biến thể: Khớp y hệt (cả hình, họa tiết, hướng) và Khớp theo thuộc tính (chỉ hai thuộc tính được nêu). Độ khó tăng số lựa chọn (4, 5, 6) và làm các lựa chọn sai chỉ khác mẫu ở một thuộc tính.",
+        "Two variants: Exact Match (shape, pattern and orientation) and Attribute Match (only two named attributes). Difficulty raises the options (4, 5, 6) and makes wrong options differ from the key in a single attribute.",
+      ),
+      learn: {
+        howItWorks: t(
+          "Một hình mẫu hiện ở trên cùng, bên dưới là vài lựa chọn. Bạn chọn một lựa chọn rồi bấm Xác minh; chọn lựa chọn khác sẽ đổi lựa chọn, chọn lại chính nó sẽ bỏ chọn.",
+          "A key shape is shown above several options. You select one and press Verify; selecting another moves the selection, selecting the same one clears it.",
+        ),
+        generation: t(
+          "Bộ sinh theo seed chọn hình mẫu và các lựa chọn sai có dấu hiệu khác nhau từng đôi một, sao cho đúng một lựa chọn khớp. Ở Khớp theo thuộc tính, lựa chọn đúng cố ý khác mẫu ở thuộc tính tự do.",
+          "A seeded generator picks the key and wrong options whose signatures all differ, so exactly one option matches. In Attribute Match the correct option deliberately differs from the key in the free attribute.",
+        ),
+        verification: t(
+          "Trình xác minh kiểm lại rằng đúng một lựa chọn khớp hình mẫu và so lựa chọn được chọn với nó; thử thách mơ hồ hoặc sai hình thức đều bị loại.",
+          "The verifier re-checks that exactly one option matches the key and compares the selection with it; an ambiguous or malformed challenge fails.",
+        ),
+        signals: [
+          t("Thời gian phản ứng và thời gian đến lần chọn đầu tiên.", "Reaction time and time to the first selection."),
+          t("Số lần chọn, số lần chọn sai và số lần sửa.", "Selections, wrong selections and corrections."),
+          t("Cách nhập (chuột, cảm ứng, bàn phím).", "Input modality (mouse, touch, keyboard)."),
+        ],
+        strengths: [
+          t("Nhanh, không cần gõ chữ.", "Quick, no typing."),
+          t("Có thể làm hoàn toàn bằng bàn phím.", "Can be done entirely with the keyboard."),
+        ],
+        weaknesses: [
+          t("Hình vẽ bằng SVG đơn giản nên phần mềm so khớp thuộc tính rất dễ.", "Plain SVG shapes make attribute comparison trivial for software."),
+          t("Người kém thị lực có thể khó phân biệt họa tiết.", "People with low vision may find patterns hard to tell apart."),
+        ],
+        accessibility: t(
+          "Mỗi lựa chọn là một nút có nhãn nêu hình, họa tiết và hướng, nên làm được bằng bàn phím và trình đọc màn hình; điều đó cũng làm bản demo này rất dễ với phần mềm.",
+          "Each option is a button whose label names its shape, pattern and orientation, so it works by keyboard and screen reader; that also makes this demo trivial for software.",
+        ),
+        automation: `${t(
+          "So khớp thuộc tính là việc tầm thường với chương trình. CaptchaLab không cài bộ giải nào.",
+          "Matching attributes is trivial for a program. CaptchaLab ships no solver.",
+        )} ${automationNote}`,
+      },
+    },
+    {
+      id: "tile-game",
+      name: t("Trò chơi ô", "Tile Game"),
+      route: "/playground/tile-game",
+      summary: t("Tìm các ô thoả một quy tắc.", "Find the tiles that satisfy a rule."),
+      variantsNote: t(
+        "Hai biến thể: Tìm cặp giống nhau (đúng hai ô giống hệt) và Khớp theo quy tắc (các ô có chung một thuộc tính với ô mẫu). Độ khó tăng số ô (4, 6, 8) và độ giống của các ô nhiễu; ở Khớp theo quy tắc mức khó phải chọn 3 ô.",
+        "Two variants: Pair Match (exactly two identical tiles) and Pattern Match (tiles sharing one attribute with a reference tile). Difficulty raises the tiles (4, 6, 8) and the distractors' similarity; Pattern Match hard asks for 3 tiles.",
+      ),
+      learn: {
+        howItWorks: t(
+          "Bạn chọn đủ số ô được yêu cầu (hai ô, hoặc ba ô ở mức khó của Khớp theo quy tắc) rồi bấm Xác minh. Chọn lại một ô đã chọn sẽ bỏ chọn; khi đã đủ số ô, các ô khác không chọn thêm được cho đến khi bạn bỏ bớt.",
+          "You select the required number of tiles (two, or three on Pattern Match hard) and press Verify. Selecting a selected tile clears it; once the required number is selected, other tiles cannot be added until you clear one.",
+        ),
+        generation: t(
+          "Bộ sinh theo seed làm mọi ô khác nhau từng đôi một, trừ cặp giống nhau của Tìm cặp; ở Khớp theo quy tắc nó chọn thuộc tính quy tắc và đúng bấy nhiêu ô cùng giá trị với ô mẫu.",
+          "A seeded generator makes every tile different except the pair of Pair Match; in Pattern Match it picks the rule attribute and exactly that many tiles sharing the reference's value.",
+        ),
+        verification: t(
+          "Trình xác minh kiểm lại rằng tập đáp án là tập duy nhất thoả quy tắc, rồi so với các ô đã chọn (không phụ thuộc thứ tự).",
+          "The verifier re-checks that the answer set is the only set that satisfies the rule, then compares it with the selected tiles (order does not matter).",
+        ),
+        signals: [
+          t("Thời gian phản ứng và thời gian đến lần chọn đầu tiên.", "Reaction time and time to the first selection."),
+          t("Số lần chọn, số lần chọn đủ ô đúng và sai, số lần bỏ chọn.", "Selections, complete right and wrong attempts, deselections."),
+        ],
+        strengths: [t("Không cần gõ chữ; làm được bằng bàn phím.", "No typing; works by keyboard.")],
+        weaknesses: [
+          t("So khớp thuộc tính của hình SVG đơn giản rất dễ với phần mềm.", "Comparing attributes of plain SVG shapes is easy for software."),
+          t("Khác Lưới hình ảnh ở chỗ có ô mẫu và quy tắc, nhưng vẫn là bài chọn ô.", "Unlike Image Grid it has a reference tile and a rule, but it is still a pick-the-tiles task."),
+        ],
+        accessibility: t(
+          "Mỗi ô là một nút có nhãn mô tả hình, họa tiết, hướng và trạng thái chọn; Tab để tới ô, Enter hoặc Space để chọn.",
+          "Each tile is a button labelled with its shape, pattern, orientation and selected state; Tab to a tile, Enter or Space to select.",
+        ),
+        automation: `${t(
+          "Chương trình so khớp thuộc tính rất dễ. CaptchaLab không cài bộ giải nào.",
+          "A program matches attributes easily. CaptchaLab ships no solver.",
         )} ${automationNote}`,
       },
     },

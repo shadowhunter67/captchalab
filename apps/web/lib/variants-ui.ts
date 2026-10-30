@@ -6,7 +6,7 @@ import type { Translate } from "@/lib/i18n";
  * generated challenge's own `config.parameters`, so what is shown is what was actually applied.
  */
 
-export type CaptchaKey = "slider" | "checkbox" | "drag-drop" | "rotation" | "text" | "image-grid" | "shape-matching" | "math-logic" | "sequence" | "memory" | "proof-of-work" | "audio";
+export type CaptchaKey = "slider" | "checkbox" | "drag-drop" | "rotation" | "text" | "image-grid" | "shape-matching" | "math-logic" | "sequence" | "memory" | "proof-of-work" | "audio" | "match-key" | "tile-game";
 
 export const difficultyLabel = (d: CaptchaDifficulty, t: Translate): string =>
   d === "easy" ? t("Dễ", "Easy") : d === "medium" ? t("Vừa", "Medium") : t("Khó", "Hard");
@@ -35,6 +35,10 @@ const VARIANT_NAMES: Record<string, [vi: string, en: string]> = {
   "proof-of-work:leading-zero-bits": ["Số bit 0 đứng đầu", "Leading zero bits"],
   "audio:spoken-digits": ["Đọc chữ số", "Spoken digits"],
   "audio:noisy-digits": ["Chữ số có nhiễu", "Digits with noise"],
+  "match-key:exact": ["Khớp y hệt", "Exact Match"],
+  "match-key:attribute": ["Khớp theo thuộc tính", "Attribute Match"],
+  "tile-game:pair": ["Tìm cặp giống nhau", "Pair Match"],
+  "tile-game:pattern": ["Khớp theo quy tắc", "Pattern Match"],
 };
 
 const VARIANT_DESCRIPTIONS: Record<string, [vi: string, en: string]> = {
@@ -60,6 +64,10 @@ const VARIANT_DESCRIPTIONS: Record<string, [vi: string, en: string]> = {
   "proof-of-work:hash-prefix": ["Tìm một nonce sao cho mã băm SHA-256 (dạng hex) bắt đầu bằng hai, ba hoặc bốn chữ số 0.", "Find a nonce whose SHA-256 hex digest starts with zeros: two, three or four."],
   "proof-of-work:leading-zero-bits": ["Cùng ý tưởng nhưng đếm theo bit, nên mỗi mức tăng công việc theo bước nhỏ hơn.", "The same idea counted in bits, so each level doubles the work in finer steps."],
   "audio:spoken-digits": ["Các chữ số được đọc lần lượt; độ khó thêm chữ số, rút ngắn khoảng nghỉ và thêm nhiễu nhỏ.", "Digits read out one by one; difficulty adds digits, shortens the gaps and adds quiet noise."],
+  "match-key:exact": ["Chọn lựa chọn giống hệt hình mẫu về hình, họa tiết và hướng (cỡ có thể khác).", "Pick the option identical to the key in shape, pattern and orientation (size may differ)."],
+  "match-key:attribute": ["Chọn lựa chọn có chung hai thuộc tính với hình mẫu; thuộc tính còn lại và cỡ được phép khác.", "Pick the option that shares two attributes with the key; the third attribute and the size may differ."],
+  "tile-game:pair": ["Đúng hai ô trông giống hệt nhau: chọn cả hai.", "Exactly two tiles look identical: select both."],
+  "tile-game:pattern": ["Chọn các ô có cùng một thuộc tính được nêu với ô mẫu.", "Select the tiles that share one named attribute with the reference tile."],
   "audio:noisy-digits": ["Cùng các chữ số nhưng có tiếng ồn nền ở mọi mức.", "The same digits over background noise at every level."],
 };
 
@@ -178,6 +186,18 @@ export function parameterRows(captcha: CaptchaKey, p: Readonly<Record<string, Pa
         { id: "digits", label: t("Số chữ số", "Digits"), value: String(num(p.digits)) },
         { id: "gapMs", label: t("Khoảng nghỉ khi phát", "Playback spacing"), value: `${num(p.gapMs)} ms` },
         { id: "noise", label: t("Nhiễu", "Noise"), value: NOISE_TEXT[String(p.noise)] ? t(...(NOISE_TEXT[String(p.noise)] as [string, string])) : String(p.noise) },
+      ];
+    case "match-key":
+      return [
+        { id: "options", label: t("Số lựa chọn", "Options"), value: String(num(p.options)) },
+        { id: "keyAttributes", label: t("Thuộc tính phải khớp", "Attributes to match"), value: `${num(p.keyAttributes)} / 3` },
+        { id: "diff", label: t("Lựa chọn sai khác mẫu ở", "Wrong options differ in"), value: num(p.minDiff) === num(p.maxDiff) ? String(num(p.minDiff)) : `${num(p.minDiff)}–${num(p.maxDiff)}` },
+      ];
+    case "tile-game":
+      return [
+        { id: "tiles", label: t("Số ô", "Tiles"), value: String(num(p.tiles)) },
+        { id: "required", label: t("Số ô cần chọn", "Tiles to select"), value: String(num(p.required)) },
+        { id: "similarity", label: t("Độ giống của các ô nhiễu", "Distractor similarity"), value: p.similarity === "far" ? t("thấp", "Low") : p.similarity === "mixed" ? t("vừa", "Medium") : t("cao", "High") },
       ];
     case "checkbox":
       return [{ id: "activation", label: t("Cách kích hoạt", "Activation"), value: p.activation === "single press" ? t("một lần bấm", "single press") : String(p.activation) }];

@@ -3,6 +3,7 @@ import { DRAG_DROP_VARIANTS } from "./drag-drop/variants";
 import { IMAGE_GRID_VARIANTS } from "./image-grid/variants";
 import { AUDIO_VARIANTS } from "./audio/variants";
 import { MATH_LOGIC_VARIANTS } from "./math-logic/variants";
+import { MATCH_KEY_VARIANTS } from "./match-key/variants";
 import { MEMORY_VARIANTS } from "./memory/variants";
 import { POW_VARIANTS } from "./proof-of-work/variants";
 import { ROTATION_VARIANTS } from "./rotation/variants";
@@ -10,6 +11,7 @@ import { SEQUENCE_VARIANTS } from "./sequence/variants";
 import { SHAPE_MATCHING_VARIANTS } from "./shape-matching/variants";
 import { SLIDER_VARIANTS } from "./slider/variants";
 import { TEXT_VARIANTS } from "./text/variants";
+import { TILE_GAME_VARIANTS } from "./tile-game/variants";
 
 /** Variant sets by plugin id, for the UI. Each plugin's own generator reads the same set. */
 export const VARIANT_SETS = {
@@ -25,4 +27,6 @@ export const VARIANT_SETS = {
   memory: MEMORY_VARIANTS,
   "proof-of-work": POW_VARIANTS,
   audio: AUDIO_VARIANTS,
+  "match-key": MATCH_KEY_VARIANTS,
+  "tile-game": TILE_GAME_VARIANTS,
 } as const;

@@ -11,4 +11,7 @@ export * from "./sequence";
 export * from "./memory";
 export * from "./proof-of-work";
 export * from "./audio";
+export * from "./match-key";
+export * from "./tile-game";
+export * from "./shared/glyph";
 export * from "./variants";

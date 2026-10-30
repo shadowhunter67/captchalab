@@ -8,6 +8,8 @@ import {
   generateImageGridChallenge,
   generateMathChallenge,
   generateAudioChallenge,
+  generateMatchKeyChallenge,
+  generateTileGameChallenge,
   generateMemoryChallenge,
   generatePowChallenge,
   generateRotationChallenge,
@@ -37,6 +39,8 @@ const generators: Record<keyof typeof VARIANT_SETS, Gen> = {
   memory: generateMemoryChallenge,
   "proof-of-work": generatePowChallenge,
   audio: generateAudioChallenge,
+  "match-key": generateMatchKeyChallenge,
+  "tile-game": generateTileGameChallenge,
 };
 
 describe("every variant set", () => {
