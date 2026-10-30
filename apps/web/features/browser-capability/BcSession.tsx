@@ -33,18 +33,14 @@ export function BcSession({ challenge: initialChallenge, onNewChallenge }: { cha
   const run = (): void => {
     if (completed) return;
     try {
-      const p0 = performance.now();
       const results: Partial<Record<BcCheckId, boolean>> = {};
       for (const id of challenge.checks) if (id !== "compute") results[id] = probeCapability(globalThis, id);
-      const probeMs = performance.now() - p0;
-      const c0 = performance.now();
       const computed = challenge.checks.includes("compute") ? computeLocal(challenge.seed, challenge.workload) : undefined;
-      const computeMs = performance.now() - c0;
       const answer: BcAnswer = { checks: results, ...(computed === undefined ? {} : { computed }) };
       const session = recorder.snapshot();
       const verification = plugin.verify(challenge, answer, session);
       const supported = typeof verification.measurements?.supported === "number" ? verification.measurements.supported : null;
-      const featureSet = plugin.extractFeatures(challenge, session, { run: { probeMs, computeMs }, supported });
+      const featureSet = plugin.extractFeatures(challenge, session, { supported });
       setCompleted({ session, verification, featureSet, results, computed: computed !== undefined });
     } catch (err) {
       console.error("Browser capability check failed", err instanceof Error ? err.message : "unknown error");

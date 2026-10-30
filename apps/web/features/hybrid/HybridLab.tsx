@@ -7,6 +7,7 @@ import { registry, type AudioChallenge, type PowChallenge, type SliderChallenge 
 import { AudioSession } from "@/features/audio/AudioSession";
 import { PowSession } from "@/features/proof-of-work/PowSession";
 import { SliderSession } from "@/features/slider/SliderSession";
+import { IdScope } from "@/lib/id-scope";
 import { Card } from "@/components/inspect/Card";
 import { ResearchDisclaimer } from "@/components/behavior/Disclaimers";
 import { HYBRID_KINDS, childUnlocked, hybridVerdict, isHybridKind, withOutcome, type HybridKind, type HybridReason, type HybridStages } from "@/lib/hybrid/hybrid";
@@ -74,7 +75,9 @@ function HybridBoard({ pair, onNewChallenge }: { pair: Pair; onNewChallenge: () 
 
       <section aria-labelledby="stage1-h" data-testid="stage-pow" className="space-y-3">
         <h2 id="stage1-h" className="text-base font-semibold">{t("Chặng 1 · Phép tính (bằng chứng công việc)", "Stage 1 · Computation (proof of work)")}</h2>
-        <PowSession challenge={pair.pow} onNewChallenge={onNewChallenge} onResult={(o) => setOutcome("pow", o.passed, o.challengeId)} />
+        <IdScope prefix={`${pair.kind}-pow-`}>
+          <PowSession challenge={pair.pow} onNewChallenge={onNewChallenge} onResult={(o) => setOutcome("pow", o.passed, o.challengeId)} />
+        </IdScope>
       </section>
 
       <section aria-labelledby="stage2-h" data-testid="stage-child" className="space-y-3">
@@ -83,20 +86,24 @@ function HybridBoard({ pair, onNewChallenge }: { pair: Pair; onNewChallenge: () 
           <p className="rounded-lg border border-dashed border-line p-4 text-sm text-muted" data-testid="stage-child-locked">
             {t("Chặng này mở khi chặng 1 có bằng chứng hợp lệ.", "This stage opens once stage 1 has a valid proof.")}
           </p>
-        ) : pair.kind === "pow-visual" ? (
-          <SliderSession
-            challenge={pair.child}
-            onNewChallenge={onNewChallenge}
-            onResult={(r) => setOutcome("child", r.verification.passed, pair.child.id)}
-            onReset={() => setOutcome("child", null, pair.child.id)}
-          />
         ) : (
-          <AudioSession
-            challenge={pair.child}
-            onNewChallenge={onNewChallenge}
-            onResult={(r) => setOutcome("child", r.passed, pair.child.id)}
-            onReset={() => setOutcome("child", null, pair.child.id)}
-          />
+          <IdScope prefix={`${pair.kind}-child-`}>
+            {pair.kind === "pow-visual" ? (
+              <SliderSession
+                challenge={pair.child}
+                onNewChallenge={onNewChallenge}
+                onResult={(r) => setOutcome("child", r.verification.passed, pair.child.id)}
+                onReset={() => setOutcome("child", null, pair.child.id)}
+              />
+            ) : (
+              <AudioSession
+                challenge={pair.child}
+                onNewChallenge={onNewChallenge}
+                onResult={(r) => setOutcome("child", r.passed, pair.child.id)}
+                onReset={() => setOutcome("child", null, pair.child.id)}
+              />
+            )}
+          </IdScope>
         )}
       </section>
     </div>

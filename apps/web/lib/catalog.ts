@@ -716,7 +716,7 @@ export function catalogFor(t: Translate = EN): readonly CatalogEntry[] {
         ),
         signals: [
           t("Số kiểm tra có và số được hỏi.", "How many checks are available out of those asked."),
-          t("Thời gian chạy kiểm tra và thời gian phép tính nhỏ.", "Time to run the checks and time of the small computation."),
+          t("Chỉ có/không cho từng API. Không đo thời gian nào, vì thời gian phản ánh hiệu năng thiết bị.", "Yes or no per API only. No duration is measured, because a duration reflects device performance."),
           t("Số lần bấm Chạy kiểm tra.", "How many times Run checks was pressed."),
           t("Không đọc phiên bản, hãng, cấu hình máy hay bất kỳ giá trị nào từ trình duyệt.", "No version, vendor, device detail or any other value is read from the browser."),
         ],

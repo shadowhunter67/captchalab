@@ -28,38 +28,26 @@ export interface BcAnswer {
   computed?: number;
 }
 
-export interface BcRun {
-  /** Time to run the availability checks. */
-  probeMs: number;
-  /** Time of the local computation. */
-  computeMs: number;
-}
-
 export interface BcFeatureContext {
-  run: BcRun | null;
   /** How many asked checks the verifier found available. */
   supported: number | null;
 }
 
 /**
- * BROWSER CAPABILITY METRICS (schema browser-capability@1). They describe what the browser offers, not the person.
+ * BROWSER CAPABILITY METRICS (schema browser-capability@1). They describe which APIs exist, not the person and not the
+ * device: counts of yes/no answers only. There is deliberately no timing here (a duration is device-performance
+ * information), no score, no hash and no identifier.
  *
- * reactionTime  ms  First press of Run, session clock. null if none.
  * runCount          Presses of Run.
  * attemptCount      Same as runCount (common feature name).
  * checkCount        Checks the challenge asked for.
  * supportedCount    Checks that came back available. null if no run finished.
- * probeTime     ms  Time to run the availability checks. null if none.
- * computeTime   ms  Time of the local computation. null if none.
  */
 export interface BcFeatures extends BaseCaptchaFeatures {
-  reactionTime: number | null;
   runCount: number;
   attemptCount: number;
   checkCount: number;
   supportedCount: number | null;
-  probeTime: number | null;
-  computeTime: number | null;
   inputModality: InputModality;
 }
 

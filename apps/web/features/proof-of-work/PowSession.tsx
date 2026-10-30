@@ -8,6 +8,7 @@ import { toPointerSample, toRecorderEvent, type PointerKind } from "@/lib/pointe
 import { PowInspect } from "./PowInspect";
 import { createPowRunner, type PowFound, type PowRunner } from "./pow-runner";
 import { powStatusText, type PowStatus } from "./pow-view-data";
+import { useScopedId } from "@/lib/id-scope";
 
 interface Completed {
   session: InteractionSession;
@@ -28,6 +29,7 @@ interface Props {
  * Only presses of the Start and Cancel buttons are recorded, never anything per hash.
  */
 export function PowSession({ challenge: initialChallenge, onNewChallenge, onResult }: Props) {
+  const sid = useScopedId();
   const t = useT();
   const [challenge] = useState(initialChallenge);
   const plugin = registry.get("proof-of-work");
@@ -122,8 +124,8 @@ export function PowSession({ challenge: initialChallenge, onNewChallenge, onResu
 
   return (
     <div className="space-y-6">
-      <section aria-labelledby="try-h" className="rounded-lg border border-line bg-panel p-4">
-        <h2 id="try-h" className="mb-1 text-base font-semibold">
+      <section aria-labelledby={sid("try-h")} className="rounded-lg border border-line bg-panel p-4">
+        <h2 id={sid("try-h")} className="mb-1 text-base font-semibold">
           {t("Thử", "Try")}
         </h2>
         <p className="mb-2 text-sm text-muted" data-testid="pow-instruction">

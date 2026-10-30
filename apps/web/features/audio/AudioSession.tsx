@@ -10,6 +10,7 @@ import { toPointerSample, toRecorderEvent, type PointerKind } from "@/lib/pointe
 import { AudioInspect } from "./AudioInspect";
 import { createAudioPlayer, type AudioPlayer, type PlayerState } from "./audio-player";
 import { playLabel, statusText } from "./audio-view-data";
+import { useScopedId } from "@/lib/id-scope";
 
 interface Completed {
   submission: number;
@@ -36,6 +37,7 @@ interface Props {
  * are never shown as text. The microphone is never used.
  */
 export function AudioSession({ challenge: initialChallenge, onNewChallenge, onResult, onReset, showInspect = true }: Props) {
+  const sid = useScopedId();
   const t = useT();
   const [challenge] = useState(initialChallenge);
   const plugin = registry.get("audio");
@@ -114,8 +116,8 @@ export function AudioSession({ challenge: initialChallenge, onNewChallenge, onRe
   const playing = playState === "playing";
   return (
     <div className="space-y-6">
-      <section aria-labelledby="try-h" className="rounded-lg border border-line bg-panel p-4">
-        <h2 id="try-h" className="mb-1 text-base font-semibold">
+      <section aria-labelledby={sid("try-h")} className="rounded-lg border border-line bg-panel p-4">
+        <h2 id={sid("try-h")} className="mb-1 text-base font-semibold">
           {t("Thử", "Try")}
         </h2>
         <p className="mb-4 text-sm text-muted">

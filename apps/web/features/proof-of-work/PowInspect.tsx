@@ -12,6 +12,7 @@ import { useEmbedReport } from "@/lib/embed-report";
 import { useT } from "@/lib/i18n";
 import { useEventSelection } from "@/lib/inspect/useEventSelection";
 import { powMetrics } from "./pow-view-data";
+import { useScopedId } from "@/lib/id-scope";
 
 interface Props {
   verification: VerificationResult;
@@ -21,13 +22,14 @@ interface Props {
 
 /** Proof of Work Inspect: result, computation metrics and the few recorded button presses. No chart or replay. */
 export function PowInspect({ verification, featureSet, session }: Props) {
+  const sid = useScopedId();
   useEmbedReport(verification, session, featureSet);
   const t = useT();
   const selection = useEventSelection(session);
   const metrics = useMemo(() => powMetrics(featureSet.features, t), [featureSet, t]);
   return (
-    <section aria-labelledby="inspect-h" className="space-y-4" data-testid="inspect">
-      <h2 id="inspect-h" className="text-base font-semibold">
+    <section aria-labelledby={sid("inspect-h")} className="space-y-4" data-testid="inspect">
+      <h2 id={sid("inspect-h")} className="text-base font-semibold">
         {t("Phân tích", "Inspect")}
       </h2>
       <VerificationSummary passed={verification.passed} reason={verification.reason} />

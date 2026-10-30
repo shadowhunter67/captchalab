@@ -18,6 +18,9 @@ test("Browser Capability: nothing runs on load; Run checks passes with boolean r
   await expect(metric(page, "checkCount")).toHaveText("4");
   await expect(metric(page, "supportedCount")).toHaveText("4");
   await expect(metric(page, "attemptCount")).toHaveText("1");
+  // Booleans and counts only: no duration of any kind is measured or shown.
+  for (const id of ["probeTime", "computeTime", "fillTime", "reactionTime"]) await expect(metric(page, id)).toHaveCount(0);
+  await expect(page.getByTestId("inspect")).not.toContainText(/ms/);
   await expect(page.getByTestId("bc-privacy")).toContainText("not a device fingerprint");
   await expect(page.getByTestId("computation-disclaimer")).toContainText("does not prove a human user");
   await expect(page.getByTestId("bc-run")).toBeDisabled();

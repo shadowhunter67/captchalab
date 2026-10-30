@@ -104,13 +104,20 @@ describe("feature extractor", () => {
     { t: t + 10, type: "pointerup", x: 1, y: 1, pointerId: 1, pointerType: "mouse", target: BC_RUN_TARGET },
   ];
   const session = (events: InteractionEvent[]): InteractionSession => ({ schemaVersion: SCHEMA_VERSION, id: "s", captchaId: "browser-capability", startedAt: 0, durationMs: events.at(-1)?.t ?? 0, events, inputModality: inferModality(events) });
-  it("counts presses and reports timings (golden)", () => {
-    const f = extractBcFeatures(c, session(press(120)), { run: { probeMs: 2, computeMs: 5 }, supported: 4 });
-    expect(f.features).toMatchObject({ reactionTime: 120, runCount: 1, attemptCount: 1, checkCount: 4, supportedCount: 4, probeTime: 2, computeTime: 5 });
+  it("counts presses and capability answers (golden)", () => {
+    const f = extractBcFeatures(c, session(press(120)), { supported: 4 });
+    expect(f.features).toMatchObject({ runCount: 1, attemptCount: 1, checkCount: 4, supportedCount: 4 });
     expect(f.schemaVersion).toBe("browser-capability@1");
   });
-  it("without a finished run the metrics are null, never zero; bad runs are ignored", () => {
-    expect(extractBcFeatures(c, session(press(100)), { run: null, supported: null }).features).toMatchObject({ runCount: 1, supportedCount: null, probeTime: null, computeTime: null });
-    expect(extractBcFeatures(c, session([]), { run: { probeMs: Number.NaN, computeMs: 1 }, supported: 3 }).features).toMatchObject({ probeTime: null, supportedCount: null });
+  it("exposes no timing or device-performance field, in the types, the features or the view", () => {
+    const f = extractBcFeatures(c, session(press(120)), { supported: 4 });
+    expect(Object.keys(f.features).filter((k) => /time|duration|ms$|speed|perf/i.test(k) && k !== "completionTime")).toEqual([]);
+    const src = ["types.ts", "feature-extractor.ts", "capability.ts", "verifier.ts", "plugin.ts", "generator.ts"].map((n) => readFileSync(join(__dirname, "..", n), "utf8").replace(/\/\*[\s\S]*?\*\/|\/\/.*$/gm, "")).join("\n");
+    expect(src).not.toMatch(/performance\.now|Date\.now|probeMs|computeMs|probeTime|computeTime|reactionTime|hrtime/);
+  });
+  it("without a finished run the count is null, never zero; a bad count is ignored", () => {
+    expect(extractBcFeatures(c, session(press(100)), { supported: null }).features).toMatchObject({ runCount: 1, supportedCount: null });
+    expect(extractBcFeatures(c, session([]), { supported: Number.NaN }).features).toMatchObject({ supportedCount: null });
+    expect(extractBcFeatures(c, session([]), { supported: 99 }).features).toMatchObject({ supportedCount: null });
   });
 });

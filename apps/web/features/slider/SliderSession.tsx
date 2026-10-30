@@ -14,6 +14,7 @@ import { SliderController, type SliderPhase, type SubmitVia } from "./slider-con
 import { SliderSurface } from "./SliderSurface";
 import { SliderInspect } from "./SliderInspect";
 import type { SessionMarker } from "@/lib/replay/markers";
+import { useScopedId } from "@/lib/id-scope";
 
 interface Completed {
   /** Increments per submission; keys the Inspect view so selection/replay never carry over. */
@@ -50,6 +51,7 @@ interface Props {
  * remounts it and drops the recorder, controller, result and replay with it: nothing carries over.
  */
 export function SliderSession({ challenge: initialChallenge, onNewChallenge, onResult, onReset, showInspect = true }: Props) {
+  const sid = useScopedId();
   // Pinned at mount: what is drawn, verified and analyzed is always the same challenge, even if a
   // parent forgot to remount with a new key.
   const t = useT();
@@ -113,8 +115,8 @@ export function SliderSession({ challenge: initialChallenge, onNewChallenge, onR
 
   return (
     <div className="space-y-6">
-      <section aria-labelledby="try-h" className="rounded-lg border border-line bg-panel p-4">
-        <h2 id="try-h" className="mb-1 text-base font-semibold">
+      <section aria-labelledby={sid("try-h")} className="rounded-lg border border-line bg-panel p-4">
+        <h2 id={sid("try-h")} className="mb-1 text-base font-semibold">
           {t("Thử", "Try")}
         </h2>
         <p className="mb-4 text-sm text-muted">

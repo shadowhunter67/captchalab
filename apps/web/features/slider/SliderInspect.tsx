@@ -19,6 +19,7 @@ import type { SessionMarker } from "@/lib/replay/markers";
 import type { SubmitVia } from "./slider-controller";
 import { SliderReplay } from "./SliderReplay";
 import { sliderAttemptMetrics, sliderDragDomain, sliderMotionSeries } from "./slider-view-data";
+import { useScopedId } from "@/lib/id-scope";
 
 interface Props {
   verification: VerificationResult;
@@ -40,6 +41,7 @@ const axisNumber = (v: number): string => String(Math.round(v));
  * the timeline, the event inspector, the trajectory marker and the chart crosshairs all derive from it.
  */
 export function SliderInspect({ verification, featureSet, session, markers, layout, challenge, via }: Props) {
+  const sid = useScopedId();
   useEmbedReport(verification, session, featureSet);
   const t = useT();
   const chartScope = t(
@@ -65,8 +67,8 @@ export function SliderInspect({ verification, featureSet, session, markers, layo
   const selectedPoint = selectedEvent && isPointerEvent(selectedEvent) ? { x: selectedEvent.x, y: selectedEvent.y } : null;
 
   return (
-    <section aria-labelledby="inspect-h" className="space-y-4" data-testid="inspect">
-      <h2 id="inspect-h" className="text-base font-semibold">
+    <section aria-labelledby={sid("inspect-h")} className="space-y-4" data-testid="inspect">
+      <h2 id={sid("inspect-h")} className="text-base font-semibold">
         {t("Phân tích", "Inspect")}
       </h2>
 
