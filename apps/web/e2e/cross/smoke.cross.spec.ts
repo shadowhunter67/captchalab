@@ -109,13 +109,28 @@ const hasWebAudio = (page: Page) => page.evaluate(() => typeof (window as unknow
 
 test("Audio: nothing plays on load; Play and Replay work; no microphone; the right digits pass", async ({ page }) => {
   const wavs: string[] = [];
-  const permissions: string[] = [];
+  const micCalls: string[] = [];
+  await page.exposeFunction("__micCall", (what: string) => void micCalls.push(what));
+  await page.addInitScript(() => {
+    // Any attempt to reach a microphone or ask for permission is recorded; the page must make none.
+    const w = window as unknown as { __micCall: (w: string) => void };
+    const md = navigator.mediaDevices as MediaDevices | undefined;
+    if (md) {
+      md.getUserMedia = () => {
+        w.__micCall("getUserMedia");
+        return Promise.reject(new Error("blocked in test"));
+      };
+      md.enumerateDevices = () => {
+        w.__micCall("enumerateDevices");
+        return Promise.resolve([]);
+      };
+    }
+  });
   page.on("request", (r) => {
     if (r.url().endsWith(".wav")) wavs.push(r.url());
   });
   await page.goto(`/playground/audio?seed=${AUDIO_SEED}&variant=spoken-digits&difficulty=easy`);
   expect(wavs).toHaveLength(0); // no auto-play
-  expect(permissions).toEqual([]);
   if (!(await hasWebAudio(page))) {
     // Without Web Audio the page must say so, keep the alternative challenge and stay usable: no crash, no answer shown.
     test.info().annotations.push({ type: "limitation", description: "this browser build has no Web Audio" });
@@ -125,6 +140,7 @@ test("Audio: nothing plays on load; Play and Replay work; no microphone; the rig
     await expect(page.getByTestId("audio-alternative")).toBeVisible();
     await expect(page.getByTestId("audio-play")).toBeEnabled();
     expect(wavs).toHaveLength(0);
+    expect(micCalls).toEqual([]);
     return;
   }
   await page.getByTestId("audio-play").click();
@@ -138,6 +154,7 @@ test("Audio: nothing plays on load; Play and Replay work; no microphone; the rig
   await page.getByTestId("verify").click();
   await expect(page.getByTestId("result")).toContainText("Passed");
   await expect(metric(page, "playCount")).toHaveText("2");
+  expect(micCalls, "no microphone or device enumeration").toEqual([]);
 });
 
 test("Audio: changing the difficulty during playback resets the session and stops the sound", async ({ page }) => {

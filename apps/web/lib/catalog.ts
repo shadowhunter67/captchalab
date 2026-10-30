@@ -153,7 +153,7 @@ export function catalogFor(t: Translate = EN): readonly CatalogEntry[] {
         ],
         weaknesses: [
           t("Cần điều khiển con trỏ chính xác.", "Needs fine pointer control."),
-          t("Bản demo này không có cách dùng bàn phím thay thế.", "No keyboard alternative in this demo."),
+          t("Dùng bàn phím phải chọn từng hình rồi từng vùng thả, nhiều bước hơn kéo.", "With the keyboard each shape and each drop area is a separate step, which is slower than one drag."),
         ],
         accessibility: t(
           "Có thể kéo bằng con trỏ hoặc hoàn thành chỉ bằng bàn phím: Enter hoặc Space để chọn hình, rồi Enter hoặc Space trên vùng thả; Escape để bỏ chọn. Chưa kiểm tra với mọi trình đọc màn hình.",

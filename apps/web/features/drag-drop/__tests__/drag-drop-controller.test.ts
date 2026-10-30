@@ -380,4 +380,21 @@ describe("DragDropController: keyboard input", () => {
     expect(vector.values.meanVelocity).toBeNull();
     expect(["human-like", "synthetic-like", "uncertain"]).toContain(classify(vector).label);
   });
+
+  it("cannot verify while a keyboard selection is pending, so a result never describes a board that is about to change", () => {
+    const { controller, last, verifies } = setup();
+    controller.keySelect("item-a", "Enter");
+    controller.keyPlace("target-a", "Enter");
+    controller.keySelect("item-b", "Enter");
+    controller.keyPlace("target-b", "Enter");
+    expect(last().allPlaced).toBe(true);
+    controller.keySelect("item-a", "Enter"); // pick a placed shape up again
+    expect(last().allPlaced).toBe(false);
+    controller.verify();
+    expect(verifies).toHaveLength(0);
+    controller.keyCancel("Escape");
+    expect(last().allPlaced).toBe(true);
+    controller.verify();
+    expect(verifies).toHaveLength(1);
+  });
 });

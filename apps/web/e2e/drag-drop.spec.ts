@@ -404,6 +404,11 @@ test("keyboard: selecting after a result discards it, like lifting a shape does"
   await itemEl(page, A).focus();
   await page.keyboard.press("Enter");
   await expect(page.getByTestId("inspect")).toHaveCount(0);
+  await expect(page.getByTestId("verify")).toBeDisabled(); // a pending selection blocks Verify, so no stale result can appear
+  await dropEl(page, A).focus();
+  await page.keyboard.press("Enter");
+  await expect(page.getByTestId("verify")).toBeEnabled();
+  await expect(page.getByTestId("result")).toHaveCount(0);
 });
 
 test("mixed pointer and keyboard in one session; a held key does not repeat; other keys are ignored", async ({ page }) => {

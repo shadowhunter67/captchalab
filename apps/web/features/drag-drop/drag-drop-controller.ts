@@ -167,7 +167,8 @@ export class DragDropController {
 
   /** Verify the current placements. Only when every item is on a target and nothing is held. */
   verify(): void {
-    if (this.disposed || this.layout === null || this.active !== null || !allPlaced(this.opts.challenge, this.state)) return;
+    // Not while a keyboard selection is pending: placing that shape would change the board the result describes.
+    if (this.disposed || this.layout === null || this.active !== null || this.selected !== null || !allPlaced(this.opts.challenge, this.state)) return;
     this.opts.onVerify(buildAnswer(this.opts.challenge, this.state), this.layout);
   }
 
@@ -269,7 +270,7 @@ export class DragDropController {
       selectedItemId: this.selected,
       keyNotice: this.keyNotice,
       placements,
-      allPlaced: this.active === null && allPlaced(this.opts.challenge, this.state),
+      allPlaced: this.active === null && this.selected === null && allPlaced(this.opts.challenge, this.state),
       lastDrop: this.lastDrop,
     });
   }
