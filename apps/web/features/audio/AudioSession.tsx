@@ -8,7 +8,7 @@ import { useT } from "@/lib/i18n";
 import type { SessionReport } from "@/lib/behavior/human";
 import { toPointerSample, toRecorderEvent, type PointerKind } from "@/lib/pointer-adapter";
 import { AudioInspect } from "./AudioInspect";
-import { createAudioPlayer, type AudioPlayer, type PlayerState } from "./audio-player";
+import { createAudioPlayer, type AudioPlayer, type PlayerError, type PlayerState } from "./audio-player";
 import { playLabel, statusText } from "./audio-view-data";
 import { useScopedId } from "@/lib/id-scope";
 
@@ -49,16 +49,16 @@ export function AudioSession({ challenge: initialChallenge, onNewChallenge, onRe
   const [error, setError] = useState<string | null>(null);
   const [playState, setPlayState] = useState<PlayerState>("idle");
   const [played, setPlayed] = useState(false);
-  const [audioFailed, setAudioFailed] = useState(false);
+  const [audioFailed, setAudioFailed] = useState<PlayerError | null>(null);
 
   // The player lives exactly as long as this session: unmount (new challenge, variant change) stops the sound.
   useEffect(() => {
     const player = createAudioPlayer(challenge, {
       onStateChange: (s) => {
         setPlayState(s);
-        if (s === "loading") setAudioFailed(false);
+        if (s === "loading") setAudioFailed(null);
       },
-      onError: () => setAudioFailed(true),
+      onError: (kind) => setAudioFailed(kind),
     });
     playerRef.current = player;
     return () => {
@@ -144,12 +144,17 @@ export function AudioSession({ challenge: initialChallenge, onNewChallenge, onRe
             {statusText(playState, t)}
           </span>
         </div>
-        {audioFailed && (
-          <p role="alert" data-testid="audio-error" className="mb-4 text-sm text-bad">
-            {t(
-              "Không tải được âm thanh. Hãy thử lại, hoặc dùng thử thách thay thế.",
-              "The audio could not be loaded. Try again, or use the alternative challenge.",
-            )}
+        {audioFailed !== null && (
+          <p role="alert" data-testid="audio-error" data-kind={audioFailed} className="mb-4 text-sm text-bad">
+            {audioFailed === "unsupported"
+              ? t(
+                  "Trình duyệt này không hỗ trợ phát âm thanh Web Audio. Hãy dùng thử thách thay thế, hoặc một trình duyệt khác.",
+                  "This browser does not support Web Audio playback. Use the alternative challenge, or another browser.",
+                )
+              : t(
+                  "Không tải được âm thanh. Hãy thử lại, hoặc dùng thử thách thay thế.",
+                  "The audio could not be loaded. Try again, or use the alternative challenge.",
+                )}
           </p>
         )}
         <form onSubmit={onSubmit} className="space-y-3">

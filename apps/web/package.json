@@ -10,7 +10,8 @@
     "start": "next start",
     "typecheck": "tsc -p tsconfig.json",
     "test": "vitest run",
-    "test:e2e": "playwright test",
+    "test:e2e": "playwright test --project=chromium",
+    "test:e2e:cross": "playwright test --project=firefox --project=webkit",
     "lint": "eslint . --max-warnings 0"
   },
   "dependencies": {

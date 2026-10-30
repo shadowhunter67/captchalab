@@ -51,8 +51,16 @@ jobs:
       - name: Install Playwright Chromium
         run: corepack pnpm --filter web exec playwright install --with-deps chromium
 
-      - name: E2E
+      - name: E2E (Chromium, full suite)
         run: corepack pnpm --filter web test:e2e
+
+      # Targeted cross-browser smoke (e2e/cross): functional paths only, no timing or pixel assertions. A functional
+      # failure here blocks the job like any other test.
+      - name: Install Playwright Firefox and WebKit
+        run: corepack pnpm --filter web exec playwright install --with-deps firefox webkit
+
+      - name: E2E (Firefox and WebKit smoke)
+        run: corepack pnpm --filter web test:e2e:cross
 
       - name: Upload Playwright report (on failure)
         if: failure()
