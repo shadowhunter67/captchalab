@@ -126,3 +126,5 @@ Not release blockers unless stated. Format: issue · impact · affected CAPTCHA 
 - The taxonomy is hand-assigned (one family per entry); an entry that spans families (a Hybrid, Checkbox) sits in one · Taxonomy · by design
 - Not built: Distorted Text as a separate challenge, a 4x4 Image Grid, Memory replay, extra Audio voices · Challenges · later
 - Hybrid and the labs have no Learn section of their own, only a short card; the sidebar entries are available from the home page · Learn · later
+- Browser Capability shows the check and computation times of this one run to the person only; they are not stored, sent or aggregated (the privacy E2E asserts it). Timing can still carry device-performance information, so removing it from the feature set is open if a stricter reading is wanted · Browser Capability · later
+- In Hybrid, the two stages are mounted together and reuse the sessions' fixed element ids (for example `try-h`, `inspect-h`), so a heading id can appear twice on that page and `aria-labelledby` may point at the wrong stage; fixing it needs an id prefix passed through every session and Inspect component · Hybrid / a11y · later

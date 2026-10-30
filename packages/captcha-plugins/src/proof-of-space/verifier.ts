@@ -2,7 +2,8 @@ import type { VerificationResult } from "@captchalab/captcha-core";
 import { MAX_SAMPLES, MAX_SPACE_BYTES, MIN_SAMPLES, MIN_SPACE_BYTES, checksumOfSpace, sampleValues, samplePositions } from "./space";
 import type { PosAnswer, PosChallenge } from "./types";
 
-function challengeOk(c: unknown): c is PosChallenge {
+/** The one definition of a well-formed challenge: the verifier and the runner both use it before doing any work. */
+export function isPosChallenge(c: unknown): c is PosChallenge {
   if (typeof c !== "object" || c === null) return false;
   const x = c as Record<string, unknown>;
   if (typeof x.seed !== "number" || !Number.isInteger(x.seed) || x.seed < 0 || x.seed > 0xffffffff) return false;
@@ -17,7 +18,7 @@ function challengeOk(c: unknown): c is PosChallenge {
  * allocated), and the page's own result is never trusted. The interaction is never consulted. Nothing throws.
  */
 export function verifyPosAnswer(challenge: PosChallenge, answer: PosAnswer): VerificationResult {
-  if (!challengeOk(challenge)) return { passed: false, reason: "The challenge is missing or malformed." };
+  if (!isPosChallenge(challenge)) return { passed: false, reason: "The challenge is missing or malformed." };
   const a = answer as { samples?: unknown; checksum?: unknown } | null | undefined;
   if (challenge.kind === "checksum") {
     if (typeof a?.checksum !== "number" || !Number.isInteger(a.checksum) || a.checksum < 0 || a.checksum > 0xffffffff) {

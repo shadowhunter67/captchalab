@@ -107,6 +107,14 @@ describe("pos runner", () => {
     expect(h.pending()).toBe(0);
     expect(h.calls.done).toHaveLength(0);
   });
+  it("refuses a malformed challenge (bad sample count, tiny size, bad seed) before any allocation", () => {
+    for (const bad of [{ sampleCount: 1e9 }, { sampleCount: Number.NaN }, { bytes: 10 }, { seed: -1 }, { kind: "other" as never }]) {
+      const h = harness({ ...make("sampled"), ...bad });
+      h.runner.start();
+      expect(h.calls.error, JSON.stringify(bad)).toBe(1);
+      expect(h.pending()).toBe(0);
+    }
+  });
   it("never allocates more than the challenge asks for", () => {
     const sizes: number[] = [];
     const Real = globalThis.Uint8Array;

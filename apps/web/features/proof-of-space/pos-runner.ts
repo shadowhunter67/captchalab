@@ -1,4 +1,4 @@
-import { CHECKSUM_START, MAX_SPACE_BYTES, checksumUpdate, fillRange, samplePositions, type PosAnswer, type PosChallenge, type PosRun } from "@captchalab/captcha-plugins";
+import { CHECKSUM_START, MAX_SPACE_BYTES, checksumUpdate, fillRange, isPosChallenge, samplePositions, type PosAnswer, type PosChallenge, type PosRun } from "@captchalab/captcha-plugins";
 
 export interface PosDone {
   proof: PosAnswer;
@@ -123,7 +123,7 @@ export function createPosRunner(challenge: PosChallenge, hooks: PosRunnerHooks, 
   return {
     start() {
       if (state !== "idle") return;
-      if (!Number.isInteger(challenge.bytes) || challenge.bytes <= 0 || challenge.bytes > MAX_SPACE_BYTES) {
+      if (!isPosChallenge(challenge)) {
         state = "finished";
         hooks.onError();
         return;

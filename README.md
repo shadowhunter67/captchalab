@@ -12,7 +12,7 @@ The site is in **Vietnamese by default**. Use the **VI / EN** button in the top-
 
 ## What you can try
 
-Sixteen challenges plus four composed labs, each with its own page and grouped by family (Visual, Cognitive, Audio, Computational, Behavioral, Environment, Hybrid). CaptchaLab covers major CAPTCHA and anti-abuse challenge families through generic educational implementations; it does not cover every commercial system and does not reproduce their internals. The full table, with what each entry supports, is on the Learn page (`/learn#coverage`).
+The challenges and composed labs below, each with its own page and grouped by family (Visual, Cognitive, Audio, Computational, Behavioral, Environment, Hybrid). CaptchaLab covers major CAPTCHA and anti-abuse challenge families through generic educational implementations; it does not cover every commercial system and does not reproduce their internals. The full table, with what each entry supports, is on the Learn page (`/learn#coverage`).
 
 | Challenge | What you do |
 |---|---|
@@ -33,7 +33,7 @@ Sixteen challenges plus four composed labs, each with its own page and grouped b
 | Proof of Space | Your device fills a small memory region and proves it (this shows memory and time, not that you are human) |
 | Browser Capability | Press once to see which basic browser APIs exist, as plain yes or no (not a fingerprint) |
 
-And four composed labs: **Hybrid** (Proof of Work then Slider, or then Audio; passes only when both stages pass), **Invisible Lab** (a neutral task observed only after you press Start), and **Adaptive Lab** (the existing experimental classifier's label mapped to a *simulated* next-challenge suggestion; nothing is blocked or redirected).
+And composed labs: **Hybrid** (Proof of Work then Slider, or then Audio; passes only when both stages pass), **Invisible Lab** (a neutral task observed only after you press Start), and **Adaptive Lab** (the existing experimental classifier's label mapped to a *simulated* next-challenge suggestion; nothing is blocked or redirected).
 
 Each challenge has **variants** (for example Clean, Rotated or Noisy text, a Number or Visual sequence, or Spoken digits) and three **difficulty levels** (Easy, Medium, Hard), plus a **seed**. The same seed, variant and difficulty always give the same challenge, and the page shows exactly what the difficulty changed (tolerance, number of noise lines...). A link such as `/playground/text/?variant=noisy&difficulty=hard&seed=742193` opens that exact challenge.
 
@@ -47,7 +47,7 @@ After each attempt you can look at:
 There are a few extra pages:
 
 - **Learn**: a short explanation of how each challenge works, its strengths and weaknesses, and how behavioral ("invisible") CAPTCHA works.
-- **Behavioral Lab**: record an attempt, set it next to a computer-generated one on the very same challenge, and see which signals differ (timing, motion, corrections, rhythm). Works for eleven of the twelve challenges: Slider, Drag & Drop, Checkbox, Image Grid, Text, Rotation, Shape Matching, Math / Logic, Sequence, Memory and Audio (Proof of Work is left out on purpose: it measures your device's computation, not an interaction). An **experimental** rule-based classifier reads both as *Human-like*, *Synthetic-like* or *Uncertain* and shows its evidence. It is a lab toy for CaptchaLab's own data: it never gives a percentage and does not prove whether a real person is human or automated. See [docs/behavioral-lab.md](docs/behavioral-lab.md).
+- **Behavioral Lab**: record an attempt, set it next to a computer-generated one on the very same challenge, and see which signals differ (timing, motion, corrections, rhythm). Works for eleven challenges: Slider, Drag & Drop, Checkbox, Image Grid, Text, Rotation, Shape Matching, Math / Logic, Sequence, Memory and Audio (Proof of Work is left out on purpose: it measures your device's computation, not an interaction). An **experimental** rule-based classifier reads both as *Human-like*, *Synthetic-like* or *Uncertain* and shows its evidence. It is a lab toy for CaptchaLab's own data: it never gives a percentage and does not prove whether a real person is human or automated. See [docs/behavioral-lab.md](docs/behavioral-lab.md).
 - **Compare**: the side-by-side view of the Behavioral Lab, with a signal table, a path or timing view and optional generated reference runs.
 - **Challenge builder** (`/builder`): pick a CAPTCHA, variant, difficulty and seed, preview and try the exact challenge, and download it as a small versioned file.
 - **Experiments** (`/experiments`): record several local sessions on one challenge, add deterministic synthetic batches, compare signals and the classifier's evidence, then export the whole experiment to a file and import it again to reproduce it. Everything stays in your browser; nothing is saved unless you download it. See [docs/experiment-workbench.md](docs/experiment-workbench.md) and [docs/data-formats.md](docs/data-formats.md).
@@ -79,7 +79,7 @@ To check the project: `corepack pnpm -r run lint`, `corepack pnpm -r run typeche
 ## Known limitations
 
 - Drag & Drop has no keyboard alternative yet, and the Text challenge has no audio or text alternative.
-- The Behavioral Lab covers eleven of the sixteen challenges (Proof of Work, Proof of Space, Browser Capability, MatchKey and Tile Game are left out; the matrix on the Learn page shows each gap), and its classifier is a hand-set baseline, not trained on real people.
+- The Behavioral Lab leaves out Proof of Work, Proof of Space, Browser Capability, MatchKey and Tile Game; the matrix on the Learn page shows each gap, and its classifier is a hand-set baseline, not trained on real people.
 - The full list is in [docs/technical-debt.md](docs/technical-debt.md).
 
 ## Contributing
