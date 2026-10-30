@@ -1,5 +1,5 @@
 import { expect, test } from "./fixtures";
-import { CATALOG } from "../lib/catalog";
+import { TAXONOMY as CATALOG } from "../lib/taxonomy";
 import { watchPrivacy } from "./privacy";
 
 const IDS = ["slider", "checkbox", "drag-drop", "rotation", "text", "image-grid", "shape-matching", "math-logic", "sequence", "memory", "proof-of-work", "audio", "match-key", "tile-game", "proof-of-space", "browser-capability"];

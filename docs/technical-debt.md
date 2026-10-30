@@ -115,3 +115,14 @@ Not release blockers unless stated. Format: issue · impact · affected CAPTCHA 
 - The Invisible demo and Proof of Work cannot be added (the first is not a CAPTCHA, the second has no behavioral reading) · Dataset · by design
 - Notes are free text (200 characters); a person can still type personal information into one, and the exported file keeps it · Dataset · by design (a warning is shown)
 
+
+## Fast completion (v0.9)
+- MatchKey, Tile Game, Proof of Space and Browser Capability are not in the classifier, Compare, Dataset evaluation, the synthetic profiles or the Builder; the coverage matrix says "—" for each. Deep behavioral support is deferred · Behavioral Lab · later
+- Invisible and Adaptive only consume `behavioral-baseline@1` and its simulated escalation; they add no rule. The classifier is still hand-set, with no baseline@2 · Classifier · later
+- Proof of Space is a simulation (a deterministic function, tiny regions up to 4 MB), not a storage-hard protocol; the fill runs on the main thread in 64 KB slices, with no Worker · Proof of Space · later
+- Hybrid is a composition rule in `lib/hybrid`, not a plugin; there is no PoW + Text or PoW + Image Grid hybrid, and its stages are not recorded as one session · Hybrid · later
+- Browser Capability checks the existence of six APIs by name only and keeps no value; it cannot tell a capable browser from a spoofed one · Browser Capability · by design
+- Evaluation reads the local dataset only: no per-annotator labels, no cross-validation, no confidence intervals, and the threshold sandbox does not change `DEFAULT_THRESHOLDS` · Evaluation · by design
+- The taxonomy is hand-assigned (one family per entry); an entry that spans families (a Hybrid, Checkbox) sits in one · Taxonomy · by design
+- Not built: Distorted Text as a separate challenge, a 4x4 Image Grid, Memory replay, extra Audio voices · Challenges · later
+- Hybrid and the labs have no Learn section of their own, only a short card; the sidebar entries are available from the home page · Learn · later

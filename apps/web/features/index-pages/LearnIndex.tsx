@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import { catalogFor } from "@/lib/catalog";
+import { CoverageMatrix } from "@/components/CoverageMatrix";
+import { FAMILIES, FAMILY_NAMES, taxonomyFor } from "@/lib/taxonomy";
 import { BehavioralLearn } from "./BehavioralLearn";
 import { useT } from "@/lib/i18n";
 
@@ -18,6 +20,7 @@ function List({ items }: { items: readonly string[] }) {
 export function LearnIndex() {
   const t = useT();
   const catalog = catalogFor(t);
+  const entries = taxonomyFor(t);
   return (
     <main className="mx-auto max-w-3xl space-y-8 px-4 py-8 sm:px-6">
       <header>
@@ -31,22 +34,36 @@ export function LearnIndex() {
             "CaptchaLab illustrates signals that a CAPTCHA system may use. It does not claim to reproduce the complete internal mechanisms of commercial CAPTCHA systems. Measurements describe one interaction; they are not evidence that it was made by a person or by software, and the demo verifiers are not production security.",
           )}
         </p>
-        <nav aria-label="CAPTCHAs" className="mt-3 flex flex-wrap gap-3 text-sm">
-          {catalog.map((c) => (
-            <a key={c.id} href={`#${c.id}`} className="underline">
-              {c.name}
+        <nav aria-label={t("Họ", "Families")} className="mt-3 flex flex-wrap gap-3 text-sm" data-testid="learn-families">
+          {FAMILIES.map((f) => (
+            <a key={f} href={`#family-${f}`} className="font-medium underline">
+              {t(FAMILY_NAMES[f][0], FAMILY_NAMES[f][1])}
             </a>
           ))}
+          <a href="#coverage" className="underline">{t("Độ phủ", "Coverage")}</a>
           <a href="#behavioral" className="underline">
             {t("Hành vi / vô hình", "Behavioral / Invisible")}
           </a>
         </nav>
+        <nav aria-label="CAPTCHAs" className="mt-2 flex flex-wrap gap-3 text-sm">
+          {catalog.map((c) => (
+            <a key={c.id} href={`#${c.id}`} className="text-muted underline">
+              {c.name}
+            </a>
+          ))}
+        </nav>
       </header>
-      {catalog.map((c) => (
+      {FAMILIES.map((f) => {
+        const familyCatalog = catalog.filter((c) => entries.find((e) => e.id === c.id)?.family === f);
+        const familyLabs = entries.filter((e) => e.family === f && e.kind === "lab");
+        return (
+          <div key={f} id={`family-${f}`} className="scroll-mt-4 space-y-4" data-testid={`learn-family-${f}`}>
+            <h2 className="text-xl font-semibold">{t(FAMILY_NAMES[f][0], FAMILY_NAMES[f][1])}</h2>
+        {familyCatalog.map((c) => (
         <section key={c.id} id={c.id} aria-labelledby={`${c.id}-h`} className="scroll-mt-4 space-y-3 rounded-lg border border-line bg-panel p-4 text-sm" data-testid={`learn-${c.id}`}>
-          <h2 id={`${c.id}-h`} className="text-lg font-semibold">
+          <h3 id={`${c.id}-h`} className="text-lg font-semibold">
             {c.name}
-          </h2>
+          </h3>
           <h3 className="font-semibold">{t("Cách hoạt động", "How it works")}</h3>
           <p className="text-muted">{c.learn.howItWorks}</p>
           <h3 className="font-semibold">{t("Cách tạo thử thách", "Generation")}</h3>
@@ -72,6 +89,19 @@ export function LearnIndex() {
           </p>
         </section>
       ))}
+            {familyLabs.map((l) => (
+              <section key={l.id} id={l.id} className="scroll-mt-4 space-y-1 rounded-lg border border-line bg-panel p-4 text-sm" data-testid={`learn-lab-${l.id}`}>
+                <h3 className="text-base font-semibold">{l.name}</h3>
+                <p className="text-muted">{l.summary}</p>
+                <p>
+                  <Link href={l.route} className="underline">{t(`Mở ${l.name}`, `Open ${l.name}`)}</Link>
+                </p>
+              </section>
+            ))}
+          </div>
+        );
+      })}
+      <CoverageMatrix />
       <BehavioralLearn />
     </main>
   );

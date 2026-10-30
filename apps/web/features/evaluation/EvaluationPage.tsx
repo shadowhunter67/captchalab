@@ -15,6 +15,7 @@ import { DEFAULT_THRESHOLDS, MIN_GROUP_SAMPLE, errorKind, evaluate, evaluateBy, 
 import { toEvalInputs } from "@/lib/evaluation/inputs";
 import { useT } from "@/lib/i18n";
 import { describeError, readFileText } from "@/lib/research/browser";
+import { ExperimentsNav } from "@/components/ExperimentsNav";
 
 const btn = "rounded-md border border-line bg-panel px-3 py-2 text-sm font-medium hover:bg-track disabled:opacity-50";
 
@@ -153,6 +154,7 @@ export function EvaluationPage() {
     <main className="mx-auto max-w-5xl space-y-6 px-4 py-8 sm:px-6">
       <header>
         <Link prefetch={false} href="/experiments" className="text-sm text-muted underline">{t("Thí nghiệm", "Experiments")}</Link>
+        <ExperimentsNav current="evaluation" />
         <h1 className="mt-2 text-2xl font-semibold tracking-tight">{t("Đánh giá bộ phân loại", "Classifier evaluation")}</h1>
         <p className="mt-1 text-sm text-muted">
           {t(

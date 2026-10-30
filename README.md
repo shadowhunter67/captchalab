@@ -12,7 +12,7 @@ The site is in **Vietnamese by default**. Use the **VI / EN** button in the top-
 
 ## What you can try
 
-Twelve challenges, each with its own page:
+Sixteen challenges plus four composed labs, each with its own page and grouped by family (Visual, Cognitive, Audio, Computational, Behavioral, Environment, Hybrid). CaptchaLab covers major CAPTCHA and anti-abuse challenge families through generic educational implementations; it does not cover every commercial system and does not reproduce their internals. The full table, with what each entry supports, is on the Learn page (`/learn#coverage`).
 
 | Challenge | What you do |
 |---|---|
@@ -28,6 +28,12 @@ Twelve challenges, each with its own page:
 | Memory | Watch a sequence or some lit cells, then recall them |
 | Proof of Work | Your device computes a proof (this shows effort, not that you are human) |
 | Audio | Listen to spoken digits and type them (with a link to a non-audio alternative) |
+| MatchKey | Pick the option that matches a key shape (exactly, or by attribute) |
+| Tile Game | Find the identical pair, or the tiles that share a named attribute |
+| Proof of Space | Your device fills a small memory region and proves it (this shows memory and time, not that you are human) |
+| Browser Capability | Press once to see which basic browser APIs exist, as plain yes or no (not a fingerprint) |
+
+And four composed labs: **Hybrid** (Proof of Work then Slider, or then Audio; passes only when both stages pass), **Invisible Lab** (a neutral task observed only after you press Start), and **Adaptive Lab** (the existing experimental classifier's label mapped to a *simulated* next-challenge suggestion; nothing is blocked or redirected).
 
 Each challenge has **variants** (for example Clean, Rotated or Noisy text, a Number or Visual sequence, or Spoken digits) and three **difficulty levels** (Easy, Medium, Hard), plus a **seed**. The same seed, variant and difficulty always give the same challenge, and the page shows exactly what the difficulty changed (tolerance, number of noise lines...). A link such as `/playground/text/?variant=noisy&difficulty=hard&seed=742193` opens that exact challenge.
 
@@ -46,6 +52,7 @@ There are a few extra pages:
 - **Challenge builder** (`/builder`): pick a CAPTCHA, variant, difficulty and seed, preview and try the exact challenge, and download it as a small versioned file.
 - **Experiments** (`/experiments`): record several local sessions on one challenge, add deterministic synthetic batches, compare signals and the classifier's evidence, then export the whole experiment to a file and import it again to reproduce it. Everything stays in your browser; nothing is saved unless you download it. See [docs/experiment-workbench.md](docs/experiment-workbench.md) and [docs/data-formats.md](docs/data-formats.md).
 - **Labeled dataset** (`/experiments/dataset`): add sessions you choose to a local dataset, give each a label you set yourself (human, synthetic or unknown), keep the source apart from the label, and export or import the set as a file. A label is user-provided, not verified ground truth, and it is never the classifier's output. The dataset lives only in your browser tab until you export it. See [docs/datasets.md](docs/datasets.md).
+- **Classifier evaluation** (`/experiments/evaluation`): read-only. It compares the classifier's reading with the labels in your local dataset (Unknown is left out, Uncertain is counted apart, small groups say "Insufficient sample") and has a threshold sandbox that changes only a local copy. Experiments, Dataset and Evaluation link to each other.
 - **Behavioral demo**: a tiny click-the-target task that shows a *simulated* escalation suggestion. Nothing is ever blocked or redirected.
 
 ## Privacy
@@ -72,7 +79,7 @@ To check the project: `corepack pnpm -r run lint`, `corepack pnpm -r run typeche
 ## Known limitations
 
 - Drag & Drop has no keyboard alternative yet, and the Text challenge has no audio or text alternative.
-- The Behavioral Lab covers eleven of the twelve challenges (Proof of Work is left out on purpose), and its classifier is a hand-set baseline, not trained on real people.
+- The Behavioral Lab covers eleven of the sixteen challenges (Proof of Work, Proof of Space, Browser Capability, MatchKey and Tile Game are left out; the matrix on the Learn page shows each gap), and its classifier is a hand-set baseline, not trained on real people.
 - The full list is in [docs/technical-debt.md](docs/technical-debt.md).
 
 ## Contributing

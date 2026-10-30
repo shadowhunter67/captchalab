@@ -44,6 +44,7 @@ import {
 } from "@/lib/research/experiment";
 import { importText, sessionJoins, toBundleFile, toSessionFile, toSummaryFile, type Imported } from "@/lib/research/formats";
 import { MAX_DRAWN, MAX_RECORDED, MAX_RUNS_PER_SPEC, MAX_SYNTHETIC_SPECS, MAX_SYNTHETIC_TOTAL, safeFilename } from "@/lib/research/safe";
+import { ExperimentsNav } from "@/components/ExperimentsNav";
 
 const ROW_CAP = 100;
 const LABELS: readonly ClassificationLabel[] = ["human-like", "synthetic-like", "uncertain"];
@@ -342,6 +343,7 @@ export function ExperimentWorkspace() {
     <main className="mx-auto max-w-5xl space-y-6 px-4 py-8 sm:px-6">
       <header>
         <Link prefetch={false} href="/behavior" className="text-sm text-muted underline">{t("Phòng thí nghiệm hành vi", "Behavioral Lab")}</Link>
+        <ExperimentsNav current="experiments" />
         <h1 className="mt-2 text-2xl font-semibold tracking-tight">{t("Thí nghiệm", "Experiments")}</h1>
         <p className="mt-1 text-sm text-muted">
           {t(

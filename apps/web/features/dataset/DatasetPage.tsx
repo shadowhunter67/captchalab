@@ -19,6 +19,7 @@ import { useT } from "@/lib/i18n";
 import { approxSize, describeError, downloadText, jsonText, readFileText } from "@/lib/research/browser";
 import { generateChallenge } from "@/lib/research/definition";
 import { MAX_IMPORT_BYTES, safeFilename } from "@/lib/research/safe";
+import { ExperimentsNav } from "@/components/ExperimentsNav";
 
 const btn = "rounded-md border border-line bg-panel px-3 py-2 text-sm font-medium hover:bg-track disabled:opacity-50";
 const primary = "rounded-md bg-accent px-3 py-2 text-sm font-medium text-bg hover:opacity-90 disabled:opacity-50";
@@ -113,8 +114,8 @@ export function DatasetPage() {
   return (
     <main className="mx-auto max-w-5xl space-y-6 px-4 py-8 sm:px-6">
       <header>
-        
-        {" · "}<Link prefetch={false} href="/experiments/evaluation" className="text-sm text-muted underline" data-testid="ds-to-evaluation">{t("Đánh giá bộ phân loại", "Classifier evaluation")}</Link>
+        <Link prefetch={false} href="/experiments/evaluation" className="text-sm text-muted underline" data-testid="ds-to-evaluation">{t("Đánh giá bộ phân loại", "Classifier evaluation")}</Link>
+        <ExperimentsNav current="dataset" />
         <h1 className="mt-2 text-2xl font-semibold tracking-tight">{t("Bộ dữ liệu có nhãn", "Labeled dataset")}</h1>
         <p className="mt-1 text-sm text-muted">
           {t(

@@ -1,7 +1,7 @@
 import { type Page } from "@playwright/test";
 import { expect, test } from "./fixtures";
 import { watchPrivacy } from "./privacy";
-import { CATALOG } from "../lib/catalog";
+import { TAXONOMY as CATALOG } from "../lib/taxonomy";
 
 const LABELS = ["human-like", "synthetic-like", "uncertain"];
 const start = (page: Page) => page.getByTestId("invisible-start");

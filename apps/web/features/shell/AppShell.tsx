@@ -2,25 +2,22 @@
 
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { catalogFor } from "@/lib/catalog";
+import { FAMILIES, FAMILY_NAMES, TAXONOMY, taxonomyFor, type TaxonomyId } from "@/lib/taxonomy";
 import { isReportMessage, type SessionReport } from "@/lib/embed-report";
 import { useLang, useT } from "@/lib/i18n";
 import { translateReason } from "@/lib/i18n/reasons";
 
-type ItemId = "slider" | "checkbox" | "text" | "drag-drop" | "rotation" | "image-grid" | "shape-matching" | "math-logic" | "sequence" | "memory" | "proof-of-work" | "audio" | "match-key" | "tile-game" | "proof-of-space" | "browser-capability" | "behavior" | "builder" | "experiments" | "compare" | "learn";
+type ItemId = TaxonomyId | "behavior" | "builder" | "experiments" | "compare" | "learn";
 type Tab = "experience" | "events" | "analysis" | "access";
 type SideTab = "summary" | "log" | "features";
 
 interface Group {
-  title: [vi: string, en: string];
+  title: readonly [vi: string, en: string];
   items: readonly ItemId[];
 }
 
 const GROUPS: readonly Group[] = [
-  { title: ["Cơ bản", "Basics"], items: ["slider", "checkbox", "text"] },
-  { title: ["Tư duy", "Reasoning"], items: ["math-logic", "sequence", "shape-matching", "memory"] },
-  { title: ["Ghép & chọn", "Match & pick"], items: ["match-key", "tile-game"] },
-  { title: ["Khác", "Other"], items: ["proof-of-work", "proof-of-space", "browser-capability", "audio"] },
-  { title: ["Tương tác không gian", "Spatial interaction"], items: ["drag-drop", "rotation", "image-grid"] },
+  ...FAMILIES.map((f): Group => ({ title: FAMILY_NAMES[f], items: TAXONOMY.filter((e) => e.family === f).map((e) => e.id) })),
   { title: ["Nghiên cứu", "Research"], items: ["behavior", "builder", "experiments", "compare", "learn"] },
 ];
 
@@ -42,6 +39,10 @@ const PATHS: Record<ItemId, string> = {
   "tile-game": "playground/tile-game/",
   "proof-of-space": "playground/proof-of-space/",
   "browser-capability": "playground/browser-capability/",
+  "hybrid-pow-visual": "playground/hybrid/?kind=pow-visual",
+  "hybrid-pow-audio": "playground/hybrid/?kind=pow-audio",
+  invisible: "playground/invisible/",
+  adaptive: "playground/adaptive/",
   behavior: "behavior/",
   builder: "builder/",
   experiments: "experiments/",
@@ -71,6 +72,10 @@ function Icon({ id }: { id: ItemId | "logo" | "clock" | "pulse" | "pointer" | "t
     case "tile-game": return <svg {...common}><rect x="4" y="4" width="7" height="7" rx="1.5" /><rect x="13" y="4" width="7" height="7" rx="1.5" /><rect x="4" y="13" width="7" height="7" rx="1.5" /><rect x="13" y="13" width="7" height="7" rx="1.5" /></svg>;
     case "proof-of-space": return <svg {...common}><rect x="4" y="5" width="16" height="14" rx="2" /><path d="M8 9v6M12 9v6M16 9v6" /></svg>;
     case "browser-capability": return <svg {...common}><rect x="3" y="5" width="18" height="14" rx="2" /><path d="M3 9h18M7 7h.01M10 7h.01M8 14l2.5 2.5L16 12" /></svg>;
+    case "hybrid-pow-visual": return <svg {...common}><rect x="3" y="4" width="8" height="16" rx="2" /><rect x="13" y="4" width="8" height="16" rx="2" /><path d="M11 12h2" /></svg>;
+    case "hybrid-pow-audio": return <svg {...common}><path d="M3 10v4h3l4 3V7l-4 3Z" /><path d="M14 8a5 5 0 0 1 0 8M17 5a9 9 0 0 1 0 14" /></svg>;
+    case "invisible": return <svg {...common}><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12Z" /><circle cx="12" cy="12" r="3" /></svg>;
+    case "adaptive": return <svg {...common}><path d="M4 7h6l4 10h6M4 17h6M14 7h6M18 5l2 2-2 2M18 15l2 2-2 2" /></svg>;
     case "behavior": return <svg {...common}><path d="M3 12h3l2.5-6 4 12 2.5-7 1.5 3H21" /></svg>;
     case "builder": return <svg {...common}><path d="M4 7h10M18 7h2M4 17h2M10 17h10" /><circle cx="16" cy="7" r="2" /><circle cx="8" cy="17" r="2" /></svg>;
     case "experiments": return <svg {...common}><path d="M9 3h6M10 3v6l-5 9a2 2 0 0 0 2 3h10a2 2 0 0 0 2-3l-5-9V3" /></svg>;
@@ -136,6 +141,7 @@ export function AppShell() {
   const [frameKey, setFrameKey] = useState(0);
   const frameRef = useRef<HTMLIFrameElement>(null);
   const catalog = useMemo(() => catalogFor(t), [t]);
+  const taxonomy = useMemo(() => taxonomyFor(t), [t]);
 
   // The choice lives in the URL hash so a link such as /#compare opens that page.
   useEffect(() => {
@@ -167,7 +173,7 @@ export function AppShell() {
 
   const entry = catalog.find((c) => c.id === selected);
   const nameOf = (id: ItemId): string =>
-    id === "behavior" ? t("Hành vi", "Behavior") : id === "builder" ? t("Trình dựng", "Builder") : id === "experiments" ? t("Thí nghiệm", "Experiments") : id === "compare" ? t("So sánh", "Compare") : id === "learn" ? t("Tìm hiểu", "Learn") : (catalog.find((c) => c.id === id)?.name ?? id);
+    id === "behavior" ? t("Hành vi", "Behavior") : id === "builder" ? t("Trình dựng", "Builder") : id === "experiments" ? t("Thí nghiệm", "Experiments") : id === "compare" ? t("So sánh", "Compare") : id === "learn" ? t("Tìm hiểu", "Learn") : (taxonomy.find((c) => c.id === id)?.name ?? id);
   const hintOf = (id: ItemId): string =>
     id === "behavior"
       ? t("Tín hiệu hành vi và bộ phân loại thử nghiệm", "Behavioral signals and an experimental classifier")
@@ -179,7 +185,7 @@ export function AppShell() {
       ? t("Thao tác của bạn và bản tạo sẵn", "Your attempt vs a generated one")
       : id === "learn"
         ? t("Mỗi thử thách hoạt động ra sao", "How each challenge works")
-        : (catalog.find((c) => c.id === id)?.summary ?? "");
+        : (taxonomy.find((c) => c.id === id)?.summary ?? "");
 
   const modalityText = (m: string): string =>
     ({
@@ -202,7 +208,7 @@ export function AppShell() {
     return points;
   }, [report, t]);
 
-  const hasSession = !["behavior", "builder", "experiments", "compare", "learn"].includes(selected);
+  const hasSession = !["behavior", "builder", "experiments", "compare", "learn", "invisible", "adaptive"].includes(selected);
   const empty = (
     <p className="text-sm text-muted" data-testid="session-empty">
       {hasSession

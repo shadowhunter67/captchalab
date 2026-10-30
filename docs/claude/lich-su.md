@@ -86,3 +86,11 @@ Plugin `text`, route `/playground/text`: SVG distorted text deterministic, verif
 - Classifier vẫn `behavioral-baseline@1`; checksum luật của cả 11 CAPTCHA được ghim trong `lib/dataset/__tests__/dataset.test.ts`. KHÔNG thêm accuracy/precision/recall/F1 — thuộc v0.9.
 - Store là singleton module trong 1 tab (không localStorage). Điều hướng client-side giữ dữ liệu, `page.goto`/reload thì mất → E2E dùng link trong trang và `dialog.accept` cho beforeunload; privacy E2E tách phần điều hướng (request RSC của Next) khỏi phần thao tác dữ liệu.
 
+
+## v0.9 Fast completion (2026-10-30)
+- Thêm 4 plugin độc lập: `match-key`, `tile-game` (dùng `shared/glyph.ts` + `shared/activations.ts`), `proof-of-space` (mô phỏng; `byteAt(seed,i)` là hàm thuần nên verifier không cấp phát buffer; runner cấp phát đúng 1 `Uint8Array`, điền 64 KB/lát, giải phóng khi cancel/finish), `browser-capability` (chỉ kiểm tra tên API tồn tại, trả boolean; test quét mã nguồn cấm API vân tay/lưu trữ). KHÔNG đưa vào classifier/Compare/Builder/Dataset/synthetic; `behavioral-baseline@1` và `captchalab-labeled-dataset@1` giữ nguyên.
+- Lab ghép (không phải plugin): `lib/hybrid` (PoW rồi Slider/Audio, đạt khi cả hai đạt cho ĐÚNG challenge id hiện tại), `/playground/invisible` (dùng lại `InvisibleLab`), `/playground/adaptive` (`lib/adaptive`: chỉ import classifier + `escalationFor`, test cấm luật/ngưỡng mới).
+- Evaluation: `lib/evaluation`, `/experiments/evaluation` (Unknown loại; Uncertain là cột riêng; nhóm <5 mẫu = Insufficient sample; sandbox chỉ sửa bản sao của `DEFAULT_THRESHOLDS`). Điều hướng Experiments/Dataset/Evaluation: `components/ExperimentsNav.tsx`.
+- Taxonomy: `lib/taxonomy.ts` là danh sách trung tâm (family, kind captcha/lab/system, cờ hỗ trợ SUY RA từ `BEHAVIOR_CAPTCHAS`/VARIANT_SETS, không gõ tay). Playground/Learn/sidebar/ma trận phủ (`components/CoverageMatrix.tsx`, `/learn#coverage`) đều đọc từ đó; số đếm trong E2E lấy từ `TAXONOMY`, đừng hardcode. Câu trung thực: "covers major ... families through generic educational implementations", không bao giờ ghi 100%.
+- Bẫy: heredoc dài trong bash hay lỗi (dùng Write tool); nhiều file là CRLF (python helper phải giữ `
+`); Next điều hướng client sinh request RSC nên `watchPrivacy` chỉ gọi trên trang đứng yên.

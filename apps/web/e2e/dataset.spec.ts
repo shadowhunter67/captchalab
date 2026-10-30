@@ -216,7 +216,7 @@ test("a session can be added from Experiments and from the Builder, and the data
   await page.getByTestId("exp-add-recorded").click();
   await page.getByTestId("sample-dataset-r1").click();
   await expect(page.getByTestId("exp-notice")).toContainText("(d2)");
-  await page.getByTestId("exp-dataset-link").getByRole("link").click();
+  await page.getByTestId("exp-dataset-link").getByRole("link").first().click();
   await expect(page.getByTestId("ds-label-d1")).toHaveValue("synthetic");
   await expect(page.getByTestId("ds-label-d2")).toHaveValue("unknown");
   await page.getByTestId("ds-view-d1").click();
