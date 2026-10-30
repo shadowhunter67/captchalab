@@ -7,7 +7,7 @@ import { EN, type Translate } from "@/lib/i18n";
  */
 
 export interface CatalogEntry {
-  id: "slider" | "checkbox" | "drag-drop" | "rotation" | "text" | "image-grid" | "shape-matching" | "math-logic" | "sequence" | "memory" | "proof-of-work" | "audio" | "match-key" | "tile-game" | "proof-of-space";
+  id: "slider" | "checkbox" | "drag-drop" | "rotation" | "text" | "image-grid" | "shape-matching" | "math-logic" | "sequence" | "memory" | "proof-of-work" | "audio" | "match-key" | "tile-game" | "proof-of-space" | "browser-capability";
   name: string;
   route: string;
   summary: string;
@@ -689,6 +689,52 @@ export function catalogFor(t: Translate = EN): readonly CatalogEntry[] {
         automation: `${t(
           "Một chương trình tự điền vùng nhớ và tính bằng chứng. Mục đích của kiểu thử thách này là làm cho việc gửi hàng loạt tốn tài nguyên.",
           "A program simply fills the region and computes the proof. The aim of this kind of challenge is to make bulk requests cost resources.",
+        )} ${automationNote}`,
+      },
+    },
+    {
+      id: "browser-capability",
+      name: t("Khả năng trình duyệt", "Browser Capability"),
+      route: "/playground/browser-capability",
+      summary: t("Kiểm tra trình duyệt có những API cơ bản nào, chỉ ở dạng có hoặc không.", "Checks which basic APIs the browser offers, as plain yes or no."),
+      variantsNote: t(
+        "Hai biến thể: Cơ bản (JavaScript, một phép tính nhỏ, Web Crypto, Canvas) và Mở rộng (thêm Web Worker, Web Audio, Pointer Events). Mức khó chỉ làm phép tính nhỏ dài hơn.",
+        "Two variants: Basic (JavaScript, a small computation, Web Crypto, Canvas) and Extended (adds Web Workers, Web Audio, Pointer Events). Difficulty only makes the small computation longer.",
+      ),
+      learn: {
+        howItWorks: t(
+          "Bạn bấm Chạy kiểm tra. Trang chỉ hỏi từng API có tồn tại hay không rồi chạy một vòng tính nhỏ cục bộ. Không tạo canvas, không mở âm thanh, không khởi động worker.",
+          "You press Run checks. The page only asks whether each API exists and runs one small local computation. It creates no canvas, plays no sound and starts no worker.",
+        ),
+        generation: t(
+          "Bộ sinh theo seed chọn danh sách kiểm tra theo biến thể, seed và độ dài của phép tính nhỏ.",
+          "A seeded generator picks the list of checks for the variant, a seed and the length of the small computation.",
+        ),
+        verification: t(
+          "Trình xác minh đòi mọi API được hỏi đều có, và tự tính lại kết quả phép tính nhỏ từ seed thay vì tin lời trang. Thử thách có độ dài ngoài giới hạn bị loại.",
+          "The verifier requires every asked API to be available and recomputes the small computation from the seed instead of trusting the page. A challenge whose length is out of bounds fails.",
+        ),
+        signals: [
+          t("Số kiểm tra có và số được hỏi.", "How many checks are available out of those asked."),
+          t("Thời gian chạy kiểm tra và thời gian phép tính nhỏ.", "Time to run the checks and time of the small computation."),
+          t("Số lần bấm Chạy kiểm tra.", "How many times Run checks was pressed."),
+          t("Không đọc phiên bản, hãng, cấu hình máy hay bất kỳ giá trị nào từ trình duyệt.", "No version, vendor, device detail or any other value is read from the browser."),
+        ],
+        strengths: [
+          t("Loại sớm các môi trường thiếu API cơ bản.", "Quickly rules out environments that lack basic APIs."),
+          t("Không cần người dùng làm gì ngoài một lần bấm.", "Needs nothing from the user beyond one press."),
+        ],
+        weaknesses: [
+          t("Không chứng minh người dùng là con người: trình duyệt tự động cũng có đủ các API này.", "It does not prove a human user: automated browsers offer these APIs too."),
+          t("Chỉ biết \"có\" hay \"không\", nên không nhận ra được ai và cũng không thể dùng để theo dõi.", "It only knows yes or no, so it cannot recognise anyone and cannot be used to track."),
+        ],
+        accessibility: t(
+          "Chỉ cần một nút, dùng được bằng bàn phím. Không cần nhìn, nghe hay thao tác chính xác.",
+          "One button, usable by keyboard. No sight, hearing or precise movement is needed.",
+        ),
+        automation: `${t(
+          "Một trình duyệt tự động có đủ các API này sẽ qua ngay. Đây là kiểm tra môi trường, không phải bằng chứng về con người.",
+          "An automated browser that offers these APIs passes at once. It checks the environment, not the person.",
         )} ${automationNote}`,
       },
     },

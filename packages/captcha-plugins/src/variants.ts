@@ -2,6 +2,7 @@ import { CHECKBOX_VARIANTS } from "./checkbox/variants";
 import { DRAG_DROP_VARIANTS } from "./drag-drop/variants";
 import { IMAGE_GRID_VARIANTS } from "./image-grid/variants";
 import { AUDIO_VARIANTS } from "./audio/variants";
+import { BC_VARIANTS } from "./browser-capability/variants";
 import { MATH_LOGIC_VARIANTS } from "./math-logic/variants";
 import { MATCH_KEY_VARIANTS } from "./match-key/variants";
 import { MEMORY_VARIANTS } from "./memory/variants";
@@ -31,4 +32,5 @@ export const VARIANT_SETS = {
   "match-key": MATCH_KEY_VARIANTS,
   "tile-game": TILE_GAME_VARIANTS,
   "proof-of-space": POS_VARIANTS,
+  "browser-capability": BC_VARIANTS,
 } as const;

@@ -1,6 +1,7 @@
 import { type Page } from "@playwright/test";
 import { expect, test } from "./fixtures";
 import { watchPrivacy } from "./privacy";
+import { CATALOG } from "../lib/catalog";
 
 const LABELS = ["human-like", "synthetic-like", "uncertain"];
 const start = (page: Page) => page.getByTestId("invisible-start");
@@ -202,7 +203,7 @@ test("Learn has a Behavioral / Invisible section that is a lab module, not a thi
   await expect(section).toContainText("never shows a percentage");
   await expect(page.getByTestId("learn-behavioral-link")).toHaveAttribute("href", /behavior/);
   await page.goto("/playground");
-  await expect(page.locator('[data-testid^="open-"]')).toHaveCount(12);
+  await expect(page.locator('[data-testid^="open-"]')).toHaveCount(CATALOG.length);
 });
 
 test("home: Behavior sits in the Research group and opens in the preview", async ({ page }) => {

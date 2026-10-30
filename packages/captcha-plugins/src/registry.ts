@@ -3,6 +3,7 @@ import { checkboxPlugin } from "./checkbox";
 import { dragDropPlugin } from "./drag-drop";
 import { imageGridPlugin } from "./image-grid";
 import { audioPlugin } from "./audio";
+import { browserCapabilityPlugin } from "./browser-capability";
 import { mathLogicPlugin } from "./math-logic";
 import { matchKeyPlugin } from "./match-key";
 import { memoryPlugin } from "./memory";
@@ -32,6 +33,7 @@ export const registry = createPluginRegistry({
   "match-key": matchKeyPlugin,
   "tile-game": tileGamePlugin,
   "proof-of-space": proofOfSpacePlugin,
+  "browser-capability": browserCapabilityPlugin,
 });
 
 export type CaptchaRegistry = typeof registry;

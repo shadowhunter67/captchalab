@@ -11,6 +11,7 @@ import {
   generateMatchKeyChallenge,
   generateTileGameChallenge,
   generatePosChallenge,
+  generateBcChallenge,
   generateMemoryChallenge,
   generatePowChallenge,
   generateRotationChallenge,
@@ -43,6 +44,7 @@ const generators: Record<keyof typeof VARIANT_SETS, Gen> = {
   "match-key": generateMatchKeyChallenge,
   "tile-game": generateTileGameChallenge,
   "proof-of-space": generatePosChallenge,
+  "browser-capability": generateBcChallenge,
 };
 
 describe("every variant set", () => {
