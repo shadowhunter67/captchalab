@@ -1,4 +1,4 @@
-import { CHECKSUM_START, MAX_SPACE_BYTES, checksumUpdate, fillRange, isPosChallenge, samplePositions, type PosAnswer, type PosChallenge, type PosRun } from "@captchalab/captcha-plugins";
+import { CHECKSUM_START, checksumUpdate, fillRange, isPosChallenge, samplePositions, type PosAnswer, type PosChallenge, type PosRun } from "@captchalab/captcha-plugins";
 
 export interface PosDone {
   proof: PosAnswer;
