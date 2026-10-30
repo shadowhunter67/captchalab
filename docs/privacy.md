@@ -25,6 +25,7 @@ For text-like inputs only the **class** of a key is recorded (letter, digit, bac
 
 - **Audio**: plays CaptchaLab's own local clips. It uses **no microphone** and asks for no permission.
 - **Browser Capability**: answers only **yes or no** per API (does it exist?). It measures **no device-performance timing** (no check or computation duration; the generic event timeline shows when you pressed Run, as on every page), calls nothing, reads no value, creates no hash, score or identifier, and stores nothing. It is not a fingerprint.
+- **Drag & Drop (keyboard)**: records only Enter, Space or Escape together with the name of the shape or drop area it acted on; no other key is handled or stored, and nothing typed.
 - **Invisible Lab**: records only after you press Start, only inside its own pad, and stops when the run ends or you press Stop.
 - **Adaptive Lab**: reads generated (synthetic) examples only; it observes nothing from you.
 - **Synthetic sessions** are generated locally by CaptchaLab and are labeled as synthetic.

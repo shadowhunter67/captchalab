@@ -1,4 +1,4 @@
-import { searchNonces, type PowChallenge } from "@captchalab/captcha-plugins";
+import { isPowChallenge, searchNonces, type PowChallenge } from "@captchalab/captcha-plugins";
 
 export interface PowFound {
   nonce: number;
@@ -12,6 +12,8 @@ export interface PowRunnerHooks {
   onProgress: (iterations: number) => void;
   onFound: (found: PowFound) => void;
   onCancel: () => void;
+  /** The challenge is malformed and was refused before any work. Optional: a runner for a generated challenge never needs it. */
+  onError?: () => void;
 }
 
 export interface PowRunnerOptions {
@@ -87,6 +89,11 @@ export function createPowRunner(challenge: PowChallenge, hooks: PowRunnerHooks, 
   return {
     start() {
       if (state !== "idle") return;
+      if (!isPowChallenge(challenge)) {
+        state = "finished"; // no hashing for a malformed challenge (it could never finish)
+        hooks.onError?.();
+        return;
+      }
       state = "running";
       token += 1;
       const myToken = token;

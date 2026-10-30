@@ -4,7 +4,8 @@ import type { PowAnswer, PowChallenge } from "./types";
 
 const MAX_NONCE = 2 ** 40;
 
-function challengeOk(c: unknown): c is PowChallenge {
+/** The one definition of a well-formed challenge: the verifier and the runner both check it before doing any work. */
+export function isPowChallenge(c: unknown): c is PowChallenge {
   if (typeof c !== "object" || c === null) return false;
   const x = c as Record<string, unknown>;
   if (typeof x.input !== "string" || !/^[0-9a-f]{16}$/.test(x.input) || x.algorithm !== "SHA-256") return false;
@@ -18,7 +19,7 @@ function challengeOk(c: unknown): c is PowChallenge {
  * result of the page's own search is never trusted. The interaction is never consulted. Nothing throws.
  */
 export function verifyPowAnswer(challenge: PowChallenge, answer: PowAnswer): VerificationResult {
-  if (!challengeOk(challenge)) return { passed: false, reason: "The challenge is missing or malformed." };
+  if (!isPowChallenge(challenge)) return { passed: false, reason: "The challenge is missing or malformed." };
   const nonce: unknown = (answer as { nonce?: unknown } | null | undefined)?.nonce;
   if (typeof nonce !== "number" || !Number.isSafeInteger(nonce) || nonce < 0 || nonce > MAX_NONCE) {
     return { passed: false, reason: "The proof must be a whole number nonce." };

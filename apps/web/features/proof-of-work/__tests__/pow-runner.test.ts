@@ -133,4 +133,38 @@ describe("createPowRunner", () => {
     expect(h.calls.found).toHaveLength(1);
     expect(h.calls.cancel).toBe(0);
   });
+
+  it("refuses a malformed challenge before hashing anything, and tells the hook", () => {
+    for (const bad of [{ bits: 300, kind: "bits" as const }, { prefix: "xyz", kind: "prefix" as const }, { input: "nothex" }, { algorithm: "MD5" as never }]) {
+      const h = harness();
+      let errors = 0;
+      createPowRunner({ ...challenge, ...bad }, { ...h.hooks, onError: () => void errors++ }, h.options).start();
+      expect(errors, JSON.stringify(bad)).toBe(1);
+      expect(h.pending()).toBe(0);
+      expect(h.drain()).toBe(0);
+      expect(h.calls.found).toHaveLength(0);
+    }
+  });
+
+  it("every slice is bounded: a hard run needs many slices, each yielding to the scheduler", () => {
+    const hard = generatePowChallenge({ rng: createRng(1), variantId: "hash-prefix", difficulty: "hard" });
+    const h = harness({ chunk: 50, sliceMs: 3, progressMs: 1_000_000 });
+    const runner = createPowRunner(hard, h.hooks, h.options);
+    runner.start();
+    let slices = 0;
+    while (slices < 20 && h.step()) slices++;
+    expect(h.pending()).toBeLessThanOrEqual(1); // one pending slice at most: never a second loop running behind
+    runner.cancel();
+    expect(h.pending()).toBe(0);
+    expect(h.calls.cancel).toBe(1);
+  });
+
+  it("a cancelled run never reports found, even if a stale slice was already queued", () => {
+    const h = harness({ chunk: 5, sliceMs: 2 });
+    const runner = createPowRunner(challenge, h.hooks, h.options);
+    runner.start();
+    runner.cancel();
+    expect(h.step()).toBe(false);
+    expect(h.calls.found).toHaveLength(0);
+  });
 });

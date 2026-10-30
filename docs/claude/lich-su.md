@@ -101,3 +101,9 @@ Plugin `text`, route `/playground/text`: SVG distorted text deterministic, verif
 - Tên Inspect: "Behavioral metrics" (CAPTCHA tương tác), "Computation metrics" (PoW/PoS), "Environment capabilities" (Browser Capability) — `ComputationInspect` có prop `metricsTitle`.
 - Learn cho Hybrid/Invisible/Adaptive: `lib/lab-learn.ts`. Docs mới: `docs/privacy.md`, `docs/limitations.md`, `docs/releases/v0.10.0-beta.md`.
 - Drag & Drop keyboard vẫn là nợ (quyết định: không viết lại controller trong beta).
+
+## v0.11 Stabilization (2026-10-30)
+- Drag & Drop bàn phím: `DragDropController.keySelect/keyPlace/keyCancel` (cùng `resolveDrop` với kéo thả, tâm vùng thả làm điểm thả), view state có `selectedItemId` + `keyNotice`; chỉ ghi `keydown` Enter/Space/Escape với target `drag-item:`/`drop-target:`. Shape và vùng thả là `role=button`, shape đứng TRƯỚC vùng thả trong DOM (Tab đi hết shape rồi mới tới vùng). Phiên chỉ-bàn-phím không có attempt con trỏ nên tín hiệu con trỏ là null, không phải 0.
+- Đa trình duyệt: `playwright.config.ts` có 3 project (chromium chạy tất cả; firefox/webkit chỉ `e2e/cross/*.cross.spec.ts`), script `test:e2e` (chromium) và `test:e2e:cross`; CI cài firefox+webkit riêng. WebKit của Playwright trên Windows KHÔNG có Web Audio nên test Audio tự rẽ nhánh (`hasWebAudio`). Đã chạy `playwright install webkit` (cache `%LOCALAPPDATA%\ms-playwright`, ~60 MB).
+- Test hủy PoS/PoW dùng kỹ thuật kéo dài: nhân `performance.now` x100 và đẩy `setTimeout(0)` lên 100 ms SAU khi hydrate, nên run luôn đủ dài để hủy trên mọi máy (throttle CPU làm trang đơ).
+- PoW: `isPowChallenge` (cùng kiểm tra với verifier) chặn thử thách sai trước khi băm; hook `onError` tuỳ chọn.

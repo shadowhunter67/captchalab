@@ -25,7 +25,7 @@ Not release blockers unless stated. Format: issue · impact · affected CAPTCHA 
 - Space held across a blur leaves an orphan keydown; the next keydown is read as auto-repeat · press duration can be inflated · Checkbox · later
 
 ## Drag & Drop
-- No keyboard alternative (draggables are `role="img"`) · not usable by keyboard-only users; documented on the page · Drag & Drop · next accessibility pass
+- Fixed in v0.11: Drag & Drop shapes and drop areas are buttons; select a shape, then a drop area (Escape unselects). A keyboard-only session has no pointer attempts, so its pointer signals are missing, not zero · Drag & Drop · done
 - One session is analysed at one layout; a resize after input only shows a note · release errors of earlier drags approximate · Drag & Drop · later
 - Snap/return in replay is instant · cosmetic · Drag & Drop · later
 
@@ -128,7 +128,11 @@ Not release blockers unless stated. Format: issue · impact · affected CAPTCHA 
 - Hybrid and the labs have no Learn section of their own, only a short card; the sidebar entries are available from the home page · Learn · later
 
 ## Beta stabilization (v0.10)
-- Drag & Drop still has no complete keyboard alternative (a select-source / select-target fallback needs a new controller path); the limitation is stated on its page, in Learn and in `docs/limitations.md`, and keyboard-operable challenges exist · Drag & Drop · later
-- Radio buttons in Compare and the native file inputs measure under 24 px as controls; their labels or the browser's own control make the effective target larger · Compare / import · later
-- Firefox and Safari are not in the automated suite; Audio, replay and timing are checked mostly in Chromium · Platform · later
+- Compare radio buttons are 13 px, but their labels are 324x40 px, so the effective target is adequate; native file inputs are the browser's own control · Compare / import · by design
+- Firefox and WebKit run only the targeted smoke suite (`e2e/cross`), not the full regression; real Safari and mobile browsers are not automated · Platform · later
 - Hybrid stage ids are scoped with `IdScope` (`lib/id-scope.tsx`); other pages still use fixed ids, which is safe because only one session is mounted per page; a new page that mounts two sessions must wrap each in an `IdScope` · Hybrid / a11y · by design
+
+## Beta stabilization (v0.11)
+- Playwright's WebKit build on Windows has no Web Audio; the cross-browser Audio test asserts the "not supported" message and the alternative link there, and real playback in Chromium and Firefox · Audio · by design
+- The Drag & Drop keyboard flow is not checked with every screen reader; it announces selection, placement and cancel through a status line · Drag & Drop · later
+- Proof of Work still runs on the main thread in bounded slices (no Worker); the runner now refuses a malformed challenge before hashing · Proof of Work · later

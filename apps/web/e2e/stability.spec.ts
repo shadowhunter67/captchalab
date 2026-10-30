@@ -146,3 +146,57 @@ test("Learn explains Hybrid, Invisible Lab and Adaptive Lab, including what they
   }
   await expect(page.getByTestId("learn-lab-adaptive")).toContainText("Nothing is blocked, redirected or restricted");
 });
+
+test("Start, then New challenge / difficulty change: the old PoW and PoS run never touches the new challenge", async ({ page }) => {
+  test.setTimeout(90_000);
+  // Proof of Work: a hard run that takes a while, then a new challenge while it works.
+  const { generatePowChallenge, searchNonces } = await import("@captchalab/captcha-plugins");
+  const { createRng } = await import("@captchalab/captcha-core");
+  let seed = 0;
+  for (; seed <= 60; seed++) if (searchNonces(generatePowChallenge({ rng: createRng(seed), variantId: "hash-prefix", difficulty: "hard" }), 0, 150000) === null) break;
+  await page.goto(`/playground/proof-of-work?seed=${seed}&variant=hash-prefix&difficulty=hard`);
+  await page.getByTestId("pow-start").click();
+  await expect(page.getByTestId("pow-status")).toHaveAttribute("data-state", "running");
+  await page.getByRole("button", { name: "New challenge" }).click();
+  await expect(page.getByTestId("pow-status")).toHaveAttribute("data-state", "idle");
+  await page.waitForTimeout(1500);
+  await expect(page.getByTestId("pow-status")).toHaveAttribute("data-state", "idle");
+  await expect(page.getByTestId("inspect")).toHaveCount(0);
+  await expect(page.getByTestId("pow-start")).toBeEnabled();
+
+  await page.goto(`/playground/proof-of-work?seed=${seed}&variant=hash-prefix&difficulty=hard`);
+  await page.getByTestId("pow-start").click();
+  await page.getByTestId("difficulty-easy").click();
+  await expect(page.getByTestId("pow-status")).toHaveAttribute("data-state", "idle");
+  await page.waitForTimeout(1000);
+  await expect(page.getByTestId("pow-status")).toHaveAttribute("data-state", "idle");
+  await expect(page.getByTestId("inspect")).toHaveCount(0);
+
+  // Proof of Space: a stretched 4 MB run, then a new challenge and a seed change while it works.
+  const stretch = () =>
+    page.evaluate(() => {
+      const origNow = performance.now.bind(performance);
+      performance.now = () => origNow() * 100;
+      const origSet = window.setTimeout.bind(window);
+      (window as unknown as { setTimeout: unknown }).setTimeout = (fn: TimerHandler, ms?: number, ...args: unknown[]) => origSet(fn, ms === 0 ? 100 : ms, ...args);
+    });
+  await page.goto("/playground/proof-of-space?seed=5&variant=checksum&difficulty=hard");
+  await expect(page.getByTestId("pos-start")).toBeEnabled();
+  await stretch();
+  await page.getByTestId("pos-start").click();
+  await expect(page.getByTestId("pos-status")).toHaveAttribute("data-state", "running");
+  await page.getByTestId("pos-new").click();
+  await expect(page.getByTestId("pos-status")).toHaveAttribute("data-state", "idle");
+  await page.waitForTimeout(1200);
+  await expect(page.getByTestId("pos-status")).toHaveAttribute("data-state", "idle");
+  await expect(page.getByTestId("inspect")).toHaveCount(0);
+
+  await page.getByTestId("pos-start").click();
+  await expect(page.getByTestId("pos-status")).toHaveAttribute("data-state", "running");
+  await page.getByTestId("seed-input").fill("99");
+  await page.getByTestId("seed-apply").click();
+  await expect(page.getByTestId("pos-status")).toHaveAttribute("data-state", "idle");
+  await page.waitForTimeout(1200);
+  await expect(page.getByTestId("pos-status")).toHaveAttribute("data-state", "idle");
+  await expect(page.getByTestId("inspect")).toHaveCount(0);
+});

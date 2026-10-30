@@ -105,6 +105,12 @@ export function PowSession({ challenge: initialChallenge, onNewChallenge, onResu
       onCancel: () => {
         if (runId === runIdRef.current) setStatus("cancelled");
       },
+      onError: () => {
+        if (runId !== runIdRef.current) return;
+        runnerRef.current = null;
+        setStatus("idle");
+        setError(t("Thử thách không hợp lệ nên không chạy. Hãy bắt đầu thử thách mới.", "The challenge is not valid, so nothing was run. Start a new challenge."));
+      },
     });
     runnerRef.current = runner;
     runner.start();

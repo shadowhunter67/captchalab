@@ -1,4 +1,4 @@
-# Known limitations (v0.10 beta)
+# Known limitations (v0.11 beta)
 
 CaptchaLab is a beta educational and research platform. These limits are real; the full itemized list is in [technical-debt.md](technical-debt.md).
 
@@ -16,13 +16,14 @@ CaptchaLab is a beta educational and research platform. These limits are real; t
 
 ## Accessibility
 
-- **Drag & Drop has no complete keyboard alternative.** It needs a pointer. Other challenges (for example Slider, Checkbox, Text, Math / Logic) can be completed with the keyboard; the Drag & Drop page says so plainly.
+- **Drag & Drop** can be finished by keyboard alone (Enter or Space selects a shape, then Enter or Space on a drop area places it; Escape unselects) or by pointer. The keyboard flow is covered by automated tests, not checked with every screen reader.
 - The Text challenge has no audio alternative. The Audio challenge has a link to a non-audio challenge.
 - A checked pass over automated structure (ids, ARIA references, horizontal overflow at 360-400 px) is part of the test suite. This is not a WCAG certification.
 
 ## Platform
 
-- **Audio**: one voice. Audio, replay and timing behavior have been tested most heavily in **Chromium**; Firefox and Safari are not covered by the automated suite.
+- **Browsers.** The full automated regression runs in **Chromium**. **Firefox and WebKit** run a targeted smoke suite of the main paths, not the full suite, so cross-browser coverage is partial. Replay and timing behavior are mostly checked in Chromium.
+- **Audio**: one voice. Playwright's WebKit build on Windows has no Web Audio, so there the page shows its "not supported" message (with the alternative challenge) instead of playing; real playback is exercised in Chromium and Firefox.
 - **Proof of Work and Proof of Space** run on the main thread in small slices with a Cancel button; there is no Worker. Proof of Space is a simulation, not a storage-hard protocol, and regions are at most 4 MB.
 - **Memory** has no replay.
 - Data is in memory only; reloading clears the dataset and experiments unless you exported them.

@@ -8,7 +8,7 @@ It is not a bot-detection product, not a production anti-bot solution and not a 
 
 **Live demo: https://shadowhunter67.github.io/captchalab/** (pick a challenge on the left, try it on the right)
 
-> **Status: Beta (`0.10.0-beta`).** The first beta: stabilization, accessibility, privacy hardening and documentation. The classifier did not change. See [known limitations](docs/limitations.md) and the [privacy notes](docs/privacy.md).
+> **Status: Beta (`0.11.0-beta.1`).** Stabilization only: Drag & Drop keyboard interaction, a Firefox and WebKit smoke suite, and Proof of Work / Proof of Space hardening. The classifier did not change. See [known limitations](docs/limitations.md) and the [privacy notes](docs/privacy.md).
 
 The site is in **Vietnamese by default**. Use the **VI / EN** button in the top-right corner to switch to English.
 
@@ -93,9 +93,9 @@ To check the project: `corepack pnpm -r run lint`, `corepack pnpm -r run typeche
 
 ## Known limitations
 
-- Drag & Drop has no keyboard alternative yet, and the Text challenge has no audio or text alternative.
+- The Text challenge has no audio or text alternative. Drag & Drop can be finished with the keyboard (select a shape, then a drop area), but that flow has not been checked with every screen reader.
 - The Behavioral Lab leaves out Proof of Work, Proof of Space, Browser Capability, MatchKey and Tile Game; the matrix on the Learn page shows each gap, and its classifier is a hand-set baseline, not trained on real people.
-- Audio, replay and timing behavior are tested mostly in Chromium; Firefox and Safari are not in the automated suite.
+- **Browsers:** the full automated regression runs in Chromium. Firefox and WebKit (Safari's engine) run a targeted smoke suite of the main paths (Slider, Drag & Drop by keyboard and pointer, Text, Audio, Memory, Proof of Work, Proof of Space, Hybrid, Browser Capability, Dataset, Evaluation). That is not full cross-browser coverage; replay and timing details are mostly checked in Chromium. Playwright's WebKit build on Windows has no Web Audio, so there the Audio page shows its "not supported" message; real playback is exercised in Chromium and Firefox.
 - The consolidated beta limits are in [docs/limitations.md](docs/limitations.md); the full itemized list is in [docs/technical-debt.md](docs/technical-debt.md).
 
 ## Contributing
