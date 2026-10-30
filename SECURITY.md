@@ -11,7 +11,7 @@ If you find a security problem in CaptchaLab itself, please report it **privatel
 - Use GitHub's private vulnerability reporting for this repository (Security tab → "Report a vulnerability") when it is enabled.
 - If it is not enabled, open a public issue that says only that you have a security report and ask for a private channel. **Do not include exploit details, proof-of-concept code or user data in a public issue.**
 
-Please give what you can: affected version/commit, steps to reproduce, and the impact. We will acknowledge reports as soon as the maintainers can; this is a volunteer-run alpha project and there is no guaranteed response time.
+Please give what you can: affected version/commit, steps to reproduce, and the impact. We will acknowledge reports as soon as the maintainers can; this is a volunteer-run project in release-candidate state and there is no guaranteed response time.
 
 ## In scope
 
@@ -28,4 +28,4 @@ Please give what you can: affected version/commit, steps to reproduce, and the i
 
 ## Supported versions
 
-Only the latest commit on the default branch is supported while the project is in alpha.
+Only the latest commit on the default branch is supported while the project is in release-candidate state (before 1.0).

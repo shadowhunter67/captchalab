@@ -200,3 +200,40 @@ test("Start, then New challenge / difficulty change: the old PoW and PoS run nev
   await expect(page.getByTestId("pos-status")).toHaveAttribute("data-state", "idle");
   await expect(page.getByTestId("inspect")).toHaveCount(0);
 });
+
+test("no broken internal link: every same-site link on every public page answers 200 and every #anchor exists", async ({ page, request }) => {
+  test.setTimeout(240_000);
+  const entry = ["/", "/playground", "/learn", "/behavior", "/compare", "/builder", "/experiments", "/experiments/dataset", "/experiments/evaluation", "/behavior/invisible", ...TAXONOMY.map((e) => e.route)];
+  const links = new Map<string, string>(); // "pathname+search" -> first page it was seen on
+  const anchors = new Map<string, string>(); // "pathname#id" -> page
+  for (const route of entry) {
+    await page.goto(route);
+    await page.waitForLoadState("networkidle");
+    const found = await page.evaluate(() =>
+      Array.from(document.querySelectorAll("a[href]")).map((a) => {
+        const u = new URL((a as HTMLAnchorElement).href, location.href);
+        return u.origin === location.origin ? { path: u.pathname + u.search, hash: u.hash.slice(1) } : null;
+      }),
+    );
+    for (const l of found) {
+      if (!l) continue;
+      if (!links.has(l.path)) links.set(l.path, route);
+      if (l.hash && l.path.split("?")[0] !== "/") anchors.set(`${l.path}#${l.hash}`, route);
+    }
+  }
+  const dead: string[] = [];
+  for (const [path, from] of links) {
+    const res = await request.get(path.includes("lang=") ? path : `${path}${path.includes("?") ? "&" : "?"}lang=en`);
+    if (res.status() !== 200) dead.push(`${path} (from ${from}): HTTP ${res.status()}`);
+  }
+  const missing: string[] = [];
+  for (const [key, from] of anchors) {
+    const [path, id] = key.split("#") as [string, string];
+    await page.goto(path);
+    await page.waitForLoadState("networkidle");
+    if ((await page.locator(`[id="${id}"]`).count()) === 0) missing.push(`${key} (from ${from})`);
+  }
+  expect(dead).toEqual([]);
+  expect(missing).toEqual([]);
+  expect(links.size).toBeGreaterThan(20);
+});

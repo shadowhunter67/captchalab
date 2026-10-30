@@ -1,6 +1,6 @@
-# Known limitations (v0.11 beta)
+# Known limitations (v1.0 release candidate)
 
-CaptchaLab is a beta educational and research platform. These limits are real; the full itemized list is in [technical-debt.md](technical-debt.md).
+CaptchaLab is an educational and research platform (release candidate). These limits are real; the full itemized list is in [technical-debt.md](technical-debt.md).
 
 ## What the results mean
 

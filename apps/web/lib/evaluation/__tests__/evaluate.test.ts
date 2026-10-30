@@ -136,3 +136,24 @@ describe("errorKind", () => {
     expect(errorKind({ label: "unknown", output: "synthetic-like" })).toBeNull();
   });
 });
+
+describe("evaluate: every number is finite or null, whatever the mix", () => {
+  const labels: GroundTruthLabel[] = ["human", "synthetic", "unknown"];
+  const outputs: ClassificationLabel[] = ["human-like", "synthetic-like", "uncertain"];
+  const finiteOrNull = (v: unknown): boolean => v === null || (typeof v === "number" && Number.isFinite(v));
+  it("sweeps 0..3 records of each (label, output) pair in several combinations", () => {
+    const cells = labels.flatMap((l) => outputs.map((o) => [l, o] as const));
+    for (let mask = 0; mask < 1 << 9; mask += 7) {
+      const input: EvalInput[] = [];
+      cells.forEach(([l, o], i) => {
+        const k = (mask >> (i % 9)) & 3;
+        for (let j = 0; j < k; j++) input.push(rec(l, o));
+      });
+      const e = evaluate(input);
+      expect(Object.values(e.metrics).every(finiteOrNull), `mask ${mask}`).toBe(true);
+      expect([e.eligible, e.decided, e.excludedUnknown].every(Number.isFinite)).toBe(true);
+      expect(e.decided).toBeLessThanOrEqual(e.eligible);
+      for (const g of evaluateBy(input, (r) => r.captcha)) expect(Object.values(g.evaluation.metrics).every(finiteOrNull)).toBe(true);
+    }
+  });
+});

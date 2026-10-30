@@ -108,3 +108,8 @@ Plugin `text`, route `/playground/text`: SVG distorted text deterministic, verif
 - Test hủy PoS/PoW dùng kỹ thuật kéo dài: nhân `performance.now` x100 và đẩy `setTimeout(0)` lên 100 ms SAU khi hydrate, nên run luôn đủ dài để hủy trên mọi máy (throttle CPU làm trang đơ).
 - PoW: `isPowChallenge` (cùng kiểm tra với verifier) chặn thử thách sai trước khi băm; hook `onError` tuỳ chọn.
 - Audio: `AudioContext.resume()` KHÔNG bao giờ settle khi máy không có thiết bị âm thanh (Firefox trên runner Linux CI) → trước đây kẹt "Loading audio…". Giờ clip tải song song với resume, chờ resume tối đa `RESUME_WAIT_MS`=2500, sau đó `onError("unavailable")`. Lỗi này chỉ lộ ra nhờ smoke Firefox trên CI (local Windows có thiết bị âm thanh).
+
+## v1.0.0-rc.1 Release candidate (2026-10-30)
+- Chỉ audit + đóng băng, KHÔNG thêm tính năng. Đã quét: secret/tracked files (sạch), license Apache-2.0 (LICENSE + mọi package.json), link markdown tương đối (không hỏng), build Pages 3,25 MB (không map/log/test), CI `permissions: contents: read` (pages.yml cần pages+id-token write để deploy). Sửa wording còn "alpha/beta" (README, SECURITY.md, docs/limitations.md).
+- Test mới: `stability.spec.ts` crawl mọi link nội bộ + #anchor (fail nếu 404/thiếu id); `evaluate.test.ts` quét mọi tổ hợp nhãn/kết quả → không NaN/Infinity.
+- Phát hành: `docs/releases/v1.0.0-rc.1.md`; tag + GitHub prerelease. Nếu có P0/P1 → rc.2; nếu ổn → 1.0.0 (không thêm tính năng giữa RC và final).
