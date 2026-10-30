@@ -184,7 +184,7 @@ export function AudioSession({ challenge: initialChallenge, onNewChallenge, onRe
             <button type="button" onClick={onNewChallenge} className="rounded-md border border-line bg-panel px-3 py-1.5 text-sm font-medium hover:bg-track">
               {t("Thử thách mới", "New challenge")}
             </button>
-            <Link href="/playground/math-logic" data-testid="audio-alternative" className="text-sm underline">
+            <Link prefetch={false} href="/playground/math-logic" data-testid="audio-alternative" className="text-sm underline">
               {t("Thử thách thay thế", "Try an alternative challenge")}
             </Link>
           </div>
