@@ -35,8 +35,15 @@ test("Proof of Space: the checksum variant passes too", async ({ page }) => {
 test("Proof of Space: Cancel stops the run, shows no result, and New challenge starts clean", async ({ page }) => {
   await page.goto(`/playground/proof-of-space?seed=${SEED}&variant=checksum&difficulty=hard`);
   await expect(page.getByTestId("pos-start")).toBeEnabled(); // hydrated before the CPU is slowed
-  const cdp = await page.context().newCDPSession(page);
-  await cdp.send("Emulation.setCPUThrottlingRate", { rate: 40 }); // keep the 4 MB run slow enough to cancel, even on a busy machine
+  // The runner works in time-boxed slices and yields between them. Running the page's clock fast makes each slice end
+  // after a chunk or two, and the stretched yields make the 4 MB run last seconds: it can always be cancelled mid-run,
+  // on any machine, while the page itself (hydration, clicks) stays at full speed.
+  await page.evaluate(() => {
+    const origNow = performance.now.bind(performance);
+    performance.now = () => origNow() * 100;
+    const origSet = window.setTimeout.bind(window);
+    (window as unknown as { setTimeout: unknown }).setTimeout = (fn: TimerHandler, ms?: number, ...args: unknown[]) => origSet(fn, ms === 0 ? 100 : ms, ...args);
+  });
   await page.getByTestId("pos-start").click();
   await expect(page.getByTestId("pos-status")).toHaveAttribute("data-state", "running");
   await page.getByTestId("pos-cancel").click();
@@ -46,7 +53,6 @@ test("Proof of Space: Cancel stops the run, shows no result, and New challenge s
   await page.waitForTimeout(500); // a stale run must not complete afterwards
   await expect(page.getByTestId("pos-status")).toHaveAttribute("data-state", "cancelled");
   await expect(page.getByTestId("inspect")).toHaveCount(0);
-  await cdp.send("Emulation.setCPUThrottlingRate", { rate: 1 });
   await page.getByTestId("pos-new").click();
   await expect(page.getByTestId("pos-status")).toHaveAttribute("data-state", "idle");
 });
