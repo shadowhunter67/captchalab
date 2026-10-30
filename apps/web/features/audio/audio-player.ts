@@ -33,12 +33,18 @@ export interface AudioContextLike {
 }
 
 export type PlayerState = "idle" | "loading" | "playing";
-export type PlayerError = "missing" | "unsupported";
+/** missing: a clip could not be loaded. unsupported: no Web Audio. unavailable: the context exists but audio output never started (for example no audio device). */
+export type PlayerError = "missing" | "unsupported" | "unavailable";
+
+/** How long to wait for a suspended context to start running before reporting that audio output is unavailable. */
+export const RESUME_WAIT_MS = 2500;
 
 export interface PlayerDeps {
   createContext: () => AudioContextLike | null;
   fetchClip: (url: string) => Promise<ArrayBuffer>;
   urlFor: (digit: string) => string;
+  /** Resolves after `ms`. Injectable so tests need no real timers. */
+  wait?: (ms: number) => Promise<void>;
   onStateChange?: (state: PlayerState) => void;
   onError?: (kind: PlayerError) => void;
   onEnded?: () => void;
@@ -160,11 +166,17 @@ export function createAudioPlayer(challenge: AudioChallenge, deps: Partial<Playe
       const c = ctx;
       setState("loading");
       let buffers: AudioBufferLike[];
+      let unavailable = false;
       try {
-        if (c.state === "suspended") await c.resume?.();
+        // resume() never settles when the device has no audio output, so it must not gate loading: the clips load
+        // meanwhile, and the wait for output is bounded.
+        const resuming: Promise<unknown> = c.state === "suspended" ? Promise.resolve(c.resume?.()).catch(() => undefined) : Promise.resolve();
         const distinct = [...new Set(challenge.digits.split(""))];
         await Promise.all(distinct.map((digit) => loadClip(digit, c)));
         buffers = challenge.digits.split("").map((digit) => cache.get(digit)!);
+        const wait = d.wait ?? ((ms: number) => new Promise<void>((resolve) => void setTimeout(resolve, ms)));
+        await Promise.race([resuming, wait(RESUME_WAIT_MS)]);
+        if (c.state === "suspended") unavailable = true;
       } catch {
         if (mine === token && !disposed) {
           setState("idle");
@@ -173,6 +185,11 @@ export function createAudioPlayer(challenge: AudioChallenge, deps: Partial<Playe
         return;
       }
       if (mine !== token || disposed) return; // a newer play/stop/dispose superseded this one
+      if (unavailable) {
+        setState("idle");
+        d.onError?.("unavailable");
+        return;
+      }
       try {
         const starts = scheduleStarts(
           buffers.map((b) => b.duration),

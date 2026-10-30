@@ -183,4 +183,39 @@ describe("audio player", () => {
     expect(noise(a.ctx)).not.toEqual(noise(c.ctx));
     expect(Math.max(...noise(a.ctx).map(Math.abs))).toBeLessThanOrEqual(1);
   });
+
+  it("a suspended context whose resume() never settles: clips still load, then it reports unavailable and plays nothing", async () => {
+    const fetched: string[] = [];
+    const ctx = new FakeContext() as FakeContext & { state: string; resume: () => Promise<void> };
+    ctx.state = "suspended";
+    ctx.resume = () => new Promise<void>(() => undefined); // no audio device: never settles
+    const hooks = { onStateChange: vi.fn(), onError: vi.fn(), onEnded: vi.fn() };
+    const player = createAudioPlayer(challenge(), {
+      createContext: () => ctx,
+      fetchClip: (url) => (fetched.push(url), clip(url)),
+      urlFor: (d) => `clip/${d}`,
+      wait: () => Promise.resolve(), // the bounded wait elapses at once
+      ...hooks,
+    });
+    await player.play();
+    expect(fetched.length).toBeGreaterThan(0); // loading did not wait for resume()
+    expect(hooks.onError).toHaveBeenCalledWith("unavailable");
+    expect(ctx.sources).toHaveLength(0);
+    expect(hooks.onStateChange).toHaveBeenLastCalledWith("idle");
+  });
+
+  it("a suspended context that does resume plays normally", async () => {
+    const ctx = new FakeContext() as FakeContext & { state: string; resume: () => Promise<void> };
+    ctx.state = "suspended";
+    ctx.resume = () => {
+      ctx.state = "running";
+      return Promise.resolve();
+    };
+    const hooks = { onStateChange: vi.fn(), onError: vi.fn(), onEnded: vi.fn() };
+    const player = createAudioPlayer(challenge(), { createContext: () => ctx, fetchClip: clip, urlFor: (d) => `clip/${d}`, wait: () => new Promise<void>(() => undefined), ...hooks });
+    await player.play();
+    expect(hooks.onError).not.toHaveBeenCalled();
+    expect(ctx.sources.length).toBeGreaterThanOrEqual(4);
+    expect(hooks.onStateChange).toHaveBeenLastCalledWith("playing");
+  });
 });

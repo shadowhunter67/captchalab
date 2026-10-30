@@ -104,8 +104,26 @@ test("Text: typing the text passes and the typed letters are not kept", async ({
 const AUDIO_SEED = 9;
 const audio = registry.get("audio").generate({ rng: createRng(AUDIO_SEED), variantId: "spoken-digits", difficulty: "easy" });
 
-/** Web Audio exists in Firefox, Safari and Chromium, but not in every automation build (Playwright's WebKit on Windows has none). */
-const hasWebAudio = (page: Page) => page.evaluate(() => typeof (window as unknown as { AudioContext?: unknown }).AudioContext !== "undefined" || typeof (window as unknown as { webkitAudioContext?: unknown }).webkitAudioContext !== "undefined");
+/**
+ * Whether this browser build can actually start audio output: Web Audio exists AND a context reaches "running". Automation
+ * builds differ: Playwright's WebKit on Windows has no Web Audio at all, and Firefox on a headless Linux runner has the API
+ * but no audio device, so resume() never settles. Both are environments, not site bugs; the page must then say so.
+ */
+const hasWorkingAudio = (page: Page) =>
+  page.evaluate(async () => {
+    const w = window as unknown as { AudioContext?: new () => AudioContext; webkitAudioContext?: new () => AudioContext };
+    const Ctor = w.AudioContext ?? w.webkitAudioContext;
+    if (!Ctor) return false;
+    try {
+      const ctx = new Ctor();
+      await Promise.race([ctx.resume().catch(() => undefined), new Promise((r) => setTimeout(r, 3000))]);
+      const ok = ctx.state === "running";
+      void ctx.close().catch(() => undefined);
+      return ok;
+    } catch {
+      return false;
+    }
+  });
 
 test("Audio: nothing plays on load; Play and Replay work; no microphone; the right digits pass", async ({ page }) => {
   const wavs: string[] = [];
@@ -131,15 +149,15 @@ test("Audio: nothing plays on load; Play and Replay work; no microphone; the rig
   });
   await page.goto(`/playground/audio?seed=${AUDIO_SEED}&variant=spoken-digits&difficulty=easy`);
   expect(wavs).toHaveLength(0); // no auto-play
-  if (!(await hasWebAudio(page))) {
-    // Without Web Audio the page must say so, keep the alternative challenge and stay usable: no crash, no answer shown.
-    test.info().annotations.push({ type: "limitation", description: "this browser build has no Web Audio" });
+  if (!(await hasWorkingAudio(page))) {
+    // Without working audio output the page must say so, keep the alternative challenge and not hang on "Loading audio...".
+    test.info().annotations.push({ type: "limitation", description: "this browser build cannot start audio output" });
     await page.getByTestId("audio-play").click();
-    await expect(page.getByTestId("audio-error")).toHaveAttribute("data-kind", "unsupported");
-    await expect(page.getByTestId("audio-error")).toContainText("does not support Web Audio");
+    await expect(page.getByTestId("audio-error")).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByTestId("audio-error")).toHaveAttribute("data-kind", /unsupported|unavailable/);
     await expect(page.getByTestId("audio-alternative")).toBeVisible();
     await expect(page.getByTestId("audio-play")).toBeEnabled();
-    expect(wavs).toHaveLength(0);
+    await expect(page.getByTestId("audio-status")).not.toContainText("Loading");
     expect(micCalls).toEqual([]);
     return;
   }
@@ -155,6 +173,24 @@ test("Audio: nothing plays on load; Play and Replay work; no microphone; the rig
   await expect(page.getByTestId("result")).toContainText("Passed");
   await expect(metric(page, "playCount")).toHaveText("2");
   expect(micCalls, "no microphone or device enumeration").toEqual([]);
+});
+
+test("Audio: when the audio device never starts (resume never settles) the page says so instead of hanging on Loading", async ({ page }) => {
+  await page.addInitScript(() => {
+    const w = window as unknown as { AudioContext?: { prototype: object }; webkitAudioContext?: { prototype: object } };
+    const proto = (w.AudioContext ?? w.webkitAudioContext)?.prototype;
+    if (!proto) return;
+    Object.defineProperty(proto, "state", { get: () => "suspended", configurable: true });
+    (proto as { resume: () => Promise<void> }).resume = () => new Promise<void>(() => undefined);
+  });
+  await page.goto(`/playground/audio?seed=${AUDIO_SEED}&variant=spoken-digits&difficulty=easy`);
+  const apiExists = await page.evaluate(() => typeof (window as unknown as { AudioContext?: unknown }).AudioContext !== "undefined" || typeof (window as unknown as { webkitAudioContext?: unknown }).webkitAudioContext !== "undefined");
+  await page.getByTestId("audio-play").click();
+  await expect(page.getByTestId("audio-error")).toBeVisible({ timeout: 10_000 });
+  await expect(page.getByTestId("audio-error")).toHaveAttribute("data-kind", apiExists ? "unavailable" : "unsupported");
+  await expect(page.getByTestId("audio-status")).not.toContainText("Loading");
+  await expect(page.getByTestId("audio-alternative")).toBeVisible();
+  await expect(page.getByTestId("audio-play")).toBeEnabled();
 });
 
 test("Audio: changing the difficulty during playback resets the session and stops the sound", async ({ page }) => {

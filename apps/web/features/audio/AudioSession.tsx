@@ -146,7 +146,12 @@ export function AudioSession({ challenge: initialChallenge, onNewChallenge, onRe
         </div>
         {audioFailed !== null && (
           <p role="alert" data-testid="audio-error" data-kind={audioFailed} className="mb-4 text-sm text-bad">
-            {audioFailed === "unsupported"
+            {audioFailed === "unavailable"
+              ? t(
+                  "Không bật được đầu ra âm thanh trên thiết bị hoặc trình duyệt này (có thể không có thiết bị âm thanh). Hãy dùng thử thách thay thế.",
+                  "Audio output could not be started on this device or browser (there may be no audio device). Use the alternative challenge.",
+                )
+              : audioFailed === "unsupported"
               ? t(
                   "Trình duyệt này không hỗ trợ phát âm thanh Web Audio. Hãy dùng thử thách thay thế, hoặc một trình duyệt khác.",
                   "This browser does not support Web Audio playback. Use the alternative challenge, or another browser.",

@@ -23,7 +23,8 @@ CaptchaLab is a beta educational and research platform. These limits are real; t
 ## Platform
 
 - **Browsers.** The full automated regression runs in **Chromium**. **Firefox and WebKit** run a targeted smoke suite of the main paths, not the full suite, so cross-browser coverage is partial. Replay and timing behavior are mostly checked in Chromium.
-- **Audio**: one voice. Playwright's WebKit build on Windows has no Web Audio, so there the page shows its "not supported" message (with the alternative challenge) instead of playing; real playback is exercised in Chromium and Firefox.
+- **Audio**: one voice. If the device has no audio output the page reports that audio could not be started and points to the alternative challenge.
+- **Audio (automation)**: Playwright's WebKit build on Windows has no Web Audio, so there the page shows its "not supported" message (with the alternative challenge) instead of playing; real playback is exercised in Chromium and Firefox.
 - **Proof of Work and Proof of Space** run on the main thread in small slices with a Cancel button; there is no Worker. Proof of Space is a simulation, not a storage-hard protocol, and regions are at most 4 MB.
 - **Memory** has no replay.
 - Data is in memory only; reloading clears the dataset and experiments unless you exported them.
