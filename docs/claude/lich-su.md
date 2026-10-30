@@ -92,7 +92,7 @@ Plugin `text`, route `/playground/text`: SVG distorted text deterministic, verif
 - Lab ghép (không phải plugin): `lib/hybrid` (PoW rồi Slider/Audio, đạt khi cả hai đạt cho ĐÚNG challenge id hiện tại), `/playground/invisible` (dùng lại `InvisibleLab`), `/playground/adaptive` (`lib/adaptive`: chỉ import classifier + `escalationFor`, test cấm luật/ngưỡng mới).
 - Evaluation: `lib/evaluation`, `/experiments/evaluation` (Unknown loại; Uncertain là cột riêng; nhóm <5 mẫu = Insufficient sample; sandbox chỉ sửa bản sao của `DEFAULT_THRESHOLDS`). Điều hướng Experiments/Dataset/Evaluation: `components/ExperimentsNav.tsx`.
 - Taxonomy: `lib/taxonomy.ts` là danh sách trung tâm (family, kind captcha/lab/system, cờ hỗ trợ SUY RA từ `BEHAVIOR_CAPTCHAS`/VARIANT_SETS, không gõ tay). Playground/Learn/sidebar/ma trận phủ (`components/CoverageMatrix.tsx`, `/learn#coverage`) đều đọc từ đó; số đếm trong E2E lấy từ `TAXONOMY`, đừng hardcode. Câu trung thực: "covers major ... families through generic educational implementations", không bao giờ ghi 100%.
-- Bẫy: heredoc dài trong bash hay lỗi (dùng Write tool); nhiều file là CRLF (python helper phải giữ `
+- Bẫy: heredoc dài trong bash hay lỗi (dùng Write tool); nhiều file là CRLF (python helper phải giữ `
 `); Next điều hướng client sinh request RSC nên `watchPrivacy` chỉ gọi trên trang đứng yên.
 
 ## v0.10 Stabilization + beta prep (2026-10-30)
