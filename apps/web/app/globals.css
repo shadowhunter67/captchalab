@@ -243,6 +243,12 @@ html[data-embed="1"] main > header:first-child {
     grid-column: 2;
     grid-row: 1;
     min-width: 0;
+    /* The output can be long: it keeps to the height of the frame and scrolls by itself, beside the card. */
+    position: sticky;
+    top: 1rem;
+    max-height: calc(100vh - 2rem);
+    overflow-y: auto;
+    overscroll-behavior: contain;
   }
   html[data-embed="1"] main > div:has(> .cl-widget) > [role="alert"] {
     grid-column: 1;
