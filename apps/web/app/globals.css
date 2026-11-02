@@ -219,3 +219,33 @@ html[data-embed="1"] main > header:first-child {
     break-inside: avoid;
   }
 }
+
+/* In the home page's frame there is room beside the challenge: the "Try" card on the left, what the attempt produced on the
+   right, instead of one narrow centered column. Only pages built as controls + session (a .cl-widget card) are affected. */
+@media (min-width: 960px) {
+  html[data-embed="1"] main:has(> div > .cl-widget) {
+    max-width: none;
+  }
+  html[data-embed="1"] main > div:has(> .cl-widget) {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 1.5rem;
+    align-items: start;
+  }
+  html[data-embed="1"] main > div:has(> .cl-widget) > * {
+    margin: 0;
+  }
+  html[data-embed="1"] main > div:has(> .cl-widget) > .cl-widget {
+    grid-column: 1;
+    grid-row: 1;
+  }
+  html[data-embed="1"] main > div:has(> .cl-widget) > :not(.cl-widget) {
+    grid-column: 2;
+    grid-row: 1;
+    min-width: 0;
+  }
+  html[data-embed="1"] main > div:has(> .cl-widget) > [role="alert"] {
+    grid-column: 1;
+    grid-row: 2;
+  }
+}
