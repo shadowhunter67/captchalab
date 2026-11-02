@@ -30,7 +30,7 @@ export function CoverageMatrix() {
         )}
       </p>
       <div className="overflow-x-auto">
-        <table className="w-full min-w-[56rem] text-left text-xs">
+        <table className="w-full min-w-[64rem] text-left text-xs">
           <caption className="sr-only">{t("Bảng độ phủ theo họ", "Coverage by family")}</caption>
           <thead>
             <tr className="border-b border-line">
@@ -46,6 +46,7 @@ export function CoverageMatrix() {
                 t("Tín hiệu hành vi", "Behavioral signals"),
                 t("Bộ phân loại", "Classifier"),
                 t("Hồ sơ mô phỏng", "Synthetic profiles"),
+                t("Trình bày giống thật", "Realistic presentation"),
               ].map((h) => (
                 <th key={h} scope="col" className="py-1 pr-3 font-medium">{h}</th>
               ))}
@@ -65,6 +66,7 @@ export function CoverageMatrix() {
                 <td className="py-1 pr-3" data-col="signals">{flag(e.behavioralSignals)}</td>
                 <td className="py-1 pr-3" data-col="classifier">{t("Bộ phân loại: ", "Classifier support: ")}{flag(e.classifier)}</td>
                 <td className="py-1 pr-3" data-col="synthetic">{flag(e.syntheticProfiles)}</td>
+                <td className="py-1 pr-3" data-col="realism">{e.realism === "yes" ? yes : t("Một phần", "Partial")}</td>
               </tr>
             ))}
           </tbody>

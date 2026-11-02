@@ -4,6 +4,7 @@ import Link from "next/link";
 import { catalogFor } from "@/lib/catalog";
 import { CoverageMatrix } from "@/components/CoverageMatrix";
 import { labLearnFor } from "@/lib/lab-learn";
+import { realismFor } from "@/lib/realism";
 import { FAMILIES, FAMILY_NAMES, taxonomyFor, type LabId } from "@/lib/taxonomy";
 import { BehavioralLearn } from "./BehavioralLearn";
 import { useT } from "@/lib/i18n";
@@ -67,6 +68,22 @@ export function LearnIndex() {
           </h3>
           <h3 className="font-semibold">{t("Cách hoạt động", "How it works")}</h3>
           <p className="text-muted">{c.learn.howItWorks}</p>
+          {(() => {
+            const r = realismFor(c.id, t);
+            return (
+              <div data-testid={`learn-realism-${c.id}`} data-level={r.level}>
+                <h3 className="font-semibold">{t("Giống thử thách thật ở đâu", "How it resembles the real thing")}</h3>
+                <p className="text-muted">
+                  <strong>{t("Họ thử thách: ", "Family: ")}</strong>
+                  {r.family}. {r.approximation}
+                </p>
+                <p className="mt-1 text-muted">
+                  <strong>{t("Cố ý không sao chép: ", "Intentionally not cloned: ")}</strong>
+                  {r.limits}
+                </p>
+              </div>
+            );
+          })()}
           <h3 className="font-semibold">{t("Cách tạo thử thách", "Generation")}</h3>
           <p className="text-muted">{c.learn.generation}</p>
           <h3 className="font-semibold">{t("Cách xác minh", "Verification")}</h3>

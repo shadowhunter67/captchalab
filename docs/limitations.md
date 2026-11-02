@@ -1,4 +1,4 @@
-# Known limitations (v1.0)
+# Known limitations (v1.1)
 
 CaptchaLab is an educational and research platform. These limits are real; the full itemized list is in [technical-debt.md](technical-debt.md).
 
@@ -13,6 +13,13 @@ CaptchaLab is an educational and research platform. These limits are real; the f
 
 - **Compare, Builder, the classifier and synthetic profiles do not cover every challenge.** They cover eleven challenges (Slider, Drag & Drop, Checkbox, Image Grid, Text, Rotation, Shape Matching, Math / Logic, Sequence, Memory, Audio). **MatchKey, Tile Game, Proof of Space, Browser Capability and Proof of Work have no deep classifier support.** The coverage matrix on the Learn page (`/learn#coverage`) shows each cell.
 - Hybrid, Invisible Lab and Adaptive Lab are composed labs. Invisible and Adaptive only consume the existing classifier and add no rule.
+
+## Realism
+
+- The pictures are **drawings**, not photographs, and the catalog is small (14 objects, 5 scenes). Image Grid is 3x3 only (no 4x4, no refreshing tiles).
+- A realistic challenge is a **generic approximation of a family**, never a copy of a product, and none of it is a real protection against abuse.
+- The picture variants cannot be done by a person who cannot see the pictures: the answer is never placed in an accessible name, so each page links to the audio challenge instead. The plain variants name what they show, which also makes them trivial for software.
+- The distorted text is drawn as SVG `<text>`, so the characters are present in the page; this is a demonstration, not an attempt to hide them from software.
 
 ## Accessibility
 

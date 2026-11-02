@@ -136,3 +136,12 @@ Not release blockers unless stated. Format: issue · impact · affected CAPTCHA 
 - Playwright's WebKit build on Windows has no Web Audio; the cross-browser Audio test asserts the "not supported" message and the alternative link there, and real playback in Chromium and Firefox · Audio · by design
 - The Drag & Drop keyboard flow is not checked with every screen reader; it announces selection, placement and cancel through a status line · Drag & Drop · later
 - Proof of Work still runs on the main thread in bounded slices (no Worker); the runner now refuses a malformed challenge before hashing · Proof of Work · later
+
+## Realism pass (v1.1)
+- Pictures are original vector drawings (14 objects, 5 scenes), not photographs; more categories, scenes and a 4x4 Image Grid are future work · Challenges · later
+- The picture variants cannot be done without seeing them; the audio challenge is the alternative, and the plain variants name what they show · Accessibility · by design
+- MatchKey and Tile Game object variants are a skin over the abstract rules (object, colour, quarter turn); a turned object is still recognisable because only the object turns, not its card · Challenges · by design
+- Sequence and Memory still use plain shapes; Memory has no card-flip effect; Audio has one voice · Challenges · later
+- The Playground opens with the realistic variant but Compare, Builder, Experiments and the dataset keep the plugins' own defaults, so earlier recordings and exports mean what they did · Compatibility · by design
+- The behavioral classifier was not tuned for the new interactions (puzzle slider, object cards): its rules are unchanged and read what they always read; a recording from a new variant is classified like any other · Classifier · later
+- The text characters are in the DOM as SVG `<text>` · Text · by design

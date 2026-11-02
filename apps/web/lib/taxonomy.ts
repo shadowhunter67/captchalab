@@ -3,6 +3,7 @@ import { VARIANT_SETS } from "@captchalab/captcha-plugins";
 import { BEHAVIOR_CAPTCHAS } from "@/lib/behavior/types";
 import { catalogFor, type CatalogEntry } from "@/lib/catalog";
 import { EN, type Translate } from "@/lib/i18n";
+import { realismLevelOf, type RealismLevel } from "@/lib/realism";
 
 /**
  * The one list every index, the sidebar, Learn and the coverage matrix read. A CAPTCHA that is also a plugin takes its
@@ -41,6 +42,8 @@ export interface TaxonomyEntry {
   /** The experimental classifier reads it. */
   classifier: boolean;
   syntheticProfiles: boolean;
+  /** How closely the presentation and the interaction follow the real-world family (see lib/realism.ts). */
+  realism: RealismLevel;
 }
 
 export const FAMILY_NAMES: Readonly<Record<Family, readonly [vi: string, en: string]>> = {
@@ -99,6 +102,7 @@ function labs(t: Translate): readonly (Omit<TaxonomyEntry, "family" | "id"> & { 
       behavioralSignals: false,
       classifier: false,
       syntheticProfiles: false,
+      realism: "yes",
     },
     {
       ...base,
@@ -113,6 +117,7 @@ function labs(t: Translate): readonly (Omit<TaxonomyEntry, "family" | "id"> & { 
       behavioralSignals: false,
       classifier: false,
       syntheticProfiles: false,
+      realism: "yes",
     },
     {
       ...base,
@@ -127,6 +132,7 @@ function labs(t: Translate): readonly (Omit<TaxonomyEntry, "family" | "id"> & { 
       behavioralSignals: true,
       classifier: true,
       syntheticProfiles: true,
+      realism: "partial",
     },
     {
       ...base,
@@ -141,6 +147,7 @@ function labs(t: Translate): readonly (Omit<TaxonomyEntry, "family" | "id"> & { 
       behavioralSignals: false,
       classifier: true,
       syntheticProfiles: true,
+      realism: "partial",
     },
   ];
 }
@@ -165,6 +172,7 @@ export function taxonomyFor(t: Translate = EN): readonly TaxonomyEntry[] {
       behavioralSignals: behavioral,
       classifier: behavioral,
       syntheticProfiles: behavioral,
+      realism: realismLevelOf(c.id),
     };
   });
   const labEntries: TaxonomyEntry[] = labs(t).map((l) => ({ ...l, family: LAB_FAMILY[l.id] }));

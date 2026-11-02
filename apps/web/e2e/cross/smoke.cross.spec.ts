@@ -335,3 +335,75 @@ test("Tile Game (default variant): select the required tiles, Verify, Passed; a 
   await expect(page.getByTestId("inspect")).toHaveCount(0);
   await expect(page.getByTestId("verify")).toBeVisible();
 });
+
+// ------------------------------------------------------------------------------- v1.1 realistic variants
+test("Image Grid pictures: select the right pictures, Verify, Passed", async ({ page }) => {
+  const c = registry.get("image-grid").generate({ rng: createRng(17), variantId: "scene-objects", difficulty: "medium" });
+  await page.goto("/playground/image-grid?seed=17&variant=scene-objects&difficulty=medium");
+  await expect(page.locator('[data-testid="image-grid"] svg')).toHaveCount(9); // nine drawn pictures
+  for (const cell of c.cells.filter((x) => x.shape === c.target)) await page.getByTestId(`cell-${cell.id}`).click();
+  await page.getByTestId("verify").click();
+  await expect(page.getByTestId("result")).toContainText("Passed");
+});
+
+test("Slider puzzle: the piece moves with the handle and fits the gap at the target", async ({ page }) => {
+  const c = registry.get("slider").generate({ rng: createRng(7), variantId: "puzzle", difficulty: "medium" });
+  await page.goto("/playground/slider?seed=7&variant=puzzle&difficulty=medium");
+  await expect(page.getByTestId("puzzle-piece")).toBeVisible();
+  const before = await page.getByTestId("puzzle-piece").getAttribute("transform");
+  await page.getByTestId("slider-handle").focus();
+  await page.keyboard.press("Home");
+  for (let i = 0; i < Math.round(c.target * 100); i++) await page.keyboard.press("ArrowRight");
+  expect(await page.getByTestId("puzzle-piece").getAttribute("transform")).not.toBe(before);
+  await page.keyboard.press("Enter");
+  await expect(page.getByTestId("result")).toContainText("Passed");
+});
+
+test("Rotation upright picture: turn it the right way up with the keyboard", async ({ page }) => {
+  const c = registry.get("rotation").generate({ rng: createRng(11), variantId: "upright-object", difficulty: "medium" });
+  await page.goto("/playground/rotation?seed=11&variant=upright-object&difficulty=medium");
+  await page.getByTestId("rotation-object").focus();
+  const [key, n] = c.initialAngle <= 180 ? (["ArrowLeft", Math.round(c.initialAngle / 5)] as const) : (["ArrowRight", Math.round((360 - c.initialAngle) / 5)] as const);
+  for (let i = 0; i < n; i++) await page.keyboard.press(key);
+  await page.getByTestId("verify").click();
+  await expect(page.getByTestId("result")).toContainText("Passed");
+});
+
+test("Drag & Drop objects: cards onto silhouettes by keyboard; Shape Matching objects by clicks", async ({ page }) => {
+  const dnd = registry.get("drag-drop").generate({ rng: createRng(4242), variantId: "object-silhouette", difficulty: "medium" });
+  await page.goto("/playground/drag-drop?seed=4242&variant=object-silhouette&difficulty=medium");
+  for (const it of dnd.items) {
+    await page.getByTestId(`item-${it.id}`).focus();
+    await page.keyboard.press("Enter");
+    await page.getByTestId(`drop-${dnd.targets.find((t) => t.acceptsItemId === it.id)!.id}`).focus();
+    await page.keyboard.press("Space");
+  }
+  await page.getByTestId("verify").click();
+  await expect(page.getByTestId("result")).toContainText("Passed");
+
+  const sm = registry.get("shape-matching").generate({ rng: createRng(3), variantId: "object-silhouette", difficulty: "medium" });
+  await page.goto("/playground/shape-matching?seed=3&variant=object-silhouette&difficulty=medium");
+  for (const s of sm.sources) {
+    await page.getByTestId(`source-${s.id}`).click();
+    await page.getByTestId(`target-${sm.matches[s.id]!}`).click();
+  }
+  await page.getByTestId("verify").click();
+  await expect(page.getByTestId("result")).toContainText("Passed");
+});
+
+test("Object MatchKey and Tile Game, and the distorted text picture, render and complete", async ({ page }) => {
+  const mk = registry.get("match-key").generate({ rng: createRng(31), variantId: "exact-object", difficulty: "medium" });
+  await page.goto("/playground/match-key?seed=31&variant=exact-object&difficulty=medium");
+  await page.getByTestId(`option-${mk.correctId}`).click();
+  await page.getByTestId("verify").click();
+  await expect(page.getByTestId("result")).toContainText("Passed");
+
+  const tg = registry.get("tile-game").generate({ rng: createRng(31), variantId: "pair-object", difficulty: "medium" });
+  await page.goto("/playground/tile-game?seed=31&variant=pair-object&difficulty=medium");
+  for (const id of tg.answerIds) await page.getByTestId(`tile-${id}`).click();
+  await page.getByTestId("verify").click();
+  await expect(page.getByTestId("result")).toContainText("Passed");
+
+  await page.goto(`/playground/text?seed=${TEXT_SEED}`);
+  await expect(page.getByTestId("text-image").locator("svg text")).toHaveCount(text.text.length);
+});

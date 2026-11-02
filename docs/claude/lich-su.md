@@ -117,3 +117,12 @@ Plugin `text`, route `/playground/text`: SVG distorted text deterministic, verif
 ## v1.0.0 Stable (2026-10-30)
 - Nâng RC lên stable, KHÔNG đổi mã sản phẩm (diff rc.1..HEAD chỉ gồm wording trạng thái + release notes). Điều kiện: không còn P0/P1, smoke production có MatchKey và Tile Game hoàn thành thật (chọn -> Verify -> Passed), Codex không P0/P1.
 - Sau 1.0: đừng tự mở phase mới; việc tiếp theo chỉ do phản hồi người dùng, lỗi đã xác nhận, dữ liệu nghiên cứu hoặc quyết định roadmap có chủ đích.
+
+## v1.1.0 Realism pass (2026-11-02)
+- Mục tiêu: mọi challenge giống họ CAPTCHA thật nhưng vẫn generic/tất định/local. KHÔNG đổi classifier, dataset, evaluation, verifier. Audit + checklist: `docs/realism.md`; nguồn gốc tranh: `docs/assets.md`.
+- Tranh vẽ bằng mã: `lib/art/{draw,ArtTile,PuzzlePicture,names}.ts(x)`; catalog dữ liệu thuần ở `packages/captcha-plugins/src/shared/art.ts` (14 vật, 5 cảnh, nhóm look-alike `ART_GROUPS`, cảnh hợp lý `ART_SCENES_FOR`). Thử thách chỉ lưu (category, seed), KHÔNG lưu ảnh.
+- Biến thể mới (rng chỉ dùng SAU các trường cũ nên biến thể cũ không đổi): image-grid `photo-categories`/`scene-objects` (cell.shape có thể là ArtCategory; ô không-đáp-án không được chứa target kể cả extras — verifier kiểm); slider `puzzle`; rotation `upright-object`; drag-drop `object-silhouette`; shape-matching `object-silhouette`; match-key `exact-object`/`attribute-object` và tile-game `pair-object`/`pattern-object` (dùng `GlyphSkin`: shape->vật, pattern->màu, orientation->quay vật; luật vẫn trên look trừu tượng).
+- Tên truy cập của ô tranh CHỈ là "Image N of 9" (không lộ đáp án) + link sang thử thách âm thanh; biến thể hình giản đơn vẫn đặt tên theo hình.
+- `PLAYGROUND_SETS` (`lib/playground-sets.ts`): Playground mở bằng biến thể thực tế; Compare/Builder/Experiments/dataset vẫn dùng default của plugin. Test cũ phụ thuộc default phải ghi `variant=` tường minh.
+- Skin widget: class `cl-widget` (globals.css) đổi token màu trong thẻ "Try"; kết quả/Inspect nằm ngoài thẻ. Hệ thống PoW/PoS/BC: `StatusBadge` + `<details>` chi tiết kỹ thuật. `lib/realism.ts` là nơi duy nhất chứa tuyên bố realism (Learn + ma trận).
+- Bẫy: heredoc dài hỏng (dùng Write + python); `<use href>`/clipPath của slider puzzle cần id duy nhất (useId) — đã kiểm Firefox/WebKit; không sửa mã nguồn khi E2E dev đang chạy (hot reload làm test nhảy).

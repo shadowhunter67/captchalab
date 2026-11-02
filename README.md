@@ -8,7 +8,7 @@ It is not a bot-detection product, not a production anti-bot solution and not a 
 
 **Live demo: https://shadowhunter67.github.io/captchalab/** (pick a challenge on the left, try it on the right)
 
-> **Status: 1.0.0 (stable).** The first stable release. It is the tested `1.0.0-rc.1` code promoted after a final production check; the classifier (`behavioral-baseline@1`), the dataset format and the evaluation math are unchanged since 0.10. Stable means the behavior is frozen and documented, not that the classifier is a validated detector. See the [release notes](docs/releases/v1.0.0.md), the [known limitations](docs/limitations.md) and the [privacy notes](docs/privacy.md).
+> **Status: 1.1.0.** A realism pass: every challenge now looks and is operated like the family of real CAPTCHA it stands for (picture grids, puzzle sliders, pictured objects and silhouettes, distorted text, system checks), still generic, local-only and deterministic. The classifier (`behavioral-baseline@1`), the dataset format and the evaluation maths are unchanged. See the [release notes](docs/releases/v1.1.0.md), the [realism audit](docs/realism.md), the [known limitations](docs/limitations.md) and the [privacy notes](docs/privacy.md).
 
 The site is in **Vietnamese by default**. Use the **VI / EN** button in the top-right corner to switch to English.
 
@@ -49,6 +49,8 @@ The challenges and composed labs below, each with its own page and grouped by fa
 | Browser Capability | Press once to see which basic browser APIs exist, as plain yes or no (not a fingerprint) |
 
 And composed labs: **Hybrid** (Proof of Work then Slider, or then Audio; passes only when both stages pass), **Invisible Lab** (a neutral task observed only after you press Start), and **Adaptive Lab** (the existing experimental classifier's label mapped to a *simulated* next-challenge suggestion; nothing is blocked or redirected).
+
+Challenges open with a realistic presentation (for example a grid of drawn pictures, a puzzle slider with a gap and a piece, objects dragged onto their silhouettes); the plain shape variants are one choice away. All pictures are CaptchaLab's own drawings, made in code from a category and a seed: nothing is downloaded and nothing is copied from any provider (see [docs/assets.md](docs/assets.md)).
 
 Each challenge has **variants** (for example Clean, Rotated or Noisy text, a Number or Visual sequence, or Spoken digits) and three **difficulty levels** (Easy, Medium, Hard), plus a **seed**. The same seed, variant and difficulty always give the same challenge, and the page shows exactly what the difficulty changed (tolerance, number of noise lines...). A link such as `/playground/text/?variant=noisy&difficulty=hard&seed=742193` opens that exact challenge.
 

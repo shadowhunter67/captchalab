@@ -4,6 +4,7 @@ import { expectedSelection, registry } from "@captchalab/captcha-plugins";
 import { expect, test } from "./fixtures";
 import { expectValidIds } from "./a11y";
 import { watchPrivacy } from "./privacy";
+import { TAXONOMY } from "../lib/taxonomy";
 
 /**
  * v1.1 realism: each upgraded challenge is completed through the real UI, with the answer derived from the same seeded
@@ -223,3 +224,43 @@ for (const variant of ["pair-object", "pattern-object"] as const) {
     await expectValidIds(page);
   });
 }
+
+// ------------------------------------------------------------------------------ the realism claims themselves
+test("Learn says, for every challenge, which family it resembles and what is not cloned; the matrix has the realism column", async ({ page }) => {
+  await page.goto("/learn");
+  for (const entry of TAXONOMY.filter((e) => e.kind !== "lab")) {
+    const block = page.getByTestId(`learn-realism-${entry.id}`);
+    await expect(block, entry.id).toBeVisible();
+    await expect(block).toContainText("Family:");
+    await expect(block).toContainText("Intentionally not cloned:");
+    await expect(page.getByTestId(`coverage-row-${entry.id}`).locator('[data-col="realism"]')).toHaveText(entry.realism === "yes" ? "Yes" : "Partial");
+  }
+  await expect(page.getByTestId("coverage-matrix")).toContainText("Realistic presentation");
+  await expect(page.getByTestId("coverage-matrix")).not.toContainText(/100%|equivalent|identical to/i);
+});
+
+test("challenge pages draw every picture themselves: no image request, nothing outside their own origin", async ({ page }) => {
+  test.setTimeout(120_000);
+  const bad: string[] = [];
+  page.on("request", (r) => {
+    const u = new URL(r.url());
+    if (u.origin !== new URL(page.url() === "about:blank" ? "http://localhost:3100" : page.url()).origin) bad.push(`external ${r.url()}`);
+    if (r.resourceType() === "image") bad.push(`image ${r.url()}`);
+  });
+  for (const route of ["/playground/image-grid?variant=scene-objects", "/playground/slider?variant=puzzle", "/playground/rotation?variant=upright-object", "/playground/drag-drop?variant=object-silhouette", "/playground/shape-matching?variant=object-silhouette", "/playground/match-key?variant=exact-object", "/playground/tile-game?variant=pair-object", "/playground/text"]) {
+    await page.goto(route);
+    await page.waitForLoadState("networkidle");
+    await expect(page.locator("section.cl-widget").first()).toBeVisible();
+  }
+  expect(bad).toEqual([]);
+});
+
+test("the Playground opens each family with its realistic variant, and a named variant is still honoured", async ({ page }) => {
+  const expected: Record<string, string> = { "image-grid": "photo-categories", slider: "puzzle", rotation: "upright-object", "drag-drop": "object-silhouette", "shape-matching": "object-silhouette", "match-key": "exact-object", "tile-game": "pair-object" };
+  for (const [id, variant] of Object.entries(expected)) {
+    await page.goto(`/playground/${id}`);
+    await expect(page.getByTestId("variant-select"), id).toHaveValue(variant);
+  }
+  await page.goto("/playground/image-grid?variant=basic-shapes");
+  await expect(page.getByTestId("variant-select")).toHaveValue("basic-shapes");
+});

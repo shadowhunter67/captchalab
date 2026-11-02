@@ -50,4 +50,9 @@ describe("taxonomy", () => {
     const vi = taxonomyFor((v) => v);
     expect(vi.map((e) => e.id)).toEqual(TAXONOMY.map((e) => e.id));
   });
+  it("every entry says how realistic its presentation is, and the claim is read from one place", () => {
+    for (const e of TAXONOMY) expect(["yes", "partial"], e.id).toContain(e.realism);
+    expect(TAXONOMY.find((e) => e.id === "image-grid")?.realism).toBe("yes");
+    expect(TAXONOMY.find((e) => e.id === "checkbox")?.realism).toBe("partial");
+  });
 });
