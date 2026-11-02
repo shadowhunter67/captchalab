@@ -148,7 +148,11 @@ test.describe("touch device", () => {
     const cdp = await page.context().newCDPSession(page);
     const touch = (type: "touchStart" | "touchMove" | "touchEnd", p?: { x: number; y: number }) =>
       cdp.send("Input.dispatchTouchEvent", { type, touchPoints: p ? [{ x: p.x, y: p.y }] : [] });
+    // A touch outside the visible viewport is dropped. On a phone the object can sit below the fold (the prompt and the setup panel
+    // above it wrap onto more lines with some fonts), so scroll it into view before measuring where to touch.
+    await obj(page).scrollIntoViewIfNeeded();
     const c = await center(page);
+    expect(c.y).toBeLessThan(844);
     await touch("touchStart", onCircle(c, 0, 70));
     for (let i = 1; i <= 10; i++) await touch("touchMove", onCircle(c, (turnToUpright * i) / 10, 70));
     await touch("touchEnd");
