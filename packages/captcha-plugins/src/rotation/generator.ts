@@ -1,4 +1,5 @@
 import { assertRange, resolveVariant, type GenerateContext } from "@captchalab/captcha-core";
+import { ART_UPRIGHT } from "../shared/art";
 import type { RotationChallenge } from "./types";
 import { ROTATION_VARIANTS } from "./variants";
 
@@ -19,5 +20,8 @@ export function generateRotationChallenge({ rng, variantId, difficulty }: Genera
   const id = `rotation-${Math.floor(rng() * 0x100000000)
     .toString(16)
     .padStart(8, "0")}`;
-  return { id, initialAngle, targetAngle: 0, tolerance: config.toleranceDeg, config: challengeConfig };
+  if (challengeConfig.variantId !== "upright-object") return { id, initialAngle, targetAngle: 0, tolerance: config.toleranceDeg, config: challengeConfig };
+  // The picture draws on the rng after every field above, so the other variants' challenges are unchanged.
+  const subject = { category: ART_UPRIGHT[Math.floor(rng() * ART_UPRIGHT.length)]!, seed: Math.floor(rng() * 1_000_000) };
+  return { id, initialAngle, targetAngle: 0, tolerance: config.toleranceDeg, subject, config: challengeConfig };
 }

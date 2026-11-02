@@ -40,7 +40,7 @@ export function RotationReplay({ challenge, center, session }: Props) {
     <div ref={hostRef} data-testid="replay">
       <div className="flex justify-center rounded-lg bg-bg p-3 ring-1 ring-line">
         <div ref={glyphRef} style={{ width: 140, height: 140 }} data-testid="replay-object">
-          <RotationGlyph size={140} />
+          <RotationGlyph size={140} subject={challenge.subject} />
         </div>
       </div>
       <p ref={labelRef} className="mt-2 text-center text-sm" data-testid="replay-angle" />

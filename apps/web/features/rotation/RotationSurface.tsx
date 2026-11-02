@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, type KeyboardEvent, type MutableRefObject, type PointerEvent } from "react";
-import { ROTATION_KEYS } from "@captchalab/captcha-plugins";
+import { ROTATION_KEYS, type RotationSubject } from "@captchalab/captcha-plugins";
 import { useT } from "@/lib/i18n";
 import { toPointerSample } from "@/lib/pointer-adapter";
 import type { RotationController } from "./rotation-controller";
@@ -13,6 +13,8 @@ interface Props {
   controller: RotationController;
   /** Set by the surface; the controller calls it (no React state) to rotate the object. */
   applyAngleRef: MutableRefObject<(angle: number) => void>;
+  /** The picture of the upright-object variant; absent for the arrow variants. */
+  subject?: RotationSubject | undefined;
 }
 
 /**
@@ -20,7 +22,7 @@ interface Props {
  * keys, or by dragging), so keyboard and assistive technology can turn it. Pointer capture on the object;
  * the object's center and the surface origin are snapshotted at pointerdown.
  */
-export function RotationSurface({ controller, applyAngleRef }: Props) {
+export function RotationSurface({ controller, applyAngleRef, subject }: Props) {
   const t = useT();
   const tRef = useRef(t);
   tRef.current = t;
@@ -107,10 +109,11 @@ export function RotationSurface({ controller, applyAngleRef }: Props) {
         data-testid="rotation-object"
         role="slider"
         tabIndex={0}
-        aria-label={t(
-          "Vật thể cần xoay. Xoay cho đến khi mũi tên chỉ lên trên. Hãy kéo nó, hoặc dùng phím mũi tên trái và phải.",
-          "Object to turn. Turn it until the arrow points up. Drag it, or use the left and right arrow keys.",
-        )}
+        aria-label={
+          subject
+            ? t("Ảnh cần xoay. Xoay cho đến khi ảnh đúng chiều (bầu trời ở trên). Hãy kéo nó, hoặc dùng phím mũi tên trái và phải.", "Picture to turn. Turn it until it is the right way up (sky at the top). Drag it, or use the left and right arrow keys.")
+            : t("Vật thể cần xoay. Xoay cho đến khi mũi tên chỉ lên trên. Hãy kéo nó, hoặc dùng phím mũi tên trái và phải.", "Object to turn. Turn it until the arrow points up. Drag it, or use the left and right arrow keys.")
+        }
         aria-valuemin={0}
         aria-valuemax={359}
         aria-valuenow={0}
@@ -135,7 +138,7 @@ export function RotationSurface({ controller, applyAngleRef }: Props) {
         style={{ width: ROTATION_OBJECT_PX, height: ROTATION_OBJECT_PX }}
       >
         <div ref={glyphRef} style={{ width: ROTATION_OBJECT_PX, height: ROTATION_OBJECT_PX }}>
-          <RotationGlyph size={ROTATION_OBJECT_PX} />
+          <RotationGlyph size={ROTATION_OBJECT_PX} subject={subject} />
         </div>
       </div>
     </div>

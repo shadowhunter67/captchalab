@@ -33,6 +33,16 @@ export const ROTATION_VARIANTS: CaptchaVariantSet<RotationVariantConfig> = {
         hard: { toleranceDeg: 12, minInitialDeg: 140, maxInitialDeg: 180, randomSide: true },
       },
     },
+    {
+      id: "upright-object",
+      name: "Upright picture",
+      description: "Turn a picture (a scene with an object) until it is the right way up; difficulty narrows the accepted angle.",
+      difficulties: {
+        easy: { toleranceDeg: 20, minInitialDeg: 40, maxInitialDeg: 320, randomSide: false },
+        medium: { toleranceDeg: 12, minInitialDeg: 40, maxInitialDeg: 320, randomSide: false },
+        hard: { toleranceDeg: 8, minInitialDeg: 40, maxInitialDeg: 320, randomSide: false },
+      },
+    },
   ],
   defaultSelection: { variantId: "classic", difficulty: "medium" },
 };

@@ -19,7 +19,14 @@ import { DragDropController, type DragDropViewState } from "./drag-drop-controll
 import { DragDropInspect } from "./DragDropInspect";
 import type { SessionReport } from "@/lib/behavior/human";
 import { DragDropSurface } from "./DragDropSurface";
+import { isArtCategory } from "@captchalab/captcha-plugins";
 import { shapeName, shapeNameLower } from "./shapes";
+
+const OBJECT_TEXT = (t: (vi: string, en: string) => string, count: number): string =>
+  t(
+    `Kéo từng thẻ vật thể vào bóng của chính vật thể đó; hoặc dùng bàn phím: Tab tới một thẻ, nhấn Enter hoặc Space để chọn, Tab tới một bóng rồi nhấn Enter hoặc Space để đặt (Escape để bỏ chọn). Khi cả ${count} thẻ đã được đặt, hãy nhấn Xác minh. Thẻ thả ra ngoài mọi bóng sẽ quay về; đặt vào bóng đã có thẻ sẽ đẩy thẻ cũ về chỗ cũ.`,
+    `Drag each object card onto the silhouette of the same object; or use the keyboard: Tab to a card, press Enter or Space to select it, Tab to a silhouette and press Enter or Space to place it (Escape unselects). When all ${count} cards are placed, press Verify. A card dropped away from every silhouette goes back; placing on an occupied silhouette sends the card there back.`,
+  );
 
 interface Completed {
   /** Increments per verification; keys the Inspect view so selection/replay never carry over. */
@@ -56,6 +63,7 @@ export function DragDropSession({ challenge: initialChallenge, onNewChallenge, o
   const onResetRef = useRef(onReset);
   onResetRef.current = onReset;
   const [challenge] = useState(initialChallenge); // pinned: drawn, verified and analyzed as one challenge
+  const objects = challenge.items.some((i) => isArtCategory(i.kind));
   const plugin = registry.get("drag-drop");
   const applyItemRef = useRef<(itemId: string, centerPx: Point) => void>(() => {});
   const submissionsRef = useRef(0);
@@ -142,10 +150,10 @@ export function DragDropSession({ challenge: initialChallenge, onNewChallenge, o
           {t("Thử", "Try")}
         </h2>
         <p className="mb-4 text-sm text-muted">
-          {t(
+          {objects ? OBJECT_TEXT(t, challenge.items.length) : (t(
             `Kéo từng hình vào vùng nét đứt có cùng đường viền; hoặc dùng bàn phím: Tab tới một hình, nhấn Enter hoặc Space để chọn, Tab tới vùng thả rồi nhấn Enter hoặc Space để đặt (Escape để bỏ chọn). Khi cả ${challenge.items.length} hình đã được đặt, hãy nhấn Xác minh. Hình thả ra ngoài mọi vùng sẽ quay về; đặt vào vùng đã có hình sẽ đẩy hình đang ở đó về chỗ cũ; bạn có thể chọn hoặc kéo lại hình đã đặt để sửa.`,
             `Drag each shape onto the dashed area with the same outline; or use the keyboard: Tab to a shape, press Enter or Space to select it, Tab to a drop area and press Enter or Space to place it (Escape unselects). When all ${challenge.items.length} shapes are placed, press Verify. A shape dropped away from any area goes back; placing on an occupied area sends the shape there back; you can select or drag a placed shape again to correct it.`,
-          )}
+          ))}
         </p>
         <DragDropSurface challenge={challenge} controller={controller} view={view} applyItemRef={applyItemRef} />
         <p role="status" className="mt-3 min-h-5 text-sm" data-testid="drag-status">

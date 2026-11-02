@@ -1,4 +1,5 @@
 import type { ChallengeConfig, BaseCaptchaFeatures, InputModality } from "@captchalab/captcha-core";
+import type { ArtCategory } from "../shared/art";
 
 export const ROTATION_ID = "rotation" as const;
 /** Semantic target of every pointer and key event of this CAPTCHA. */
@@ -19,8 +20,18 @@ export interface RotationChallenge {
   targetAngle: number;
   /** Accepted shortest angular distance to the target, degrees (inclusive). */
   tolerance: number;
+  /**
+   * The picture to turn upright (the "upright-object" variant): one of CaptchaLab's own scenes with an object whose top
+   * and bottom are unmistakable (sky above, ground below). Presentation only: the angle rule is unchanged.
+   */
+  subject?: RotationSubject;
   /** How it was generated (variant, difficulty, parameters). Absent on hand-built challenges. */
   config?: ChallengeConfig;
+}
+
+export interface RotationSubject {
+  category: ArtCategory;
+  seed: number;
 }
 
 /** Final angle only, degrees (any real number; it is wrapped for comparison). */

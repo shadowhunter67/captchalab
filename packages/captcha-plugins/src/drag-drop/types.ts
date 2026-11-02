@@ -1,8 +1,11 @@
 import type { ChallengeConfig, BaseCaptchaFeatures, InputModality } from "@captchalab/captcha-core";
+import type { ArtCategory } from "../shared/art";
 
 export const DRAG_DROP_ID = "drag-drop" as const;
 
 export type ShapeKind = "circle" | "square" | "triangle";
+/** What an item (and its drop area) shows: a plain shape, or one of CaptchaLab's own illustrated objects (v1.1). */
+export type DragItemKind = ShapeKind | ArtCategory;
 
 /** Fractions of the surface: x of its width, y of its height, both in [0, 1]. */
 export interface NormalizedPoint {
@@ -12,7 +15,7 @@ export interface NormalizedPoint {
 
 export interface DragDropItem {
   id: string;
-  kind: ShapeKind;
+  kind: DragItemKind;
   /** Initial CENTER of the item. */
   start: NormalizedPoint;
 }

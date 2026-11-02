@@ -1,6 +1,7 @@
 import { assertRange, resolveVariant, type GenerateContext } from "@captchalab/captcha-core";
 import { DRAG_DROP_VARIANTS } from "./variants";
-import type { DragDropChallenge, DragDropItem, DragDropTarget, ShapeKind } from "./types";
+import { ART_GROUPS, type ArtCategory } from "../shared/art";
+import type { DragDropChallenge, DragDropItem, DragDropTarget, DragItemKind, ShapeKind } from "./types";
 
 export const DRAG_DROP_ITEM_SIZE = 0.17;
 export const DRAG_DROP_TOLERANCE = 0.14;
@@ -23,6 +24,18 @@ function shuffled<T>(values: readonly T[], rng: () => number): T[] {
 }
 
 /**
+ * Three objects from three DIFFERENT look-alike groups (a bus, a cat and a chair, never a bus and a car), so which
+ * silhouette belongs to which card is never in doubt. Drawn from the seeded rng only.
+ */
+function pickObjects(rng: () => number): ArtCategory[] {
+  const names = shuffled(Object.keys(ART_GROUPS), rng).slice(0, 3);
+  return names.map((g) => {
+    const members = ART_GROUPS[g] as readonly ArtCategory[];
+    return members[Math.floor(rng() * members.length)] as ArtCategory;
+  });
+}
+
+/**
  * Three shapes and three drop areas in two rows (targets on top, items at the bottom). Which shape
  * belongs to which column, and the item order, come from the seeded rng; small jitter keeps item starts
  * from looking aligned. Rows are 0.58 of the surface height apart and columns 0.3 of its width, so for a
@@ -33,7 +46,8 @@ export function generateDragDropChallenge({ rng, variantId, difficulty }: Genera
   const { config, challengeConfig } = resolveVariant(DRAG_DROP_VARIANTS, { variantId, difficulty });
   assertRange("drag-drop item size", config.itemSize, 0.1, 0.25);
   assertRange("drag-drop drop tolerance", config.dropTolerance, 0.06, 0.25);
-  const targetKinds = shuffled(KINDS, rng);
+  const kinds: readonly DragItemKind[] = config.objects === 1 ? pickObjects(rng) : KINDS;
+  const targetKinds = shuffled(kinds, rng);
   const itemColumns = shuffled([0, 1, 2], rng);
 
   const targets: DragDropTarget[] = targetKinds.map((kind, i) => ({
@@ -41,7 +55,7 @@ export function generateDragDropChallenge({ rng, variantId, difficulty }: Genera
     acceptsItemId: `item-${kind}`,
     position: { x: COLUMNS[i] as number, y: TARGET_Y },
   }));
-  const items: DragDropItem[] = shuffled(KINDS, rng).map((kind, i) => ({
+  const items: DragDropItem[] = shuffled(kinds, rng).map((kind, i) => ({
     id: `item-${kind}`,
     kind,
     start: {

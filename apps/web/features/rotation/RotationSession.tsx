@@ -79,12 +79,17 @@ export function RotationSession({ challenge: initialChallenge, onNewChallenge, o
           {t("Thử", "Try")}
         </h2>
         <p className="mb-4 text-sm text-muted">
-          {t(
-            "Xoay vật thể cho đến khi mũi tên chỉ lên trên. Hãy kéo nó quanh tâm, hoặc chọn nó (phím Tab) rồi dùng phím mũi tên trái và phải (5° mỗi lần bấm). Sau đó nhấn Xác minh.",
-            "Turn the object until the arrow points up. Drag it around its center, or focus it (Tab) and use the left and right arrow keys (5° per press). Then press Verify.",
-          )}
+          {challenge.subject
+            ? t(
+                "Xoay ảnh cho đến khi nó đúng chiều (bầu trời ở trên, mặt đất ở dưới). Hãy kéo nó quanh tâm, hoặc chọn nó (phím Tab) rồi dùng phím mũi tên trái và phải (5° mỗi lần bấm). Sau đó nhấn Xác minh.",
+                "Turn the picture until it is the right way up (sky at the top, ground at the bottom). Drag it around its center, or focus it (Tab) and use the left and right arrow keys (5° per press). Then press Verify.",
+              )
+            : t(
+                "Xoay vật thể cho đến khi mũi tên chỉ lên trên. Hãy kéo nó quanh tâm, hoặc chọn nó (phím Tab) rồi dùng phím mũi tên trái và phải (5° mỗi lần bấm). Sau đó nhấn Xác minh.",
+                "Turn the object until the arrow points up. Drag it around its center, or focus it (Tab) and use the left and right arrow keys (5° per press). Then press Verify.",
+              )}
         </p>
-        <RotationSurface controller={controller} applyAngleRef={applyAngleRef} />
+        <RotationSurface controller={controller} applyAngleRef={applyAngleRef} subject={challenge.subject} />
         <div className="mt-4 flex flex-wrap gap-3">
           <button
             type="button"
