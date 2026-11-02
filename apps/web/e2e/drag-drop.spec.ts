@@ -294,6 +294,9 @@ test.describe("touch device", () => {
   test("touch drags work on a phone-sized board without horizontal overflow", async ({ page }) => {
     await page.goto(URL);
     await expect(page.getByTestId(`item-${A}`)).toBeVisible();
+    // Touch sent before React is live does nothing: wait until the board reports itself measured, and the page is quiet.
+    await expect(page.getByTestId("drag-status")).toContainText("0 of 3 shapes placed");
+    await page.waitForLoadState("networkidle");
     const cdp = await page.context().newCDPSession(page);
     const touch = (type: "touchStart" | "touchMove" | "touchEnd", p?: P) =>
       cdp.send("Input.dispatchTouchEvent", { type, touchPoints: p ? [{ x: p.x, y: p.y }] : [] });

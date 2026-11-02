@@ -141,6 +141,10 @@ test.describe("touch device", () => {
   test.use({ hasTouch: true, isMobile: true, viewport: { width: 390, height: 844 } });
   test("touch rotation works on a phone without overflow", async ({ page }) => {
     await page.goto(URL);
+    // Touch events sent before React has attached its handlers do nothing. The object's angle is written by an effect once
+    // the page is live (it is 0 in the server HTML), so wait for it and for the layout to settle before touching.
+    await expect(obj(page)).not.toHaveAttribute("aria-valuenow", "0");
+    await page.waitForLoadState("networkidle");
     const cdp = await page.context().newCDPSession(page);
     const touch = (type: "touchStart" | "touchMove" | "touchEnd", p?: { x: number; y: number }) =>
       cdp.send("Input.dispatchTouchEvent", { type, touchPoints: p ? [{ x: p.x, y: p.y }] : [] });
