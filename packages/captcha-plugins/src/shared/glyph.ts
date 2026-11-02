@@ -1,3 +1,5 @@
+import { ART_CATEGORIES, ART_GROUPS, type ArtCategory } from "./art";
+
 /**
  * The generic look shared by MatchKey and Tile Game: a shape, a fill pattern and an orientation (a small mark on the
  * shape turns with it, so every orientation is visibly different). Drawn by CaptchaLab itself; no outside asset.
@@ -82,3 +84,30 @@ export const ORIENTATION_NAME: Readonly<Record<GlyphOrientation, readonly [vi: s
   180: ["dấu hướng xuống", "mark down"],
   270: ["dấu hướng trái", "mark left"],
 };
+
+/**
+ * A skin dresses the abstract look as pictured objects (the object variants, v1.1): the SHAPE becomes one of four objects,
+ * the PATTERN a colourway and the ORIENTATION a quarter turn. It is presentation only: every rule, generator and
+ * verifier still works on the abstract look, so the answer is exactly as unambiguous as before.
+ */
+export interface GlyphSkin {
+  /** The object that stands for circle, square, triangle and hexagon, in the order of GLYPH_SHAPES. */
+  objects: readonly ArtCategory[];
+}
+
+export const isGlyphSkin = (v: unknown): v is GlyphSkin => {
+  if (typeof v !== "object" || v === null) return false;
+  const o = (v as { objects?: unknown }).objects;
+  return Array.isArray(o) && o.length === GLYPH_SHAPES.length && new Set(o).size === o.length && o.every((c) => (ART_CATEGORIES as readonly unknown[]).includes(c));
+};
+
+/** Four objects from four DIFFERENT look-alike groups, so two shapes are never confusable (a bus and a car never share a board). */
+export function pickSkin(rng: () => number): GlyphSkin {
+  const groups = shuffled(Object.keys(ART_GROUPS), rng).slice(0, GLYPH_SHAPES.length);
+  return {
+    objects: groups.map((g) => {
+      const members = ART_GROUPS[g] as readonly ArtCategory[];
+      return members[Math.floor(rng() * members.length)] as ArtCategory;
+    }),
+  };
+}

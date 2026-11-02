@@ -31,6 +31,9 @@ export function inkFor(seed: number, sil: string | null = null): Ink {
   };
 }
 
+/** An ink with a chosen body colour (the colourways of the skinned MatchKey and Tile Game). */
+export const inkWith = (body: string): Ink => ({ body, accent: "#ffffff", dark: "#2b2f3a", glass: "#cfe6fb", sil: null });
+
 const f = (k: Ink, c: string): string => k.sil ?? c;
 
 function bicycle(k: Ink): ReactNode {

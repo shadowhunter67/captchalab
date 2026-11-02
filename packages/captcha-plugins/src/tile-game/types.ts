@@ -1,5 +1,5 @@
 import type { BaseCaptchaFeatures, ChallengeConfig, InputModality } from "@captchalab/captcha-core";
-import type { Glyph, GlyphAttr } from "../shared/glyph";
+import type { Glyph, GlyphAttr, GlyphSkin } from "../shared/glyph";
 
 export const TILE_GAME_ID = "tile-game" as const;
 
@@ -20,6 +20,8 @@ export interface TileGameChallenge {
   ruleAttr?: GlyphAttr;
   required: number;
   answerIds: readonly string[];
+  /** The object variants only: dresses every glyph as a pictured object. Presentation only. */
+  skin?: GlyphSkin;
   config?: ChallengeConfig;
 }
 

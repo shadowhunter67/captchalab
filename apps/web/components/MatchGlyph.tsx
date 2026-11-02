@@ -1,18 +1,38 @@
 import { useId } from "react";
-import type { GlyphLook } from "@captchalab/captcha-plugins";
+import { GLYPH_ORIENTATIONS, GLYPH_PATTERNS, GLYPH_SHAPES, type GlyphLook, type GlyphSkin } from "@captchalab/captcha-plugins";
+import { drawObject, inkWith } from "@/lib/art/draw";
 
 interface Props {
   look: GlyphLook;
   /** Relative size around the centre; 1 = normal. */
   scale?: number;
+  /** The object variants: the same look drawn as a pictured object, colourway and quarter turn. */
+  skin?: GlyphSkin | undefined;
 }
+
+/** Pattern -> colourway of a skinned glyph. */
+const COLOURWAY: Record<(typeof GLYPH_PATTERNS)[number], string> = { solid: "#d94f4f", striped: "#2f7fd1", dotted: "#3a9a5b" };
 
 /**
  * The generic MatchKey / Tile Game picture, from SVG primitives only (no bitmap, no outside asset). The small mark on
  * top turns with the orientation, so every orientation looks different. Decorative: the button carries the label.
  */
-export function MatchGlyph({ look, scale = 1 }: Props) {
+export function MatchGlyph({ look, scale = 1, skin }: Props) {
   const uid = useId().replace(/:/g, "");
+  if (skin) {
+    const object = skin.objects[GLYPH_SHAPES.indexOf(look.shape)] ?? skin.objects[0];
+    return (
+      <svg viewBox="0 0 100 100" width="100%" height="100%" aria-hidden="true" focusable="false">
+        <g transform={`translate(50 50) scale(${scale}) translate(-50 -50)`}>
+          {/* The card stays upright; only the object on it turns, so a turned object is still a recognisable object. */}
+          <rect x={4} y={4} width={92} height={92} rx={14} fill="#ffffff" stroke="var(--line)" strokeWidth={2.5} />
+          <g transform={`translate(50 50) rotate(${GLYPH_ORIENTATIONS.includes(look.orientation) ? look.orientation : 0}) scale(0.7) translate(-50 -50)`}>
+            {object ? drawObject(object, inkWith(COLOURWAY[look.pattern])) : null}
+          </g>
+        </g>
+      </svg>
+    );
+  }
   const fill = look.pattern === "solid" ? "var(--fg)" : look.pattern === "striped" ? `url(#s${uid})` : `url(#d${uid})`;
   return (
     <svg viewBox="0 0 48 48" width="100%" height="100%" aria-hidden="true" focusable="false">

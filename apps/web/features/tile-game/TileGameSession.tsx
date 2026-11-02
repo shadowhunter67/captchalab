@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 
 import { useRef, useState } from "react";
 import type { FeatureSet, InteractionSession, VerificationResult } from "@captchalab/captcha-core";
@@ -59,8 +60,8 @@ export function TileGameSession({ challenge: initialChallenge, onNewChallenge }:
         <div ref={boardRef} data-testid="tile-game" className="space-y-4">
           {challenge.reference && (
             <div className="flex items-center gap-4">
-              <div role="img" aria-label={`${t("Ô mẫu", "Reference tile")}: ${lookLabel(challenge.reference, t)}`} data-testid="reference-tile" className="h-24 w-24 rounded-md border-2 border-dashed border-line bg-bg p-2">
-                <MatchGlyph look={challenge.reference} />
+              <div role="img" aria-label={challenge.skin ? t("Ô mẫu", "Reference tile") : `${t("Ô mẫu", "Reference tile")}: ${lookLabel(challenge.reference, t)}`} data-testid="reference-tile" className="h-24 w-24 rounded-md border-2 border-dashed border-line bg-bg p-2">
+                <MatchGlyph look={challenge.reference} skin={challenge.skin} />
               </div>
               <span className="text-sm text-muted">{t("Ô mẫu", "Reference tile")}</span>
             </div>
@@ -73,13 +74,13 @@ export function TileGameSession({ challenge: initialChallenge, onNewChallenge }:
                   key={tile.id}
                   type="button"
                   aria-pressed={on}
-                  aria-label={tileLabel(tile, i, total, on, t)}
+                  aria-label={tileLabel(tile, i, total, on, t, challenge.skin !== undefined)}
                   data-testid={`tile-${tile.id}`}
                   {...handlers(makeTileTarget(tile.id))}
                   onClick={() => activate(tile.id)}
                   className={`h-20 w-20 touch-manipulation rounded-md border-2 bg-bg p-2 sm:h-24 sm:w-24 ${on ? "border-accent ring-2 ring-accent" : "border-line hover:bg-track"}`}
                 >
-                  <MatchGlyph look={tile} scale={tile.scale} />
+                  <MatchGlyph look={tile} scale={tile.scale} skin={challenge.skin} />
                 </button>
               );
             })}
@@ -91,7 +92,15 @@ export function TileGameSession({ challenge: initialChallenge, onNewChallenge }:
           <button type="button" onClick={onNewChallenge} className="rounded-md border border-line bg-panel px-3 py-1.5 text-sm font-medium hover:bg-track">{t("Thử thách mới", "New challenge")}</button>
         </div>
         <p className="mt-3 text-xs text-muted">
-          {t(
+          {challenge.skin ? (
+            <>
+              {t(
+                "Khả năng tiếp cận: Tab để tới một ô, Enter hoặc Space để chọn hoặc bỏ chọn. Với ảnh vật thể, tên ô chỉ là số thứ tự (lời giải không nằm trong tên ô), nên người không nhìn được không làm được thử thách này; hãy dùng thử thách thay thế bằng âm thanh. Đây chỉ là bản minh hoạ, không phải CAPTCHA dùng cho sản phẩm thật.",
+                "Accessibility: press Tab to reach a tile, then Enter or Space to select or clear it. With pictured objects the tile names are only numbers (the answer is not in the name), so people who cannot see the pictures cannot do this challenge; use the audio challenge instead. It is a demonstration, not a production CAPTCHA.",
+              )}{" "}
+              <Link href="/playground/audio" data-testid="tg-alternative" className="underline">{t("Thử thách thay thế (âm thanh)", "Alternative challenge (audio)")}</Link>
+            </>
+          ) : t(
             "Khả năng tiếp cận: Tab để tới một ô, Enter hoặc Space để chọn hoặc bỏ chọn. Nhãn của ô nêu hình, họa tiết và hướng nên không cần nhìn vẫn làm được; điều đó cũng khiến bản demo này rất dễ với phần mềm. Đây chỉ là bản minh hoạ, không phải CAPTCHA dùng cho sản phẩm thật.",
             "Accessibility: press Tab to reach a tile, then Enter or Space to select or clear it. Each tile's label names its shape, pattern and orientation, so the task does not need sight; that also makes this demo trivial for software. It is a demonstration, not a production CAPTCHA.",
           )}

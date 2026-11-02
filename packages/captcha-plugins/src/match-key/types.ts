@@ -1,5 +1,5 @@
 import type { BaseCaptchaFeatures, ChallengeConfig, InputModality } from "@captchalab/captcha-core";
-import type { Glyph, GlyphAttr } from "../shared/glyph";
+import type { Glyph, GlyphAttr, GlyphSkin } from "../shared/glyph";
 
 export const MATCH_KEY_ID = "match-key" as const;
 
@@ -14,6 +14,8 @@ export interface MatchKeyChallenge {
   options: readonly Glyph[];
   keyAttrs: readonly GlyphAttr[];
   correctId: string;
+  /** The object variants only: dresses every glyph as a pictured object. Presentation only. */
+  skin?: GlyphSkin;
   config?: ChallengeConfig;
 }
 

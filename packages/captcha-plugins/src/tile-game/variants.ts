@@ -33,6 +33,26 @@ export const TILE_GAME_VARIANTS: CaptchaVariantSet<TileGameVariantConfig> = {
         hard: { tiles: 8, required: 3, similarity: "near" },
       },
     },
+    {
+      id: "pair-object",
+      name: "Object Pair",
+      description: "Pictured objects: exactly two tiles show the same object, colour and turn; select both.",
+      difficulties: {
+        easy: { tiles: 4, required: 2, similarity: "far" },
+        medium: { tiles: 6, required: 2, similarity: "mixed" },
+        hard: { tiles: 8, required: 2, similarity: "near" },
+      },
+    },
+    {
+      id: "pattern-object",
+      name: "Object Pattern",
+      description: "Pictured objects: select the tiles that share one named attribute (object, colour or turn) with the reference tile.",
+      difficulties: {
+        easy: { tiles: 4, required: 2, similarity: "far" },
+        medium: { tiles: 6, required: 2, similarity: "mixed" },
+        hard: { tiles: 8, required: 3, similarity: "near" },
+      },
+    },
   ],
   defaultSelection: { variantId: "pair", difficulty: "medium" },
 };

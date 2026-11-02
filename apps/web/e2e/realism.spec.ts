@@ -170,3 +170,56 @@ test("Text: the distorted picture is the same for the same seed, differs for ano
   await page.getByTestId("verify").click();
   await expect(page.getByTestId("result")).toContainText("Passed");
 });
+
+// ------------------------------------------------------------------------ Shape Matching, MatchKey, Tile Game
+test("Shape Matching objects: match each pictured object to its silhouette, Verify, Passed", async ({ page }) => {
+  const SEED = 3;
+  const c = registry.get("shape-matching").generate({ rng: createRng(SEED), variantId: "object-silhouette", difficulty: "medium" });
+  await page.goto(`/playground/shape-matching?seed=${SEED}&variant=object-silhouette&difficulty=medium`);
+  await expect(page.getByTestId("shape-matching")).toBeVisible();
+  const assertNoDataLeft = await watchPrivacy(page);
+  for (const s of c.sources) {
+    await page.getByTestId(`source-${s.id}`).click();
+    await page.getByTestId(`target-${c.matches[s.id]!}`).click();
+  }
+  await page.getByTestId("verify").click();
+  await expect(page.getByTestId("result")).toContainText("Passed");
+  await assertNoDataLeft();
+  await expectValidIds(page);
+});
+
+for (const variant of ["exact-object", "attribute-object"] as const) {
+  test(`MatchKey ${variant}: the right card passes, a wrong one fails, names are only numbers, alternative offered`, async ({ page }) => {
+    const SEED = 31;
+    const c = registry.get("match-key").generate({ rng: createRng(SEED), variantId: variant, difficulty: "medium" });
+    await page.goto(`/playground/match-key?seed=${SEED}&variant=${variant}&difficulty=medium`);
+    const assertNoDataLeft = await watchPrivacy(page);
+    for (const o of c.options) await expect(page.getByTestId(`option-${o.id}`)).toHaveAttribute("aria-label", /^Option \d of \d$/);
+    await expect(page.getByTestId("mk-alternative")).toHaveAttribute("href", /playground\/audio/);
+    const wrong = c.options.find((o) => o.id !== c.correctId)!.id;
+    await page.getByTestId(`option-${wrong}`).click();
+    await page.getByTestId("verify").click();
+    await expect(page.getByTestId("result")).toContainText("Not passed");
+    await page.getByTestId(`option-${c.correctId}`).click();
+    await page.getByTestId("verify").click();
+    await expect(page.getByTestId("result")).toContainText("Passed");
+    await assertNoDataLeft();
+  });
+}
+
+for (const variant of ["pair-object", "pattern-object"] as const) {
+  test(`Tile Game ${variant}: select the answer tiles, Passed; names are only numbers`, async ({ page }) => {
+    const SEED = 31;
+    const c = registry.get("tile-game").generate({ rng: createRng(SEED), variantId: variant, difficulty: "medium" });
+    await page.goto(`/playground/tile-game?seed=${SEED}&variant=${variant}&difficulty=medium`);
+    for (const t of c.tiles) await expect(page.getByTestId(`tile-${t.id}`)).toHaveAttribute("aria-label", /^Tile \d of \d$/);
+    await expect(page.getByTestId("tg-alternative")).toHaveAttribute("href", /playground\/audio/);
+    for (const id of c.answerIds) {
+      await page.getByTestId(`tile-${id}`).focus();
+      await page.keyboard.press("Space");
+    }
+    await page.getByTestId("verify").click();
+    await expect(page.getByTestId("result")).toContainText("Passed");
+    await expectValidIds(page);
+  });
+}

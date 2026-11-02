@@ -1,5 +1,5 @@
 import { assertRange, resolveVariant, type GenerateContext } from "@captchalab/captcha-core";
-import { GLYPH_ATTRS, GLYPH_SCALES, allLooks, diffCount, lookKey, pick, shuffled, type Glyph, type GlyphLook } from "../shared/glyph";
+import { GLYPH_ATTRS, pickSkin, GLYPH_SCALES, allLooks, diffCount, lookKey, pick, shuffled, type Glyph, type GlyphLook } from "../shared/glyph";
 import { TILE_GAME_VARIANTS } from "./variants";
 import type { TileGameChallenge } from "./types";
 
@@ -23,7 +23,7 @@ function takeDistinct(candidates: readonly GlyphLook[], used: Set<string>, count
  * Same seed + variant + difficulty, same board. Every tile has a different look, except the one identical pair of
  * Pair Match; the answer set is the only set that satisfies the rule.
  */
-export function generateTileGameChallenge({ rng, variantId, difficulty }: GenerateContext): TileGameChallenge {
+function generateTileGameLooks({ rng, variantId, difficulty }: GenerateContext): TileGameChallenge {
   const { variant, config, challengeConfig } = resolveVariant(TILE_GAME_VARIANTS, { variantId, difficulty });
   assertRange("tile game tiles", config.tiles, 4, 8);
   assertRange("tile game required", config.required, 2, 3);
@@ -35,7 +35,7 @@ export function generateTileGameChallenge({ rng, variantId, difficulty }: Genera
     return { tiles, answerIds: tiles.filter((_, i) => order[i]?.answer).map((t) => t.id) };
   };
 
-  if (variant.id === "pair") {
+  if (variant.id.startsWith("pair")) {
     const target = pick(looks, rng);
     const [minDiff, maxDiff] = config.similarity === "far" ? [2, 3] : config.similarity === "mixed" ? [1, 3] : [1, 1];
     const others = looks.filter((l) => {
@@ -59,4 +59,10 @@ export function generateTileGameChallenge({ rng, variantId, difficulty }: Genera
   const { tiles, answerIds } = glyphs([...right.map((look) => ({ look, answer: true })), ...wrong.map((look) => ({ look, answer: false }))]);
   const reference: Glyph = { id: "ref", ...ref, scale: 1 };
   return { id: id(), kind: "pattern", tiles, reference, ruleAttr, required: config.required, answerIds, config: challengeConfig };
+}
+
+/** As in MatchKey: an object variant adds a skin after the board, so every glyph board is unchanged. */
+export function generateTileGameChallenge(ctx: GenerateContext): TileGameChallenge {
+  const base = generateTileGameLooks(ctx);
+  return base.config?.variantId.endsWith("-object") ? { ...base, skin: pickSkin(ctx.rng) } : base;
 }

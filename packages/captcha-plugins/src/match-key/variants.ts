@@ -34,6 +34,26 @@ export const MATCH_KEY_VARIANTS: CaptchaVariantSet<MatchKeyVariantConfig> = {
         hard: { options: 6, minDiff: 1, maxDiff: 1, keyAttributes: 2 },
       },
     },
+    {
+      id: "exact-object",
+      name: "Exact Object",
+      description: "Pictured objects: pick the one identical to the key in object, colour and turn (size may differ).",
+      difficulties: {
+        easy: { options: 4, minDiff: 2, maxDiff: 3, keyAttributes: 3 },
+        medium: { options: 5, minDiff: 1, maxDiff: 2, keyAttributes: 3 },
+        hard: { options: 6, minDiff: 1, maxDiff: 1, keyAttributes: 3 },
+      },
+    },
+    {
+      id: "attribute-object",
+      name: "Attribute Object",
+      description: "Pictured objects: pick the one that shares the two attributes the task names (object, colour or turn).",
+      difficulties: {
+        easy: { options: 4, minDiff: 2, maxDiff: 2, keyAttributes: 2 },
+        medium: { options: 5, minDiff: 1, maxDiff: 2, keyAttributes: 2 },
+        hard: { options: 6, minDiff: 1, maxDiff: 1, keyAttributes: 2 },
+      },
+    },
   ],
   defaultSelection: { variantId: "exact", difficulty: "medium" },
 };

@@ -9,7 +9,12 @@ const ATTR_NAME: Record<GlyphAttr, readonly [vi: string, en: string]> = {
 };
 
 /** The instruction for the current board. */
-export function instructionText(c: Pick<TileGameChallenge, "kind" | "required" | "ruleAttr">, t: Translate = EN): string {
+export function instructionText(c: Pick<TileGameChallenge, "kind" | "required" | "ruleAttr"> & { skin?: unknown }, t: Translate = EN): string {
+  if (c.skin !== undefined) {
+    if (c.kind === "pair") return t("Đúng hai ô cho thấy cùng một vật thể, màu và hướng quay. Chọn cả hai rồi bấm Xác minh.", "Exactly two tiles show the same object, colour and turn. Select both, then press Verify.");
+    const name = c.ruleAttr === "shape" ? t("vật thể", "object") : c.ruleAttr === "pattern" ? t("màu", "colour") : t("hướng quay", "turn");
+    return t(`Chọn ${c.required} ô có cùng ${name} với ô mẫu rồi bấm Xác minh. Các thuộc tính khác có thể khác.`, `Select the ${c.required} tiles with the same ${name} as the reference tile, then press Verify. Other attributes may differ.`);
+  }
   if (c.kind === "pair") return t("Đúng hai ô trông giống hệt nhau (cùng hình, họa tiết và hướng). Chọn cả hai rồi bấm Xác minh.", "Exactly two tiles look identical (same shape, pattern and orientation). Select both, then press Verify.");
   const attr = c.ruleAttr ? t(...ATTR_NAME[c.ruleAttr]) : "";
   return t(`Chọn ${c.required} ô có cùng ${attr} với ô mẫu rồi bấm Xác minh. Các thuộc tính khác có thể khác.`, `Select the ${c.required} tiles with the same ${attr} as the reference tile, then press Verify. Other attributes may differ.`);
@@ -19,7 +24,8 @@ export function lookLabel(look: GlyphLook, t: Translate = EN): string {
   return `${t(...SHAPE_NAME[look.shape])}, ${t(...PATTERN_NAME[look.pattern])}, ${t(...ORIENTATION_NAME[look.orientation])}`;
 }
 
-export function tileLabel(look: GlyphLook, index: number, total: number, selected: boolean, t: Translate = EN): string {
+export function tileLabel(look: GlyphLook, index: number, total: number, selected: boolean, t: Translate = EN, skinned = false): string {
+  if (skinned) return `${t(`Ô ${index + 1} trên ${total}`, `Tile ${index + 1} of ${total}`)}${selected ? t(", đã chọn", ", selected") : ""}`;
   return `${t(`Ô ${index + 1} trên ${total}`, `Tile ${index + 1} of ${total}`)}: ${lookLabel(look, t)}${selected ? t(", đã chọn", ", selected") : ""}`;
 }
 

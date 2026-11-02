@@ -1,12 +1,13 @@
 import type { BaseCaptchaFeatures, ChallengeConfig, InputModality } from "@captchalab/captcha-core";
-import type { GridShape } from "../image-grid/types";
+import type { GridSubject } from "../image-grid/types";
 
 export const SHAPE_MATCHING_ID = "shape-matching" as const;
 
 /** One drawn shape. `shape` is its structural identity; rotation, fill and scale are only presentation. */
 export interface MatchShape {
   id: string;
-  shape: GridShape;
+  /** A plain shape, or an illustrated object (the object-silhouette variant: a picture on the source side, its silhouette on the target side). */
+  shape: GridSubject;
   /** Degrees, clockwise. */
   rotation: number;
   filled: boolean;

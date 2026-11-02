@@ -8,9 +8,16 @@ const ATTR_NAME: Record<GlyphAttr, readonly [vi: string, en: string]> = {
   orientation: ["hướng", "orientation"],
 };
 
+const OBJECT_ATTR_NAME: Record<GlyphAttr, readonly [vi: string, en: string]> = {
+  shape: ["vật thể", "object"],
+  pattern: ["màu", "colour"],
+  orientation: ["hướng quay", "turn"],
+};
+
 /** "same shape and pattern as the key": the rule the page shows for the current variant. */
-export function ruleText(keyAttrs: readonly GlyphAttr[], t: Translate = EN): string {
-  const names = keyAttrs.map((a) => t(...ATTR_NAME[a]));
+export function ruleText(keyAttrs: readonly GlyphAttr[], t: Translate = EN, skinned = false): string {
+  const names = keyAttrs.map((a) => t(...(skinned ? OBJECT_ATTR_NAME : ATTR_NAME)[a]));
+  if (skinned && keyAttrs.length === 3) return t("Chọn lựa chọn giống hệt hình mẫu về vật thể, màu và hướng quay (cỡ có thể khác).", "Pick the option identical to the key in object, colour and turn (size may differ).");
   if (keyAttrs.length === 3) return t("Chọn lựa chọn giống hệt hình mẫu về hình, họa tiết và hướng (cỡ có thể khác).", "Pick the option identical to the key in shape, pattern and orientation (size may differ).");
   const list = names.join(t(" và ", " and "));
   return t(`Chọn lựa chọn có cùng ${list} với hình mẫu. Thuộc tính còn lại và cỡ có thể khác.`, `Pick the option with the same ${list} as the key. The other attribute and the size may differ.`);

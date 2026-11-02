@@ -1,5 +1,6 @@
 import type { VerificationResult } from "@captchalab/captcha-core";
 import { GRID_SHAPES } from "../image-grid/types";
+import { ART_CATEGORIES } from "../shared/art";
 import type { ShapeMatchingAnswer, ShapeMatchingChallenge } from "./types";
 
 const isRecord = (v: unknown): v is Record<string, unknown> => typeof v === "object" && v !== null && !Array.isArray(v);
@@ -12,7 +13,7 @@ function challengeIsValid(c: unknown): c is ShapeMatchingChallenge {
     const out = new Set<string>();
     for (const item of list) {
       if (!isRecord(item) || typeof item.id !== "string" || !ID.test(item.id) || out.has(item.id)) return null;
-      if (typeof item.shape !== "string" || !(GRID_SHAPES as readonly string[]).includes(item.shape)) return null;
+      if (typeof item.shape !== "string" || !([...GRID_SHAPES, ...ART_CATEGORIES] as readonly string[]).includes(item.shape)) return null;
       out.add(item.id);
     }
     return out;

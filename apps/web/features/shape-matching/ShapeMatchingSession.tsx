@@ -14,7 +14,7 @@ import {
   type ShapeMatchingChallenge,
   type ShapeMatchingFeatures,
 } from "@captchalab/captcha-plugins";
-import { SHAPE_NAMES, ShapeGlyph } from "@/components/ShapeGlyph";
+import { ShapeGlyph, subjectName } from "@/components/ShapeGlyph";
 import { useT } from "@/lib/i18n";
 import type { SessionReport } from "@/lib/behavior/human";
 import { toPointerSample, toRecorderEvent, type PointerKind } from "@/lib/pointer-adapter";
@@ -56,7 +56,7 @@ export function ShapeMatchingSession({ challenge: initialChallenge, onNewChallen
 
   const total = challenge.sources.length;
   const numbers = pairNumbers(state);
-  const shapeName = (s: MatchShape): string => t(SHAPE_NAMES[s.shape][0], SHAPE_NAMES[s.shape][1]);
+  const shapeName = (s: MatchShape): string => subjectName(s.shape, t);
   const sourceIndexOf = (id: string): number => challenge.sources.findIndex((s) => s.id === id);
   const targetIndexOf = (id: string): number => challenge.targets.findIndex((s) => s.id === id);
 

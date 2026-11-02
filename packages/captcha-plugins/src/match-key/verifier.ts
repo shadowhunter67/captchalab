@@ -1,5 +1,5 @@
 import type { VerificationResult } from "@captchalab/captcha-core";
-import { GLYPH_ATTRS, isGlyphLook, isScale, sameOn, type GlyphAttr } from "../shared/glyph";
+import { GLYPH_ATTRS, isGlyphLook, isGlyphSkin, isScale, sameOn, type GlyphAttr } from "../shared/glyph";
 import type { MatchKeyAnswer, MatchKeyChallenge } from "./types";
 
 const isRecord = (v: unknown): v is Record<string, unknown> => typeof v === "object" && v !== null && !Array.isArray(v);
@@ -9,6 +9,7 @@ const ID = /^[a-z0-9-]{1,16}$/;
 function challengeIsValid(c: unknown): c is MatchKeyChallenge {
   if (!isRecord(c) || typeof c.id !== "string" || !isRecord(c.reference) || !Array.isArray(c.options) || !Array.isArray(c.keyAttrs)) return false;
   if (!isGlyphLook(c.reference) || typeof c.correctId !== "string") return false;
+  if (c.skin !== undefined && !isGlyphSkin(c.skin)) return false;
   if (c.keyAttrs.length < 1 || !c.keyAttrs.every((a) => (GLYPH_ATTRS as readonly unknown[]).includes(a))) return false;
   if (c.options.length < 2 || c.options.length > 8) return false;
   const ids = new Set<string>();

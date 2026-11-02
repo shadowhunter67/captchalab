@@ -1,5 +1,5 @@
 import type { VerificationResult } from "@captchalab/captcha-core";
-import { GLYPH_ATTRS, isGlyphLook, isScale, lookKey, type GlyphAttr } from "../shared/glyph";
+import { GLYPH_ATTRS, isGlyphLook, isGlyphSkin, isScale, lookKey, type GlyphAttr } from "../shared/glyph";
 import { sameSet } from "./selection";
 import type { TileGameAnswer, TileGameChallenge } from "./types";
 
@@ -10,6 +10,7 @@ const ID = /^[a-z0-9-]{1,16}$/;
 function challengeIsValid(c: unknown): c is TileGameChallenge {
   if (!isRecord(c) || typeof c.id !== "string" || !Array.isArray(c.tiles) || !Array.isArray(c.answerIds)) return false;
   if ((c.kind !== "pair" && c.kind !== "pattern") || typeof c.required !== "number" || !Number.isInteger(c.required) || c.required < 2) return false;
+  if (c.skin !== undefined && !isGlyphSkin(c.skin)) return false;
   if (c.tiles.length < c.required || c.tiles.length > 12) return false;
   const ids = new Set<string>();
   for (const t of c.tiles) {

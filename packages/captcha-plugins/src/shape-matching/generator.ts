@@ -1,5 +1,6 @@
 import { assertRange, resolveVariant, type GenerateContext } from "@captchalab/captcha-core";
-import type { GridShape } from "../image-grid/types";
+import { ART_GROUPS, type ArtCategory } from "../shared/art";
+import type { GridShape, GridSubject } from "../image-grid/types";
 import type { MatchShape, ShapeMatchingChallenge } from "./types";
 import { SHAPE_MATCHING_VARIANTS } from "./variants";
 
@@ -20,7 +21,16 @@ function shuffled<T>(values: readonly T[], rng: () => number): T[] {
   return out;
 }
 
-function pickShapes(similarity: string, pairs: number, rng: () => number): GridShape[] {
+function pickShapes(similarity: string, pairs: number, rng: () => number): GridSubject[] {
+  if (similarity === "objects") {
+    // One object from each of `pairs` different look-alike groups: a bus and a cat, never a bus and a car.
+    return shuffled(Object.keys(ART_GROUPS), rng)
+      .slice(0, pairs)
+      .map((g) => {
+        const members = ART_GROUPS[g] as readonly ArtCategory[];
+        return members[Math.floor(rng() * members.length)] as ArtCategory;
+      });
+  }
   if (similarity === "high") {
     const extra = shuffled(HIGH_EXTRA, rng);
     return shuffled([...HIGH_CORE, ...extra].slice(0, pairs), rng);
@@ -48,9 +58,10 @@ export function generateShapeMatchingChallenge({ rng, variantId, difficulty }: G
   const order = shuffled(shapes.map((_, i) => i), rng);
   const targets: MatchShape[] = order.map((sourceIndex, j) => {
     const rotation = config.rotationDeg > 0 ? Math.round((rng() * config.rotationDeg) / 15) * 15 : 0;
-    const filled = config.mixedFill ? rng() < 0.5 : true;
+    // An object target is always drawn as a silhouette; mixedFill only applies to plain shapes.
+    const filled = config.similarity === "objects" ? false : config.mixedFill ? rng() < 0.5 : true;
     const scale = config.sizeVariation > 0 ? Math.round((1 + (rng() - 0.5) * 2 * config.sizeVariation) * 100) / 100 : 1;
-    return { id: `t${j + 1}`, shape: shapes[sourceIndex] as GridShape, rotation, filled, scale };
+    return { id: `t${j + 1}`, shape: shapes[sourceIndex] as GridSubject, rotation, filled, scale };
   });
   const matches: Record<string, string> = {};
   order.forEach((sourceIndex, j) => {

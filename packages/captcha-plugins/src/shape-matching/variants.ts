@@ -4,7 +4,7 @@ export interface ShapeMatchingVariantConfig {
   [key: string]: number | string | boolean;
   /** Number of source/target pairs. */
   pairs: number;
-  /** "low": four clearly different shapes. "medium": adds an oval. "high": circle/oval and square/rounded square pairs. */
+  /** "low": four clearly different shapes. "medium": adds an oval. "high": circle/oval and square/rounded square pairs. "objects": pictured objects from different look-alike groups. */
   similarity: string;
   /** Targets are turned by a random multiple of 15 degrees up to this much (0 = never). */
   rotationDeg: number;
@@ -38,6 +38,16 @@ export const SHAPE_MATCHING_VARIANTS: CaptchaVariantSet<ShapeMatchingVariantConf
         easy: { pairs: 3, similarity: "low", rotationDeg: 90, mixedFill: false, sizeVariation: 0.2 },
         medium: { pairs: 4, similarity: "medium", rotationDeg: 180, mixedFill: true, sizeVariation: 0.3 },
         hard: { pairs: 5, similarity: "high", rotationDeg: 330, mixedFill: true, sizeVariation: 0.4 },
+      },
+    },
+    {
+      id: "object-silhouette",
+      name: "Object and silhouette",
+      description: "Pictured objects on one side, their silhouettes (resized) on the other: match each object to its silhouette.",
+      difficulties: {
+        easy: { pairs: 3, similarity: "objects", rotationDeg: 0, mixedFill: false, sizeVariation: 0 },
+        medium: { pairs: 4, similarity: "objects", rotationDeg: 0, mixedFill: false, sizeVariation: 0.2 },
+        hard: { pairs: 5, similarity: "objects", rotationDeg: 0, mixedFill: false, sizeVariation: 0.3 },
       },
     },
   ],

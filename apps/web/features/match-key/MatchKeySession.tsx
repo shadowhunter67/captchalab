@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 
 import { useRef, useState } from "react";
 import type { FeatureSet, InteractionSession, VerificationResult } from "@captchalab/captcha-core";
@@ -55,11 +56,11 @@ export function MatchKeySession({ challenge: initialChallenge, onNewChallenge }:
     <div className="space-y-6">
       <section aria-labelledby="try-h" className="cl-widget rounded-lg border border-line bg-panel p-4">
         <h2 id="try-h" className="mb-1 text-base font-semibold">{t("Thử", "Try")}</h2>
-        <p className="mb-4 text-sm text-muted" data-testid="match-instruction">{ruleText(challenge.keyAttrs, t)}</p>
+        <p className="mb-4 text-sm text-muted" data-testid="match-instruction">{ruleText(challenge.keyAttrs, t, challenge.skin !== undefined)}</p>
         <div ref={boardRef} data-testid="match-key" className="space-y-4">
           <div className="flex items-center gap-4">
-            <div role="img" aria-label={`${t("Hình mẫu", "Key")}: ${lookLabel(challenge.reference, t)}`} data-testid="key-glyph" className="h-24 w-24 rounded-md border-2 border-dashed border-line bg-bg p-2">
-              <MatchGlyph look={challenge.reference} />
+            <div role="img" aria-label={challenge.skin ? t("Hình mẫu", "Key") : `${t("Hình mẫu", "Key")}: ${lookLabel(challenge.reference, t)}`} data-testid="key-glyph" className="h-24 w-24 rounded-md border-2 border-dashed border-line bg-bg p-2">
+              <MatchGlyph look={challenge.reference} skin={challenge.skin} />
             </div>
             <span className="text-sm text-muted">{t("Hình mẫu", "Key")}</span>
           </div>
@@ -71,13 +72,13 @@ export function MatchKeySession({ challenge: initialChallenge, onNewChallenge }:
                   key={o.id}
                   type="button"
                   aria-pressed={on}
-                  aria-label={t(`Lựa chọn ${i + 1} trên ${total}: ${lookLabel(o, t)}`, `Option ${i + 1} of ${total}: ${lookLabel(o, t)}`)}
+                  aria-label={challenge.skin ? t(`Lựa chọn ${i + 1} trên ${total}`, `Option ${i + 1} of ${total}`) : t(`Lựa chọn ${i + 1} trên ${total}: ${lookLabel(o, t)}`, `Option ${i + 1} of ${total}: ${lookLabel(o, t)}`)}
                   data-testid={`option-${o.id}`}
                   {...handlers(makeMatchOptionTarget(o.id))}
                   onClick={() => activate(o.id)}
                   className={`h-20 w-20 touch-manipulation rounded-md border-2 bg-bg p-2 sm:h-24 sm:w-24 ${on ? "border-accent ring-2 ring-accent" : "border-line hover:bg-track"}`}
                 >
-                  <MatchGlyph look={o} scale={o.scale} />
+                  <MatchGlyph look={o} scale={o.scale} skin={challenge.skin} />
                 </button>
               );
             })}
@@ -91,7 +92,15 @@ export function MatchKeySession({ challenge: initialChallenge, onNewChallenge }:
           <button type="button" onClick={onNewChallenge} className="rounded-md border border-line bg-panel px-3 py-1.5 text-sm font-medium hover:bg-track">{t("Thử thách mới", "New challenge")}</button>
         </div>
         <p className="mt-3 text-xs text-muted">
-          {t(
+          {challenge.skin ? (
+            <>
+              {t(
+                "Khả năng tiếp cận: Tab để tới một lựa chọn, Enter hoặc Space để chọn. Với ảnh vật thể, tên nút chỉ là số thứ tự (lời giải không nằm trong tên nút), nên người không nhìn được không làm được thử thách này; hãy dùng thử thách thay thế bằng âm thanh. Đây chỉ là bản minh hoạ, không phải CAPTCHA dùng cho sản phẩm thật.",
+                "Accessibility: press Tab to reach an option, then Enter or Space to select it. With pictured objects the button names are only numbers (the answer is not in the name), so people who cannot see the pictures cannot do this challenge; use the audio challenge instead. It is a demonstration, not a production CAPTCHA.",
+              )}{" "}
+              <Link href="/playground/audio" data-testid="mk-alternative" className="underline">{t("Thử thách thay thế (âm thanh)", "Alternative challenge (audio)")}</Link>
+            </>
+          ) : t(
             "Khả năng tiếp cận: Tab để tới một lựa chọn, Enter hoặc Space để chọn. Nhãn của nút nêu hình, họa tiết và hướng nên không cần nhìn vẫn làm được; điều đó cũng khiến bản demo này rất dễ với phần mềm. Đây chỉ là bản minh hoạ, không phải CAPTCHA dùng cho sản phẩm thật.",
             "Accessibility: press Tab to reach an option, then Enter or Space to select it. Each button's label names its shape, pattern and orientation, so the task does not need sight; that also makes this demo trivial for software. It is a demonstration, not a production CAPTCHA.",
           )}

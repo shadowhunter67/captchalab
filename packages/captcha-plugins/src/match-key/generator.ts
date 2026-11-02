@@ -1,5 +1,5 @@
 import { assertRange, resolveVariant, type GenerateContext } from "@captchalab/captcha-core";
-import { GLYPH_ATTRS, GLYPH_SCALES, allLooks, diffCount, pick, sameOn, shuffled, valuesOf, type Glyph, type GlyphAttr, type GlyphLook } from "../shared/glyph";
+import { GLYPH_ATTRS, GLYPH_SCALES, allLooks, diffCount, pick, pickSkin, sameOn, shuffled, valuesOf, type Glyph, type GlyphAttr, type GlyphLook } from "../shared/glyph";
 import type { MatchKeyChallenge } from "./types";
 import { MATCH_KEY_VARIANTS } from "./variants";
 
@@ -8,7 +8,7 @@ import { MATCH_KEY_VARIANTS } from "./variants";
  * agrees with the key on every key attribute, so exactly one option is correct. In Attribute Match the correct option
  * is made to differ from the key in the free attribute, so it cannot be found by looking for an identical twin.
  */
-export function generateMatchKeyChallenge({ rng, variantId, difficulty }: GenerateContext): MatchKeyChallenge {
+function generateMatchKeyLooks({ rng, variantId, difficulty }: GenerateContext): MatchKeyChallenge {
   const { config, challengeConfig } = resolveVariant(MATCH_KEY_VARIANTS, { variantId, difficulty });
   assertRange("match key options", config.options, 3, 6);
   assertRange("match key key attributes", config.keyAttributes, 2, 3);
@@ -45,4 +45,13 @@ export function generateMatchKeyChallenge({ rng, variantId, difficulty }: Genera
   const reference: Glyph = { id: "key", ...key, scale: 1 };
   const id = `match-key-${Math.floor(rng() * 0x100000000).toString(16).padStart(8, "0")}`;
   return { id, reference, options, keyAttrs, correctId, config: challengeConfig };
+}
+
+/**
+ * The glyph variants and the object variants draw the same board; an object variant then adds a skin. The skin uses the
+ * rng AFTER the board, so every glyph challenge is exactly what it always was.
+ */
+export function generateMatchKeyChallenge(ctx: GenerateContext): MatchKeyChallenge {
+  const base = generateMatchKeyLooks(ctx);
+  return base.config?.variantId.endsWith("-object") ? { ...base, skin: pickSkin(ctx.rng) } : base;
 }
