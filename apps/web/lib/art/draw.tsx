@@ -15,6 +15,8 @@ export interface Ink {
   glass: string;
   /** When set, every part is drawn in this one colour. */
   sil: string | null;
+  /** The colourway of a skinned card (MatchKey, Tile Game): the body colour must show on every object, even those that are naturally one colour (a tree, a traffic light). */
+  forceBody?: boolean;
 }
 
 const BODY = ["#d94f4f", "#e08a1e", "#2f7fd1", "#3a9a5b", "#8a5bd0", "#d0577f", "#1f9aa3", "#c9a227"];
@@ -32,7 +34,7 @@ export function inkFor(seed: number, sil: string | null = null): Ink {
 }
 
 /** An ink with a chosen body colour (the colourways of the skinned MatchKey and Tile Game). */
-export const inkWith = (body: string): Ink => ({ body, accent: "#ffffff", dark: "#2b2f3a", glass: "#cfe6fb", sil: null });
+export const inkWith = (body: string): Ink => ({ body, accent: "#ffffff", dark: "#2b2f3a", glass: "#cfe6fb", sil: null, forceBody: true });
 
 const f = (k: Ink, c: string): string => k.sil ?? c;
 
@@ -167,9 +169,9 @@ function tree(k: Ink): ReactNode {
   return (
     <g>
       <rect x="44" y="50" width="12" height="36" rx="2" fill={f(k, "#7a4e2a")} />
-      <circle cx="50" cy="34" r="22" fill={f(k, "#2f8a4b")} />
-      <circle cx="32" cy="50" r="15" fill={f(k, "#3aa05b")} />
-      <circle cx="68" cy="50" r="15" fill={f(k, "#3aa05b")} />
+      <circle cx="50" cy="34" r="22" fill={f(k, k.forceBody ? k.body : "#2f8a4b")} />
+      <circle cx="32" cy="50" r="15" fill={f(k, k.forceBody ? k.body : "#3aa05b")} />
+      <circle cx="68" cy="50" r="15" fill={f(k, k.forceBody ? k.body : "#3aa05b")} />
       <circle cx="44" cy="30" r="6" fill={f(k, "#56b774")} opacity={k.sil ? 0 : 0.7} />
     </g>
   );
@@ -196,9 +198,9 @@ function trafficLight(k: Ink): ReactNode {
   return (
     <g>
       <rect x="47" y="60" width="6" height="28" fill={f(k, "#6b7280")} />
-      <rect x="35" y="10" width="30" height="52" rx="7" fill={f(k, k.dark)} />
+      <rect x="35" y="10" width="30" height="52" rx="7" fill={f(k, k.forceBody ? k.body : k.dark)} />
       {[0, 1, 2].map((i) => (
-        <circle key={i} cx="50" cy={24 + i * 13} r="5.6" fill={f(k, i === lit ? (colors[i] as string) : "#454c5c")} />
+        <circle key={i} cx="50" cy={24 + i * 13} r="5.6" fill={f(k, i === lit ? (colors[i] as string) : k.forceBody ? "#2b2f3a" : "#454c5c")} />
       ))}
     </g>
   );

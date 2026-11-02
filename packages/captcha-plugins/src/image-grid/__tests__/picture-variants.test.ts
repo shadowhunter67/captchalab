@@ -98,3 +98,14 @@ describe("verifier: an ambiguous or malformed picture grid is refused", () => {
     expect(verifyImageGridAnswer({ ...base, target: "spaceship" } as unknown as ImageGridChallenge, { selected: [] }).passed).toBe(false);
   });
 });
+
+describe("verifier: a grid must be one family and must have an answer", () => {
+  const base = gen(3, "photo-categories", "medium");
+  it("a picture target over shape cells, or a grid with no matching cell, is malformed (an empty selection cannot pass)", () => {
+    const shapes = base.cells.map((c) => ({ id: c.id, shape: "circle" as const }));
+    expect(verifyImageGridAnswer({ ...base, cells: shapes } as ImageGridChallenge, { selected: [] }).reason).toMatch(/malformed/);
+    const noAnswer = base.cells.map((c) => ({ ...c, shape: c.shape === base.target ? ("chair" as const) === base.target ? ("cat" as const) : ("chair" as const) : c.shape }));
+    expect(verifyImageGridAnswer({ ...base, cells: noAnswer } as ImageGridChallenge, { selected: [] }).passed).toBe(false);
+    expect(verifyImageGridAnswer({ ...base, target: "circle" } as ImageGridChallenge, { selected: [] }).reason).toMatch(/malformed/);
+  });
+});

@@ -14,8 +14,11 @@ const isRecord = (v: unknown): v is Record<string, unknown> => typeof v === "obj
 function challengeIsValid(c: unknown): c is ImageGridChallenge {
   if (!isRecord(c) || typeof c.id !== "string" || typeof c.target !== "string" || !Array.isArray(c.cells)) return false;
   if (!SUBJECTS.includes(c.target) || c.cells.length !== GRID_SIZE * GRID_SIZE) return false;
+  // One family per grid: a picture target goes with picture cells, a shape target with shape cells.
+  const picture = (ART_CATEGORIES as readonly string[]).includes(c.target);
   const ids = new Set<string>();
   for (const cell of c.cells as unknown[]) {
+    if (isRecord(cell) && typeof cell.shape === "string" && (ART_CATEGORIES as readonly string[]).includes(cell.shape) !== picture) return false;
     if (!isRecord(cell) || typeof cell.id !== "string" || typeof cell.shape !== "string" || ids.has(cell.id)) return false;
     if (!/^[a-z0-9-]{1,16}$/.test(cell.id) || !SUBJECTS.includes(cell.shape)) return false;
     if (cell.art !== undefined && !(typeof cell.art === "number" && Number.isInteger(cell.art) && cell.art >= 0 && cell.art <= 0xffffffff)) return false;
@@ -27,7 +30,8 @@ function challengeIsValid(c: unknown): c is ImageGridChallenge {
     }
     ids.add(cell.id);
   }
-  return true;
+  // A grid with no matching cell has an empty answer, which would let an empty selection pass: refuse it.
+  return (c.cells as { shape: unknown }[]).some((cell) => cell.shape === c.target);
 }
 
 /**
