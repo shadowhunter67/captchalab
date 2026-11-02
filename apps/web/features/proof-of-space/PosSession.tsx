@@ -99,7 +99,7 @@ export function PosSession({ challenge: initialChallenge, onNewChallenge }: { ch
   const pct = Math.min(100, Math.round((filled / challenge.bytes) * 100));
   return (
     <div className="space-y-6">
-      <section aria-labelledby="try-h" className="rounded-lg border border-line bg-panel p-4">
+      <section aria-labelledby="try-h" className="cl-widget rounded-lg border border-line bg-panel p-4">
         <h2 id="try-h" className="mb-1 text-base font-semibold">{t("Thử", "Try")}</h2>
         <p className="mb-2 text-sm text-muted" data-testid="pos-instruction">
           {challenge.kind === "sample"

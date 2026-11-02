@@ -1,6 +1,10 @@
 import type { VerificationResult } from "@captchalab/captcha-core";
 import { expectedSelection } from "./generator";
+import { ART_CATEGORIES } from "../shared/art";
 import { GRID_SHAPES, GRID_SIZE, type ImageGridAnswer, type ImageGridChallenge } from "./types";
+
+const SUBJECTS: readonly string[] = [...GRID_SHAPES, ...ART_CATEGORIES];
+const MAX_EXTRAS = 3;
 
 /** Upper bound on the submitted list (a valid selection has at most 9 ids; duplicates are tolerated). */
 const MAX_SELECTED_LIST = 64;
@@ -9,11 +13,18 @@ const isRecord = (v: unknown): v is Record<string, unknown> => typeof v === "obj
 
 function challengeIsValid(c: unknown): c is ImageGridChallenge {
   if (!isRecord(c) || typeof c.id !== "string" || typeof c.target !== "string" || !Array.isArray(c.cells)) return false;
-  if (!(GRID_SHAPES as readonly string[]).includes(c.target) || c.cells.length !== GRID_SIZE * GRID_SIZE) return false;
+  if (!SUBJECTS.includes(c.target) || c.cells.length !== GRID_SIZE * GRID_SIZE) return false;
   const ids = new Set<string>();
   for (const cell of c.cells as unknown[]) {
     if (!isRecord(cell) || typeof cell.id !== "string" || typeof cell.shape !== "string" || ids.has(cell.id)) return false;
-    if (!/^[a-z0-9-]{1,16}$/.test(cell.id) || !(GRID_SHAPES as readonly string[]).includes(cell.shape)) return false;
+    if (!/^[a-z0-9-]{1,16}$/.test(cell.id) || !SUBJECTS.includes(cell.shape)) return false;
+    if (cell.art !== undefined && !(typeof cell.art === "number" && Number.isInteger(cell.art) && cell.art >= 0 && cell.art <= 0xffffffff)) return false;
+    if (cell.extras !== undefined) {
+      const extras = cell.extras;
+      if (!Array.isArray(extras) || extras.length > MAX_EXTRAS || extras.some((e) => typeof e !== "string" || !(ART_CATEGORIES as readonly string[]).includes(e))) return false;
+      // A tile that is not the answer must not show the target even in the background: that would make two answers possible.
+      if (cell.shape !== c.target && (extras as string[]).includes(c.target)) return false;
+    }
     ids.add(cell.id);
   }
   return true;

@@ -53,7 +53,7 @@ export function TileGameSession({ challenge: initialChallenge, onNewChallenge }:
   const total = challenge.tiles.length;
   return (
     <div className="space-y-6">
-      <section aria-labelledby="try-h" className="rounded-lg border border-line bg-panel p-4">
+      <section aria-labelledby="try-h" className="cl-widget rounded-lg border border-line bg-panel p-4">
         <h2 id="try-h" className="mb-1 text-base font-semibold">{t("Thử", "Try")}</h2>
         <p className="mb-4 text-sm text-muted" data-testid="tile-instruction">{instructionText(challenge, t)}</p>
         <div ref={boardRef} data-testid="tile-game" className="space-y-4">

@@ -92,7 +92,7 @@ export function CheckboxSession({ challenge: initialChallenge, onNewChallenge, o
 
   return (
     <div className="space-y-6">
-      <section aria-labelledby="try-h" className="rounded-lg border border-line bg-panel p-4">
+      <section aria-labelledby="try-h" className="cl-widget rounded-lg border border-line bg-panel p-4">
         <h2 id="try-h" className="mb-1 text-base font-semibold">
           {t("Thử", "Try")}
         </h2>

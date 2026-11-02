@@ -1,4 +1,5 @@
 import type { ChallengeConfig, BaseCaptchaFeatures, InputModality } from "@captchalab/captcha-core";
+import type { ArtCategory } from "../shared/art";
 
 export const IMAGE_GRID_ID = "image-grid" as const;
 export const GRID_SIZE = 3;
@@ -11,15 +12,23 @@ export const GRID_FAMILIES: Readonly<Record<string, readonly GridShape[]>> = {
   similar: ["circle", "oval", "square", "rounded"],
 };
 
+/** What a cell shows: a plain shape (the shape variants) or an illustrated category (the picture variants, v1.1). */
+export type GridSubject = GridShape | ArtCategory;
+
 export interface GridCell {
   id: string;
-  shape: GridShape;
+  /** The subject of the cell: for a picture it is the MAIN object. Legacy name, kept so older challenges still parse. */
+  shape: GridSubject;
+  /** Seed of the illustration (picture variants). The same seed draws the same picture. */
+  art?: number;
+  /** Small background objects of a scene tile. They never include the target unless the main object is the target. */
+  extras?: readonly ArtCategory[];
 }
 
-/** A 3x3 grid of drawn shapes; the user must select every cell that shows `target`. */
+/** A 3x3 grid of drawn shapes or pictures; the user must select every cell that shows `target`. */
 export interface ImageGridChallenge {
   id: string;
-  target: GridShape;
+  target: GridSubject;
   cells: readonly GridCell[];
   /** How it was generated (variant, difficulty, parameters). Absent on hand-built challenges. */
   config?: ChallengeConfig;

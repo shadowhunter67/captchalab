@@ -23,6 +23,8 @@ const VARIANT_NAMES: Record<string, [vi: string, en: string]> = {
   "text:noisy": ["Nhiễu", "Noisy"],
   "image-grid:basic-shapes": ["Hình cơ bản", "Basic shapes"],
   "image-grid:similar-shapes": ["Hình giống nhau", "Similar shapes"],
+  "image-grid:photo-categories": ["Ảnh theo loại", "Picture categories"],
+  "image-grid:scene-objects": ["Cảnh có vật thể", "Scene objects"],
   "shape-matching:exact": ["Hình y hệt", "Exact shape"],
   "shape-matching:pattern": ["Ghép theo cấu trúc", "Pattern match"],
   "math-logic:arithmetic": ["Tính toán", "Arithmetic"],
@@ -57,6 +59,8 @@ const VARIANT_DESCRIPTIONS: Record<string, [vi: string, en: string]> = {
   "text:noisy": ["Xoay nhẹ, nhiều đường ngẫu nhiên cắt qua chữ.", "Mild rotation with many random lines crossing the text."],
   "image-grid:basic-shapes": ["Bốn hình khác nhau rõ rệt; độ khó tăng số ô khớp.", "Four clearly different shapes; difficulty raises how many cells match."],
   "image-grid:similar-shapes": ["Các cặp hình trông giống nhau (tròn và bầu dục, vuông và vuông bo góc) làm nhiễu.", "Pairs that look alike (circle and oval, square and rounded square) act as distractors."],
+  "image-grid:photo-categories": ["Chọn mọi ảnh có vật được nêu (xe đạp, xe buýt, cái cây...); mức khó thêm các vật trông giống.", "Pick every picture of the named object (a bicycle, a bus, a tree...); harder levels add look-alike objects."],
+  "image-grid:scene-objects": ["Mỗi ô là một cảnh nhỏ; chọn mọi cảnh có vật chính là vật được nêu.", "Each tile is a small scene; pick every scene whose main object is the named one."],
   "shape-matching:exact": ["Mỗi hình nguồn có một bản sao giống hệt trong các đích; độ khó thêm cặp và hình na ná nhau.", "Each source has an identical twin among the targets; difficulty adds pairs and look-alikes."],
   "shape-matching:pattern": ["Các đích là cùng hình nhưng bị xoay, chỉ có viền hoặc đổi cỡ: ghép theo cấu trúc, không theo vẻ ngoài.", "Targets show the same shape turned, outlined or resized: match by structure, not by looks."],
   "math-logic:arithmetic": ["Tính một tổng, hiệu hoặc tích; mức khó nhất có hai bước.", "Work out a sum, difference or product; the hardest level has two steps."],
@@ -124,6 +128,8 @@ const NOISE_TEXT: Record<string, [vi: string, en: string]> = {
 const FAMILY_TEXT: Record<string, [vi: string, en: string]> = {
   basic: ["hình tròn, vuông, tam giác, ngôi sao", "circle, square, triangle, star"],
   similar: ["hình tròn, bầu dục, vuông, vuông bo góc", "circle, oval, square, rounded square"],
+  photos: ["tranh minh hoạ từng vật", "one illustrated object per tile"],
+  scenes: ["cảnh nhỏ có vật chính và vật nền", "small scenes with a main and background objects"],
 };
 
 /** Parameter rows for the "Challenge configuration" block. Unknown keys fall back to `key: value`. */
@@ -154,6 +160,7 @@ export function parameterRows(captcha: CaptchaKey, p: Readonly<Record<string, Pa
       return [
         { id: "targets", label: t("Số ô khớp", "Matching cells"), value: `${num(p.targetMin)}–${num(p.targetMax)} / 9` },
         { id: "family", label: t("Bộ hình", "Shape set"), value: fam ? t(...fam) : String(p.family) },
+        ...(p.lookalike === "none" || p.lookalike === undefined ? [] : [{ id: "lookalike", label: t("Vật trông giống", "Look-alikes"), value: p.lookalike === "group" ? t("phần lớn ô nhiễu cùng nhóm", "most distractors from the same group") : t("một phần ô nhiễu cùng nhóm", "some distractors from the same group") }]),
       ];
     }
     case "shape-matching":

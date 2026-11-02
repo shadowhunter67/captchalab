@@ -2,7 +2,9 @@
 
 import { useRef, useState, type KeyboardEvent, type PointerEvent } from "react";
 import { createEventRecorder, type FeatureSet, type InteractionSession, type VerificationResult } from "@captchalab/captcha-core";
-import { GRID_SIZE, makeCellTarget, registry, type ImageGridChallenge, type ImageGridFeatures } from "@captchalab/captcha-plugins";
+import Link from "next/link";
+import { GRID_SIZE, isArtCategory, makeCellTarget, registry, type ImageGridChallenge, type ImageGridFeatures } from "@captchalab/captcha-plugins";
+import { artLabel } from "@/lib/art/names";
 import { useT } from "@/lib/i18n";
 import { toPointerSample, toRecorderEvent, type PointerKind } from "@/lib/pointer-adapter";
 import { ImageGridInspect } from "./ImageGridInspect";
@@ -44,8 +46,12 @@ interface Props {
  */
 export function ImageGridSession({ challenge: initialChallenge, onNewChallenge, onResult, onReset, showInspect = true }: Props) {
   const t = useT();
-  const shapeName = (s: string): string => t(SHAPE_VI[s] ?? s, s);
+  const shapeName = (s: string): string => (isArtCategory(s) ? artLabel(s, t) : t(SHAPE_VI[s] ?? s, s));
   const [challenge] = useState(initialChallenge);
+  /** Picture variants: tiles are illustrations, so their accessible name is only "Image N of 9" (the answer is not in the name). */
+  const pictures = isArtCategory(challenge.target);
+  const targetName = shapeName(challenge.target);
+  const article = /^[aeiou]/i.test(artLabel(isArtCategory(challenge.target) ? challenge.target : "cat", (_vi, en) => en)) ? "an" : "a";
   const plugin = registry.get("image-grid");
   const gridRef = useRef<HTMLDivElement>(null);
   const cellRefs = useRef<(HTMLButtonElement | null)[]>([]);
@@ -98,14 +104,14 @@ export function ImageGridSession({ challenge: initialChallenge, onNewChallenge, 
 
   return (
     <div className="space-y-6">
-      <section aria-labelledby="try-h" className="rounded-lg border border-line bg-panel p-4">
+      <section aria-labelledby="try-h" className="cl-widget rounded-lg border border-line bg-panel p-4">
         <h2 id="try-h" className="mb-1 text-base font-semibold">
           {t("Thử", "Try")}
         </h2>
         <p className="mb-4 text-sm text-muted" data-testid="grid-instruction">
-          {t("Chọn mọi ảnh có ", "Select every image that shows a ")}
-          <strong>{shapeName(challenge.target)}</strong>
-          {t(", rồi bấm Xác minh.", ", then press Verify.")}
+          {pictures ? t("Chọn tất cả ảnh có ", `Select all images with ${article} `) : t("Chọn mọi ảnh có ", "Select every image that shows a ")}
+          <strong>{targetName}</strong>
+          {pictures ? t(".", ".") : t(", rồi bấm Xác minh.", ", then press Verify.")}
         </p>
         <div
           ref={gridRef}
@@ -124,7 +130,11 @@ export function ImageGridSession({ challenge: initialChallenge, onNewChallenge, 
                 }}
                 type="button"
                 aria-pressed={on}
-                aria-label={t(`Ảnh ${i + 1} trên ${challenge.cells.length}: ${shapeName(cell.shape)}`, `Image ${i + 1} of ${challenge.cells.length}: ${cell.shape}`)}
+                aria-label={
+                  pictures
+                    ? t(`Ảnh ${i + 1} trên ${challenge.cells.length}`, `Image ${i + 1} of ${challenge.cells.length}`)
+                    : t(`Ảnh ${i + 1} trên ${challenge.cells.length}: ${shapeName(cell.shape)}`, `Image ${i + 1} of ${challenge.cells.length}: ${cell.shape}`)
+                }
                 data-testid={`cell-${cell.id}`}
                 onPointerDown={(e) => recordPointer("pointerdown", e, cell.id)}
                 onPointerUp={(e) => recordPointer("pointerup", e, cell.id)}
@@ -136,11 +146,16 @@ export function ImageGridSession({ challenge: initialChallenge, onNewChallenge, 
                   setError(null);
                   onReset?.();
                 }}
-                className={`h-20 w-20 touch-manipulation rounded-md border-2 bg-bg p-2 sm:h-24 sm:w-24 ${
+                className={`relative touch-manipulation overflow-hidden rounded-md border-2 bg-bg ${pictures ? "h-[5.5rem] w-[5.5rem] p-0 sm:h-28 sm:w-28" : "h-20 w-20 p-2 sm:h-24 sm:w-24"} ${
                   on ? "border-accent ring-2 ring-accent" : "border-line hover:bg-track"
                 }`}
               >
-                <ImageGridTile shape={cell.shape} />
+                <ImageGridTile cell={cell} />
+                {pictures && on && (
+                  <span aria-hidden="true" className="absolute right-1 top-1 grid h-6 w-6 place-items-center rounded-full bg-accent text-sm font-bold text-bg">
+                    ✓
+                  </span>
+                )}
               </button>
             );
           })}
@@ -154,9 +169,22 @@ export function ImageGridSession({ challenge: initialChallenge, onNewChallenge, 
           </button>
         </div>
         <p className="mt-3 text-xs text-muted">
-          {t(
+          {pictures
+            ? t(
+                "Khả năng tiếp cận: mỗi ảnh là một nút bật/tắt (Tab, mũi tên, Space hoặc Enter), nhưng tên nút chỉ là số thứ tự và ảnh không có chú thích: lời giải không được nói ra trong tên nút, nên người không nhìn được không làm được thử thách này. Hãy dùng thử thách thay thế bằng âm thanh. Đây chỉ là bản minh hoạ, không phải CAPTCHA dùng cho sản phẩm thật.",
+                "Accessibility: every image is a toggle button (Tab, arrow keys, Space or Enter), but its name is only its number and the pictures have no captions: the answer is not spoken in the name, so people who cannot see the pictures cannot do this challenge. Use the audio challenge instead. It is a demonstration, not a production CAPTCHA.",
+              )
+            : t(
             "Khả năng tiếp cận: mỗi ảnh là một nút bật/tắt, dùng phím Tab để tới, phím mũi tên để di chuyển giữa các ảnh, và phím Space hoặc Enter để bật/tắt. Nhãn của mỗi nút nêu tên hình nên không cần nhìn vẫn làm được; điều đó cũng khiến bản demo này rất dễ với phần mềm. Đây chỉ là bản minh hoạ, không phải CAPTCHA dùng cho sản phẩm thật.",
             "Accessibility: every image is a toggle button reachable with Tab, arrow keys move between them, and Space or Enter toggles. Each button's label names its shape, so the task does not need sight; that also makes this demo trivial for software. It is a demonstration, not a production CAPTCHA.",
+          )}
+          {pictures && (
+            <>
+              {" "}
+              <Link href="/playground/audio" data-testid="grid-alternative" className="underline">
+                {t("Thử thách thay thế (âm thanh)", "Alternative challenge (audio)")}
+              </Link>
+            </>
           )}
         </p>
       </section>

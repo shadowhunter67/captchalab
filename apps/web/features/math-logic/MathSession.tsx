@@ -67,7 +67,7 @@ export function MathSession({ challenge: initialChallenge, onNewChallenge, onRes
   const box = "rounded-md border border-line bg-bg px-4 py-3 text-center font-mono text-2xl tabular-nums";
   return (
     <div className="space-y-6">
-      <section aria-labelledby="try-h" className="rounded-lg border border-line bg-panel p-4">
+      <section aria-labelledby="try-h" className="cl-widget rounded-lg border border-line bg-panel p-4">
         <h2 id="try-h" className="mb-1 text-base font-semibold">
           {t("Thử", "Try")}
         </h2>

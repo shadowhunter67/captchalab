@@ -119,6 +119,71 @@ select option {
   scrollbar-color: #2b3d8a #0a1230;
 }
 
+/*
+ * Challenge widget skin (v1.1). The "Try" card of every challenge is drawn like a real CAPTCHA widget: a light, calm
+ * card with a prompt and one primary action. It only redefines the colour tokens inside the card, so every component
+ * that reads them (shapes, tiles, buttons, inputs, status text) follows without changes. Results, Inspect and the other
+ * lab panels stay outside the card, in the dark console theme: the challenge looks like a challenge, the lab like a lab.
+ */
+.cl-widget {
+  --bg: #ffffff;
+  --fg: #1c2330;
+  --muted: #566275;
+  --line: #c9d2e0;
+  --panel: #f4f6fa;
+  --accent: #2563eb;
+  --track: #e5eaf3;
+  --ok: #0f7a55;
+  --bad: #b42318;
+  --glow: transparent;
+  color-scheme: light;
+  background-color: #ffffff;
+  background-image: none;
+  color: var(--fg);
+  border-color: #d3dae6;
+  border-radius: 14px;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.08), 0 14px 30px -16px rgba(15, 23, 42, 0.55);
+  backdrop-filter: none;
+}
+.cl-widget .bg-panel,
+.cl-widget .bg-track {
+  background-image: none;
+  box-shadow: none;
+  backdrop-filter: none;
+}
+.cl-widget .bg-accent {
+  background-image: none;
+  background-color: #2563eb;
+  box-shadow: none;
+}
+.cl-widget .border-accent {
+  box-shadow: 0 0 0 2px #2563eb;
+}
+.cl-widget select,
+.cl-widget input[type="text"],
+.cl-widget input:not([type]),
+.cl-widget input[inputmode],
+.cl-widget textarea {
+  background-color: #ffffff;
+  color: var(--fg);
+  border-color: #b8c3d6;
+}
+.cl-widget > h2 {
+  font-size: 0.7rem;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--muted);
+  font-weight: 600;
+}
+.cl-widget > h2 + p {
+  font-size: 1.02rem;
+  font-weight: 600;
+  color: var(--fg);
+}
+.cl-widget :focus-visible {
+  outline-color: #2563eb;
+}
+
 @media (prefers-reduced-motion: reduce) {
   * {
     transition: none !important;
