@@ -14,6 +14,7 @@ export const difficultyLabel = (d: CaptchaDifficulty, t: Translate): string =>
 const VARIANT_NAMES: Record<string, [vi: string, en: string]> = {
   "slider:classic": ["Cổ điển", "Classic"],
   "slider:precision": ["Chính xác", "Precision"],
+  "slider:puzzle": ["Ghép mảnh", "Puzzle piece"],
   "checkbox:basic": ["Cơ bản", "Basic"],
   "drag-drop:shape-match": ["Ghép hình", "Shape match"],
   "rotation:classic": ["Cổ điển", "Classic"],
@@ -50,6 +51,7 @@ const VARIANT_NAMES: Record<string, [vi: string, en: string]> = {
 const VARIANT_DESCRIPTIONS: Record<string, [vi: string, en: string]> = {
   "slider:classic": ["Thanh trượt quen thuộc; độ khó thu hẹp vùng thả được chấp nhận.", "The usual slider; difficulty narrows the accepted release window."],
   "slider:precision": ["Vùng đích hẹp ngay từ đầu; độ khó làm nó hẹp hơn nữa.", "A narrow target from the start; difficulty makes it narrower still."],
+  "slider:puzzle": ["Một ảnh có chỗ khuyết: kéo thanh trượt cho mảnh ghép khớp vào. Độ khó thu hẹp vùng chấp nhận.", "A picture with a gap: slide the handle until the piece fits. Difficulty narrows the accepted window."],
   "checkbox:basic": ["Một ô đánh dấu gốc. Chỉ có một mức: độ khó không áp dụng cho ô đánh dấu.", "A single native checkbox. One level only: difficulty does not apply to a checkbox."],
   "drag-drop:shape-match": ["Ba hình vào đúng vùng; độ khó làm hình và vùng thả nhỏ lại.", "Three shapes onto their matching areas; difficulty shrinks the shapes and the drop areas."],
   "rotation:classic": ["Góc bắt đầu bất kỳ; độ khó thu hẹp góc được chấp nhận.", "Any starting angle; difficulty narrows the accepted angle."],

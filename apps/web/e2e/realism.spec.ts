@@ -61,3 +61,36 @@ test("Image Grid pictures: the same seed draws the same grid; New challenge repl
   await expect(page.getByTestId("cell-c1")).toHaveAttribute("aria-pressed", "false");
   expect(await page.getByTestId("image-grid").innerHTML()).not.toBe(first);
 });
+
+// ------------------------------------------------------------------------------------------------------- Slider
+test("Slider puzzle: the piece follows the handle, fits the gap at the target, and Passed", async ({ page }) => {
+  const SEED = 7;
+  const c = registry.get("slider").generate({ rng: createRng(SEED), variantId: "puzzle", difficulty: "medium" });
+  await page.goto(`/playground/slider?seed=${SEED}&variant=puzzle&difficulty=medium`);
+  await expect(page.getByTestId("puzzle-picture")).toBeVisible();
+  await expect(page.getByTestId("slider-target")).toHaveCount(0); // the gap is the target; no marker on the bar
+  const piece = page.getByTestId("puzzle-piece");
+  const before = await piece.getAttribute("transform");
+  const handle = page.getByTestId("slider-handle");
+  await handle.focus();
+  await page.keyboard.press("Home");
+  for (let i = 0; i < Math.round(c.target * 100); i++) await page.keyboard.press("ArrowRight");
+  expect(await piece.getAttribute("transform")).not.toBe(before); // the piece moved with the handle
+  await expect(piece).toHaveAttribute("transform", /translate\((-?0(\.\d+)?|-?\d\.\d+e-\d+) 0\)/); // and sits on the gap (shift ~ 0)
+  await page.keyboard.press("Enter");
+  await expect(page.getByTestId("result")).toContainText("Passed");
+  await expectValidIds(page);
+});
+
+test("Slider puzzle: released far from the gap is Not passed; Try again resets the piece; the accessible name does not say where the gap is", async ({ page }) => {
+  await page.goto("/playground/slider?seed=7&variant=puzzle&difficulty=medium");
+  const handle = page.getByTestId("slider-handle");
+  await expect(handle).toHaveAttribute("aria-label", /Puzzle slider handle/);
+  await handle.focus();
+  await page.keyboard.press("End");
+  await page.keyboard.press("Enter");
+  await expect(page.getByTestId("result")).toContainText("Not passed");
+  await page.getByRole("button", { name: "Try again (same challenge)" }).click();
+  await expect(page.getByTestId("result")).toHaveCount(0);
+  await expect(handle).toHaveAttribute("aria-valuenow", "0");
+});

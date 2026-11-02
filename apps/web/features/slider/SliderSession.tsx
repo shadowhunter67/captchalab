@@ -120,16 +120,22 @@ export function SliderSession({ challenge: initialChallenge, onNewChallenge, onR
           {t("Thử", "Try")}
         </h2>
         <p className="mb-4 text-sm text-muted">
-          {t(
-            "Kéo tay nắm cho khớp với khung nét đứt rồi thả ra. Bàn phím: phím mũi tên di chuyển tay nắm, Enter để gửi.",
-            "Drag the handle so it lands on the dashed outline, then release. Keyboard: Arrow keys move the handle, Enter submits.",
-          )}
+          {challenge.puzzle
+            ? t(
+                "Kéo thanh trượt để mảnh ghép khớp vào chỗ khuyết trên ảnh rồi thả ra. Bàn phím: phím mũi tên di chuyển mảnh ghép, Enter để gửi.",
+                "Slide the handle until the piece fits the gap in the picture, then release. Keyboard: Arrow keys move the piece, Enter submits.",
+              )
+            : t(
+                "Kéo tay nắm cho khớp với khung nét đứt rồi thả ra. Bàn phím: phím mũi tên di chuyển tay nắm, Enter để gửi.",
+                "Drag the handle so it lands on the dashed outline, then release. Keyboard: Arrow keys move the handle, Enter submits.",
+              )}
         </p>
         <SliderSurface
           controller={controller}
           target={challenge.target}
           tolerance={challenge.tolerance}
           phase={phase}
+          puzzle={challenge.puzzle}
           applyPositionRef={applyPositionRef}
         />
         {phase === "disabled" && (

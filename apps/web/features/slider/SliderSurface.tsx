@@ -8,7 +8,8 @@ import {
   type MutableRefObject,
   type PointerEvent as ReactPointerEvent,
 } from "react";
-import { positionToTravelPx, type SliderLayout } from "@captchalab/captcha-plugins";
+import { positionToTravelPx, type SliderLayout, type SliderPuzzle } from "@captchalab/captcha-plugins";
+import { PuzzlePicture, pieceShift } from "@/lib/art/PuzzlePicture";
 import { useT } from "@/lib/i18n";
 import { toPointerSample, type SurfaceOrigin } from "@/lib/pointer-adapter";
 import type { SliderController, SliderPhase } from "./slider-controller";
@@ -25,6 +26,8 @@ interface Props {
   /** Normalized accepted release distance; draws the width of the accepted window. */
   tolerance?: number;
   phase: SliderPhase;
+  /** The puzzle variant's picture: a scene with a gap and a piece that follows the handle. Presentation only. */
+  puzzle?: SliderPuzzle | undefined;
   /** Set by the surface; the controller calls it (no React state) to move the handle. */
   applyPositionRef: MutableRefObject<(position: number) => void>;
 }
@@ -38,12 +41,13 @@ interface Props {
  * measurement. One handler set on the track; events captured by the handle bubble here, so each
  * event is seen (and recorded) exactly once.
  */
-export function SliderSurface({ controller, target, tolerance, phase, applyPositionRef }: Props) {
+export function SliderSurface({ controller, target, tolerance, phase, puzzle, applyPositionRef }: Props) {
   const t = useT();
   const trackRef = useRef<HTMLDivElement>(null);
   const handleRef = useRef<HTMLDivElement>(null);
   const originRef = useRef<SurfaceOrigin>({ left: 0, top: 0 });
   const layoutRef = useRef<SliderLayout | null>(null);
+  const pieceRef = useRef<SVGGElement | null>(null);
 
   useLayoutEffect(() => {
     const track = trackRef.current;
@@ -70,6 +74,7 @@ export function SliderSurface({ controller, target, tolerance, phase, applyPosit
       if (!layout) return;
       handle.style.transform = `translate3d(${positionToTravelPx(position, layout)}px,0,0)`;
       handle.setAttribute("aria-valuenow", String(Math.round(position * 100)));
+      pieceRef.current?.setAttribute("transform", `translate(${pieceShift(position, target)} 0)`);
     };
 
     measure();
@@ -84,7 +89,7 @@ export function SliderSurface({ controller, target, tolerance, phase, applyPosit
       window.removeEventListener("resize", refreshOrigin);
       applyPositionRef.current = () => {};
     };
-  }, [controller, applyPositionRef]);
+  }, [controller, applyPositionRef, target]);
 
   // Unmount safety: never leave a drag active.
   useEffect(() => {
@@ -159,7 +164,7 @@ export function SliderSurface({ controller, target, tolerance, phase, applyPosit
   const disabled = phase === "disabled";
   const locked = phase === "submitted";
 
-  return (
+  const track = (
     <div
       ref={trackRef}
       data-testid="slider-track"
@@ -175,8 +180,13 @@ export function SliderSurface({ controller, target, tolerance, phase, applyPosit
       className="relative h-14 select-none overflow-hidden rounded-lg bg-track ring-1 ring-line"
       style={{ height: TRACK_HEIGHT_PX }}
     >
-      {/* Target marker: a dashed ghost of the handle at the target position (size-independent). */}
-      <div
+      {puzzle && (
+        <span aria-hidden="true" className="pointer-events-none absolute inset-0 grid place-items-center text-sm text-muted">
+          {t("Kéo để ghép mảnh vào chỗ khuyết", "Slide to fit the piece into the gap")}
+        </span>
+      )}
+      {/* Target marker: a dashed ghost of the handle at the target position (size-independent). Not shown for the puzzle: its gap is the target. */}
+      {!puzzle && <div
         aria-hidden="true"
         data-testid="slider-target"
         className="absolute top-0 h-full rounded-md border-2 border-dashed border-accent"
@@ -184,8 +194,8 @@ export function SliderSurface({ controller, target, tolerance, phase, applyPosit
           width: HANDLE_WIDTH_PX,
           left: `calc((100% - ${HANDLE_WIDTH_PX}px) * ${target})`,
         }}
-      />
-      {tolerance !== undefined && (
+      />}
+      {tolerance !== undefined && !puzzle && (
         <div
           aria-hidden="true"
           data-testid="slider-tolerance"
@@ -201,10 +211,11 @@ export function SliderSurface({ controller, target, tolerance, phase, applyPosit
         data-testid="slider-handle"
         role="slider"
         tabIndex={disabled ? -1 : 0}
-        aria-label={t(
-          "Tay nắm thanh trượt CAPTCHA. Kéo tới khung nét đứt, hoặc dùng phím mũi tên rồi nhấn Enter.",
-          "Slider CAPTCHA handle. Drag to the dashed outline, or use arrow keys and press Enter.",
-        )}
+        aria-label={
+          puzzle
+            ? t("Tay nắm ghép hình. Kéo để mảnh ghép khớp vào chỗ khuyết, hoặc dùng phím mũi tên rồi nhấn Enter.", "Puzzle slider handle. Drag so the piece fits the gap, or use arrow keys and press Enter.")
+            : t("Tay nắm thanh trượt CAPTCHA. Kéo tới khung nét đứt, hoặc dùng phím mũi tên rồi nhấn Enter.", "Slider CAPTCHA handle. Drag to the dashed outline, or use arrow keys and press Enter.")
+        }
         aria-orientation="horizontal"
         aria-valuemin={0}
         aria-valuemax={100}
@@ -225,6 +236,13 @@ export function SliderSurface({ controller, target, tolerance, phase, applyPosit
           ⇄
         </span>
       </div>
+    </div>
+  );
+  if (!puzzle) return track;
+  return (
+    <div className="max-w-[26rem] space-y-2">
+      <PuzzlePicture puzzle={puzzle} target={target} pieceRef={pieceRef} className="w-full rounded-lg ring-1 ring-line" />
+      {track}
     </div>
   );
 }

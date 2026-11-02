@@ -1,4 +1,5 @@
 import { assertRange, resolveVariant, type GenerateContext } from "@captchalab/captcha-core";
+import { ART_CATEGORIES, ART_SCENES_FOR, type ArtCategory } from "../shared/art";
 import type { SliderChallenge } from "./types";
 import { SLIDER_VARIANTS } from "./variants";
 
@@ -18,5 +19,10 @@ export function generateSliderChallenge({ rng, variantId, difficulty }: Generate
   const id = `slider-${Math.floor(rng() * 0x100000000)
     .toString(16)
     .padStart(8, "0")}`;
-  return { id, target, tolerance: config.tolerance, config: challengeConfig };
+  if (challengeConfig.variantId !== "puzzle") return { id, target, tolerance: config.tolerance, config: challengeConfig };
+  // The puzzle picture draws on the rng AFTER the fields above, so the classic and precision variants are unchanged.
+  const category = ART_CATEGORIES[Math.floor(rng() * ART_CATEGORIES.length)] as ArtCategory;
+  const scenes = ART_SCENES_FOR[category];
+  const puzzle = { category, seed: Math.floor(rng() * 1_000_000), scene: scenes[Math.floor(rng() * scenes.length)]!, y: round4(0.22 + rng() * 0.38) };
+  return { id, target, tolerance: config.tolerance, puzzle, config: challengeConfig };
 }

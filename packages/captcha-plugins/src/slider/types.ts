@@ -1,4 +1,5 @@
 import type { ChallengeConfig, BaseCaptchaFeatures, MotionFeatures } from "@captchalab/captcha-core";
+import type { ArtCategory, ArtScene } from "../shared/art";
 
 export const SLIDER_ID = "slider" as const;
 
@@ -31,8 +32,23 @@ export interface SliderChallenge {
   target: number;
   /** Accepted |answer.position - target|, normalized (same units as target). */
   tolerance: number;
+  /**
+   * The picture of the puzzle variant: a drawn scene with a gap at the target and a piece that follows the handle. Pure
+   * presentation: correctness is still |position - target| <= tolerance, so the gap can never disagree with the verifier.
+   */
+  puzzle?: SliderPuzzle;
   /** How it was generated (variant, difficulty, parameters). Absent on hand-built challenges. */
   config?: ChallengeConfig;
+}
+
+export interface SliderPuzzle {
+  /** The main object drawn near the gap. */
+  category: ArtCategory;
+  /** Seed of the picture (the same seed draws the same picture). */
+  seed: number;
+  scene: ArtScene;
+  /** Vertical place of the gap and the piece, fraction of the picture height (0..1). */
+  y: number;
 }
 
 /** Final state of the solution only. The trajectory lives in the InteractionSession. */

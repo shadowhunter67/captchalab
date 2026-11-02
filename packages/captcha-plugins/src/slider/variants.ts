@@ -20,6 +20,12 @@ export const SLIDER_VARIANTS: CaptchaVariantSet<SliderVariantConfig> = {
       description: "A narrow target from the start; difficulty makes it narrower still.",
       difficulties: { easy: { tolerance: 0.015 }, medium: { tolerance: 0.012 }, hard: { tolerance: 0.01 } },
     },
+    {
+      id: "puzzle",
+      name: "Puzzle piece",
+      description: "A picture with a gap: slide the handle until the piece fits. Difficulty narrows the accepted window.",
+      difficulties: { easy: { tolerance: 0.04 }, medium: { tolerance: 0.025 }, hard: { tolerance: 0.015 } },
+    },
   ],
   defaultSelection: { variantId: "classic", difficulty: "medium" },
 };
