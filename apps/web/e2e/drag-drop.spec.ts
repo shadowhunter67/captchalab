@@ -6,7 +6,7 @@ import { watchPrivacy } from "./privacy";
 import { scrubTo, scrubToEdge } from "./replay";
 
 const SEED = 4242;
-const URL = `/playground/drag-drop?seed=${SEED}`;
+const URL = `/playground/drag-drop?seed=${SEED}&variant=shape-match`;
 const challenge = registry.get("drag-drop").generate({ rng: createRng(SEED) });
 const item = (id: string) => challenge.items.find((i) => i.id === id)!;
 const targetOf = (itemId: string) => challenge.targets.find((t) => t.acceptsItemId === itemId)!;

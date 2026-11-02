@@ -6,6 +6,7 @@ import { POS_CANCEL_TARGET, POS_START_TARGET, registry, type PosChallenge, type 
 import { ComputationInspect } from "@/components/inspect/ComputationInspect";
 import { useT } from "@/lib/i18n";
 import { useCellRecorder } from "@/lib/useCellRecorder";
+import { StatusBadge } from "@/components/StatusBadge";
 import { createPosRunner, type PosDone, type PosRunner } from "./pos-runner";
 import { formatBytes, posMetrics, posStatusText, type PosStatus } from "./pos-view-data";
 
@@ -101,16 +102,11 @@ export function PosSession({ challenge: initialChallenge, onNewChallenge }: { ch
     <div className="space-y-6">
       <section aria-labelledby="try-h" className="cl-widget rounded-lg border border-line bg-panel p-4">
         <h2 id="try-h" className="mb-1 text-base font-semibold">{t("Thử", "Try")}</h2>
-        <p className="mb-2 text-sm text-muted" data-testid="pos-instruction">
-          {challenge.kind === "sample"
-            ? t(
-                `Trình duyệt sẽ điền một vùng nhớ ${formatBytes(challenge.bytes)} theo cách xác định rồi báo lại giá trị của ${challenge.sampleCount} byte do thử thách chọn. Chỉ chạy khi bạn bấm Bắt đầu.`,
-                `The browser fills a ${formatBytes(challenge.bytes)} memory region deterministically and reports ${challenge.sampleCount} bytes the challenge picks. It only runs when you press Start.`,
-              )
-            : t(
-                `Trình duyệt sẽ điền một vùng nhớ ${formatBytes(challenge.bytes)} theo cách xác định rồi báo lại mã kiểm tra của toàn bộ vùng. Chỉ chạy khi bạn bấm Bắt đầu.`,
-                `The browser fills a ${formatBytes(challenge.bytes)} memory region deterministically and reports a checksum of all of it. It only runs when you press Start.`,
-              )}
+        <p className="mb-3 text-sm text-muted">
+          {t(
+            "Trình duyệt của bạn sẽ chuẩn bị một vùng nhớ nhỏ để hoàn tất phép kiểm tra. Chỉ chạy khi bạn bấm Bắt đầu.",
+            "Your browser will prepare a small block of memory to complete the check. It only runs when you press Start.",
+          )}
         </p>
         <div ref={boardRef} role="group" aria-label={t("Điều khiển phép tính", "Computation controls")} className="flex flex-wrap gap-3">
           <button type="button" data-testid="pos-start" disabled={running || status === "done"} onClick={onStart} {...handlers(POS_START_TARGET)} className="rounded-md bg-accent px-3 py-1.5 text-sm font-medium text-bg hover:opacity-90 disabled:opacity-50">
@@ -124,15 +120,31 @@ export function PosSession({ challenge: initialChallenge, onNewChallenge }: { ch
           </button>
         </div>
         <div className="mt-4 space-y-2 text-sm">
-          <p role="status" aria-live="polite" data-testid="pos-status" data-state={status}>{posStatusText(status, t)}</p>
-          <p data-testid="pos-progress" aria-live="polite" aria-atomic="true" className="font-mono">
-            {t("Đã điền: ", "Filled: ")}{formatBytes(filled)} / {formatBytes(challenge.bytes)}
+          <p role="status" aria-live="polite" data-testid="pos-status" data-state={status}>
+            <StatusBadge state={status === "running" ? "working" : status === "done" ? "done" : "idle"}>{posStatusText(status, t)}</StatusBadge>
           </p>
           {running && (
             <div role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={pct} aria-label={t("Tiến độ điền bộ nhớ", "Memory fill progress")} className="h-2 w-full overflow-hidden rounded bg-track">
               <div className="h-full rounded bg-accent" style={{ width: `${pct}%` }} />
             </div>
           )}
+          <details data-testid="pos-details" className="text-xs text-muted">
+            <summary className="cursor-pointer">{t("Chi tiết kỹ thuật", "Technical details")}</summary>
+            <p className="mt-2" data-testid="pos-instruction">
+              {challenge.kind === "sample"
+                ? t(
+                    `Trình duyệt điền một vùng nhớ ${formatBytes(challenge.bytes)} theo cách xác định rồi báo lại giá trị của ${challenge.sampleCount} byte do thử thách chọn.`,
+                    `The browser fills a ${formatBytes(challenge.bytes)} memory region deterministically and reports ${challenge.sampleCount} bytes the challenge picks.`,
+                  )
+                : t(
+                    `Trình duyệt điền một vùng nhớ ${formatBytes(challenge.bytes)} theo cách xác định rồi báo lại mã kiểm tra của toàn bộ vùng.`,
+                    `The browser fills a ${formatBytes(challenge.bytes)} memory region deterministically and reports a checksum of all of it.`,
+                  )}
+            </p>
+            <p data-testid="pos-progress" className="mt-1 font-mono text-sm text-fg">
+              {t("Đã điền: ", "Filled: ")}{formatBytes(filled)} / {formatBytes(challenge.bytes)}
+            </p>
+          </details>
         </div>
         <p className="mt-3 text-xs text-muted" data-testid="pos-note">
           {t(

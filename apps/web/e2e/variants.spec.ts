@@ -148,7 +148,7 @@ test("seed box: typing a seed and applying it reproduces that challenge", async 
 
 test("an unknown variant or level in the URL falls back to the default", async ({ page }) => {
   await page.goto("/playground/slider?seed=1&variant=nope&difficulty=extreme");
-  await expect(page.getByTestId("variant-select")).toHaveValue("classic");
+  await expect(page.getByTestId("variant-select")).toHaveValue("puzzle");
   await expect(level(page, "medium")).toHaveAttribute("aria-pressed", "true");
 });
 

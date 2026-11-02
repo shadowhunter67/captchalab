@@ -67,7 +67,8 @@ export function AdaptiveLab() {
           <h2 id="adaptive-result-h" className="text-base font-semibold">{t("Kết quả", "Result")}</h2>
           <ClassifierDisclaimer />
           <ClassificationCard title={t("Ví dụ mô phỏng", "Synthetic example")} classification={outcome.classification} testId="adaptive-class" />
-          <Card id="adaptive-escalation-h" title={t("Gợi ý leo thang thử nghiệm", "Experimental escalation suggestion")}>
+          <Card id="adaptive-escalation-h" title={t("Thử thách tiếp theo được gợi ý", "Suggested next challenge")}>
+            <p className="mb-2 text-xs text-muted">{t("Gợi ý leo thang thử nghiệm", "Experimental escalation suggestion")}</p>
             <p role="status" aria-live="polite" className="text-sm" data-testid="adaptive-escalation" data-escalation={outcome.escalation.key} data-label={outcome.classification.label}>
               {t(outcome.escalation.vi, outcome.escalation.en)}
             </p>

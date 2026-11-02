@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { createRng } from "@captchalab/captcha-core";
-import { VARIANT_SETS, registry } from "@captchalab/captcha-plugins";
+import { registry } from "@captchalab/captcha-plugins";
+import { PLAYGROUND_SETS } from "@/lib/playground-sets";
 import { useT } from "@/lib/i18n";
 import { ChallengeControls } from "@/components/ChallengeControls";
 import { ChallengeConfigProvider } from "@/components/inspect/ChallengeConfigCard";
@@ -16,7 +17,7 @@ export function SliderPlayground() {
   const t = useT();
   const { challenge, failed, round, newChallenge, choice, seed, setVariant, setDifficulty, setSeed } = useSeededChallenge(
     generateSlider,
-    VARIANT_SETS["slider"],
+    PLAYGROUND_SETS["slider"],
   );
 
   return (
@@ -36,7 +37,7 @@ export function SliderPlayground() {
 
       <ChallengeControls
         captcha="slider"
-        variantSet={VARIANT_SETS["slider"]}
+        variantSet={PLAYGROUND_SETS["slider"]}
         choice={choice}
         seed={seed}
         onVariant={setVariant}

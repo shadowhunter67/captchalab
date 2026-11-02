@@ -5,7 +5,7 @@ import { expectedSelection, registry } from "@captchalab/captcha-plugins";
 import { watchPrivacy } from "./privacy";
 
 const SEED = 17;
-const URL = `/playground/image-grid?seed=${SEED}`;
+const URL = `/playground/image-grid?seed=${SEED}&variant=basic-shapes`;
 const challenge = registry.get("image-grid").generate({ rng: createRng(SEED) });
 const good = expectedSelection(challenge);
 const wrong = challenge.cells.find((c) => !good.includes(c.id))!.id;

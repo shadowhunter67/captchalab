@@ -3,7 +3,8 @@
 import Link from "next/link";
 import { useT } from "@/lib/i18n";
 import { createRng } from "@captchalab/captcha-core";
-import { VARIANT_SETS, registry } from "@captchalab/captcha-plugins";
+import { registry } from "@captchalab/captcha-plugins";
+import { PLAYGROUND_SETS } from "@/lib/playground-sets";
 import { ChallengeControls } from "@/components/ChallengeControls";
 import { ChallengeConfigProvider } from "@/components/inspect/ChallengeConfigCard";
 import { stampSeed, useSeededChallenge, type VariantChoice } from "@/lib/useSeededChallenge";
@@ -17,7 +18,7 @@ export function DragDropPlayground() {
   const t = useT();
   const { challenge, failed, round, newChallenge, choice, seed, setVariant, setDifficulty, setSeed } = useSeededChallenge(
     generateDragDrop,
-    VARIANT_SETS["drag-drop"],
+    PLAYGROUND_SETS["drag-drop"],
   );
 
   return (
@@ -37,7 +38,7 @@ export function DragDropPlayground() {
 
       <ChallengeControls
         captcha="drag-drop"
-        variantSet={VARIANT_SETS["drag-drop"]}
+        variantSet={PLAYGROUND_SETS["drag-drop"]}
         choice={choice}
         seed={seed}
         onVariant={setVariant}

@@ -50,7 +50,7 @@ export function CheckboxSurface({ controller, checked, measureRef }: Props) {
     <label
       ref={labelRef}
       data-testid="checkbox-label"
-      className="flex w-full max-w-md cursor-pointer select-none items-center gap-3 rounded-lg border border-line bg-bg px-4 py-3 has-[:focus-visible]:outline has-[:focus-visible]:outline-[3px] has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-accent"
+      className="flex w-full max-w-md cursor-pointer select-none items-center gap-3 rounded-lg border border-line bg-bg px-4 py-4 shadow-sm has-[:focus-visible]:outline has-[:focus-visible]:outline-[3px] has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-accent"
       onPointerDown={(e) => {
         if (e.pointerType === "mouse" && e.button !== 0) return;
         const s = sample(e);
@@ -75,9 +75,16 @@ export function CheckboxSurface({ controller, checked, measureRef }: Props) {
         onKeyDown={(e: KeyboardEvent<HTMLInputElement>) => controller.keyDown(e.code, e.repeat)}
         onKeyUp={(e: KeyboardEvent<HTMLInputElement>) => controller.keyUp(e.code)}
         onBlur={() => controller.blur()}
-        className="h-6 w-6 shrink-0 cursor-pointer accent-[var(--accent)]"
+        className="h-7 w-7 shrink-0 cursor-pointer accent-[var(--accent)]"
       />
       <span className="text-base">{t("Đánh dấu ô này để vượt qua thử thách", "Check this box to pass the challenge")}</span>
+      <span aria-hidden="true" className="ml-auto flex shrink-0 flex-col items-center gap-0.5 text-[10px] leading-tight text-muted">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M12 3 4 6.5v5.2c0 4.4 3 7.6 8 9.3 5-1.7 8-4.9 8-9.3V6.5Z" />
+          <path d="m8.5 12 2.5 2.5 4.5-5" />
+        </svg>
+        <span>{t("Kiểm tra demo", "Demo check")}</span>
+      </span>
     </label>
   );
 }

@@ -170,7 +170,7 @@ export function InvisibleLab() {
           <div className="space-y-3">
             <p className="text-sm text-muted">{t("Bấm Bắt đầu, rồi bấm vào mục tiêu 4 lần liên tiếp. Dùng bàn phím cũng được: Tab tới mục tiêu rồi nhấn Enter hoặc Space.", "Press Start, then click the target 4 times in a row. A keyboard works too: Tab to the target and press Enter or Space.")}</p>
             <button type="button" data-testid="invisible-start" onClick={start} className="rounded-md bg-accent px-3 py-1.5 text-sm font-medium text-bg hover:opacity-90">
-              {t("Bắt đầu", "Start")}
+              {t("Bắt đầu quan sát", "Start observation")}
             </button>
           </div>
         )}
@@ -266,7 +266,8 @@ export function InvisibleLab() {
           <ClassifierDisclaimer />
           <ClassificationCard title={result.origin === "human" ? t("Lần thử của bạn", "Your run") : t("Ví dụ mô phỏng", "Synthetic example")} classification={result.classification} testId="invisible-class" />
 
-          <Card id="escalation-h" title={t("Gợi ý leo thang thử nghiệm", "Experimental escalation suggestion")}>
+          <Card id="escalation-h" title={t("Thử thách tiếp theo được gợi ý", "Suggested next challenge")}>
+            <p className="mb-2 text-xs text-muted">{t("Gợi ý leo thang thử nghiệm", "Experimental escalation suggestion")}</p>
             <p className="text-sm" data-testid="escalation-text" data-escalation={escalation.key}>
               {t(escalation.vi, escalation.en)}
             </p>

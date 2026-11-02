@@ -9,6 +9,7 @@ import { PowInspect } from "./PowInspect";
 import { createPowRunner, type PowFound, type PowRunner } from "./pow-runner";
 import { powStatusText, type PowStatus } from "./pow-view-data";
 import { useScopedId } from "@/lib/id-scope";
+import { StatusBadge } from "@/components/StatusBadge";
 
 interface Completed {
   session: InteractionSession;
@@ -134,14 +135,11 @@ export function PowSession({ challenge: initialChallenge, onNewChallenge, onResu
         <h2 id={sid("try-h")} className="mb-1 text-base font-semibold">
           {t("Thử", "Try")}
         </h2>
-        <p className="mb-2 text-sm text-muted" data-testid="pow-instruction">
+        <p className="mb-3 text-sm text-muted">
           {t(
-            "Tìm một số (nonce) sao cho mã băm SHA-256 của văn bản này đạt mức khó bên dưới. Phép tính chỉ chạy khi bạn bấm Bắt đầu.",
-            "Find a number (a nonce) so that the SHA-256 hash of the text below meets the difficulty shown. Nothing runs until you press Start.",
+            "Trình duyệt của bạn sẽ hoàn thành một phép kiểm tra tính toán ngắn trước khi tiếp tục. Chỉ chạy khi bạn bấm Bắt đầu.",
+            "Your browser will complete a short computation check before you continue. It only runs when you press Start.",
           )}
-        </p>
-        <p className="mb-3 break-all font-mono text-sm" data-testid="pow-input">
-          {challenge.input}:<span className="text-muted">nonce</span>
         </p>
         <div ref={boardRef} role="group" aria-label={t("Điều khiển phép tính", "Computation controls")} className="flex flex-wrap gap-3">
           <button
@@ -176,17 +174,29 @@ export function PowSession({ challenge: initialChallenge, onNewChallenge, onResu
         </div>
         <div className="mt-4 space-y-2 text-sm">
           <p role="status" aria-live="polite" data-testid="pow-status" data-state={status}>
-            {powStatusText(status, t)}
-          </p>
-          <p data-testid="pow-progress" aria-live="polite" aria-atomic="true" className="font-mono">
-            {t("Số lần băm đã thử: ", "Hashes tried: ")}
-            {progress.toLocaleString("en-US")}
+            <StatusBadge state={status === "running" ? "working" : status === "done" ? "done" : "idle"}>{powStatusText(status, t)}</StatusBadge>
           </p>
           {running && (
             <div role="progressbar" aria-label={t("Đang tính, chưa biết còn bao lâu", "Computing, time left unknown")} className="h-2 w-full overflow-hidden rounded bg-track">
               <div className="h-full w-1/3 animate-pulse rounded bg-accent" />
             </div>
           )}
+          <details data-testid="pow-details" className="text-xs text-muted">
+            <summary className="cursor-pointer">{t("Chi tiết kỹ thuật", "Technical details")}</summary>
+            <p className="mt-2" data-testid="pow-instruction">
+              {t(
+                "Tìm một số (nonce) sao cho mã băm SHA-256 của văn bản này đạt mức khó bên dưới.",
+                "Find a number (a nonce) so that the SHA-256 hash of the text below meets the difficulty shown.",
+              )}
+            </p>
+            <p className="mt-1 break-all font-mono text-sm text-fg" data-testid="pow-input">
+              {challenge.input}:<span className="text-muted">nonce</span>
+            </p>
+            <p data-testid="pow-progress" className="mt-1 font-mono text-sm text-fg">
+              {t("Số lần băm đã thử: ", "Hashes tried: ")}
+              {progress.toLocaleString("en-US")}
+            </p>
+          </details>
         </div>
         <p className="mt-3 text-xs text-muted" data-testid="pow-note">
           {t(

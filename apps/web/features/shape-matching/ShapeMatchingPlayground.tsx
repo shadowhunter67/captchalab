@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { createRng } from "@captchalab/captcha-core";
-import { VARIANT_SETS, registry } from "@captchalab/captcha-plugins";
+import { registry } from "@captchalab/captcha-plugins";
+import { PLAYGROUND_SETS } from "@/lib/playground-sets";
 import { useT } from "@/lib/i18n";
 import { ChallengeControls } from "@/components/ChallengeControls";
 import { CaptchaLearn } from "@/components/CaptchaLearn";
@@ -17,7 +18,7 @@ export function ShapeMatchingPlayground() {
   const t = useT();
   const { challenge, failed, round, newChallenge, choice, seed, setVariant, setDifficulty, setSeed } = useSeededChallenge(
     generateMatching,
-    VARIANT_SETS["shape-matching"],
+    PLAYGROUND_SETS["shape-matching"],
   );
   return (
     <main className="mx-auto max-w-3xl space-y-6 px-4 py-8 sm:px-6">
@@ -35,7 +36,7 @@ export function ShapeMatchingPlayground() {
       </header>
       <ChallengeControls
         captcha="shape-matching"
-        variantSet={VARIANT_SETS["shape-matching"]}
+        variantSet={PLAYGROUND_SETS["shape-matching"]}
         choice={choice}
         seed={seed}
         onVariant={setVariant}

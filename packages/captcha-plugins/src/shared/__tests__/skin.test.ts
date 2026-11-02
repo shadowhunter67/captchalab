@@ -64,7 +64,7 @@ describe("glyph skin (object variants of MatchKey and Tile Game)", () => {
     expect(verifyMatchKeyAnswer({ ...o, skin: { objects: ["bus", "car", "cat", "tree"] } }, { selectedId: o.correctId }).passed).toBe(true); // distinct objects: valid (groups are only a generator rule)
     expect(verifyMatchKeyAnswer({ ...o, skin: { objects: ["bus", "bus", "cat", "tree"] } }, { selectedId: o.correctId }).reason).toMatch(/malformed/);
     const t = generateTileGameChallenge(ctx(4, "pair-object"));
-    expect(verifyTileGameAnswer({ ...t, skin: { objects: [] } as never }, { selectedIds: t.answerIds }).reason).toMatch(/malformed/);
+    expect(verifyTileGameAnswer({ ...t, skin: { objects: [] } }, { selectedIds: t.answerIds }).reason).toMatch(/malformed/);
   });
 });
 

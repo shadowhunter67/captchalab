@@ -57,7 +57,7 @@ const dd = registry.get("drag-drop").generate({ rng: createRng(DD_SEED) });
 const own = (itemId: string) => dd.targets.find((t) => t.acceptsItemId === itemId)!;
 
 test("Drag & Drop: the whole challenge can be finished with the keyboard", async ({ page }) => {
-  await page.goto(`/playground/drag-drop?seed=${DD_SEED}`);
+  await page.goto(`/playground/drag-drop?seed=${DD_SEED}&variant=shape-match`);
   await expect(page.getByTestId("drag-status")).toContainText("0 of 3 shapes placed");
   for (const it of dd.items) {
     await page.getByTestId(`item-${it.id}`).focus();
@@ -73,7 +73,7 @@ test("Drag & Drop: the whole challenge can be finished with the keyboard", async
 });
 
 test("Drag & Drop: a pointer drag with pointer capture places a shape", async ({ page }) => {
-  await page.goto(`/playground/drag-drop?seed=${DD_SEED}`);
+  await page.goto(`/playground/drag-drop?seed=${DD_SEED}&variant=shape-match`);
   const first = dd.items[0]!;
   await page.getByTestId("drag-surface").scrollIntoViewIfNeeded();
   const surface = (await page.getByTestId("drag-surface").boundingBox())!;

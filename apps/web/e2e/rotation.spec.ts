@@ -6,7 +6,7 @@ import { watchPrivacy } from "./privacy";
 import { scrubToEdge } from "./replay";
 
 const SEED = 99;
-const URL = `/playground/rotation?seed=${SEED}`;
+const URL = `/playground/rotation?seed=${SEED}&variant=classic`;
 const challenge = registry.get("rotation").generate({ rng: createRng(SEED) });
 const metric = (page: Page, id: string) => page.getByTestId(`metric-${id}`);
 const obj = (page: Page) => page.getByTestId("rotation-object");

@@ -3,7 +3,8 @@
 import Link from "next/link";
 import { useT } from "@/lib/i18n";
 import { createRng } from "@captchalab/captcha-core";
-import { VARIANT_SETS, registry } from "@captchalab/captcha-plugins";
+import { registry } from "@captchalab/captcha-plugins";
+import { PLAYGROUND_SETS } from "@/lib/playground-sets";
 import { ChallengeControls } from "@/components/ChallengeControls";
 import { ChallengeConfigProvider } from "@/components/inspect/ChallengeConfigCard";
 import { stampSeed, useSeededChallenge, type VariantChoice } from "@/lib/useSeededChallenge";
@@ -17,7 +18,7 @@ export function RotationPlayground() {
   const t = useT();
   const { challenge, failed, round, newChallenge, choice, seed, setVariant, setDifficulty, setSeed } = useSeededChallenge(
     generateRotation,
-    VARIANT_SETS["rotation"],
+    PLAYGROUND_SETS["rotation"],
   );
   return (
     <main className="mx-auto max-w-3xl space-y-6 px-4 py-8 sm:px-6">
@@ -35,7 +36,7 @@ export function RotationPlayground() {
       </header>
       <ChallengeControls
         captcha="rotation"
-        variantSet={VARIANT_SETS["rotation"]}
+        variantSet={PLAYGROUND_SETS["rotation"]}
         choice={choice}
         seed={seed}
         onVariant={setVariant}

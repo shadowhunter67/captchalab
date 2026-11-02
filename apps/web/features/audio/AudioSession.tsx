@@ -138,6 +138,10 @@ export function AudioSession({ challenge: initialChallenge, onNewChallenge, onRe
             onClick={onPlay}
             className="touch-manipulation rounded-md bg-accent px-4 py-2 text-sm font-medium text-bg hover:opacity-90"
           >
+            <svg aria-hidden="true" focusable="false" viewBox="0 0 24 24" width="16" height="16" className="mr-2 inline-block align-[-2px]" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M4 10v4h3.5l5 4V6l-5 4Z" />
+              <path d="M16 9a4 4 0 0 1 0 6M18.5 6.5a8 8 0 0 1 0 11" />
+            </svg>
             {playLabel(played, t)}
           </button>
           <span role="status" aria-live="polite" data-testid="audio-status" className="text-sm text-muted">

@@ -6,6 +6,7 @@ import { BC_RUN_TARGET, computeLocal, probeCapability, registry, type BcAnswer, 
 import { ComputationInspect } from "@/components/inspect/ComputationInspect";
 import { useT } from "@/lib/i18n";
 import { useCellRecorder } from "@/lib/useCellRecorder";
+import { StatusBadge } from "@/components/StatusBadge";
 import { bcMetrics, checkLabel } from "./bc-view-data";
 
 interface Completed {
@@ -66,6 +67,13 @@ export function BcSession({ challenge: initialChallenge, onNewChallenge }: { cha
             {t("Thử thách mới", "New challenge")}
           </button>
         </div>
+        {completed && (
+          <p role="status" aria-live="polite" data-testid="bc-summary" data-ok={completed.verification.passed ? "true" : "false"} className="mt-3 text-sm font-medium">
+            <StatusBadge state={completed.verification.passed ? "done" : "stopped"}>
+              {completed.verification.passed ? t("Các khả năng cần thiết đều có", "Required capabilities available") : t("Thiếu một số khả năng cần thiết", "Some required capabilities are not available")}
+            </StatusBadge>
+          </p>
+        )}
         <p className="mt-3 text-xs text-muted" data-testid="bc-privacy">
           {t(
             "Đây không phải dấu vân tay thiết bị: chỉ có/không, không đọc giá trị nào, không lưu, không gửi đi và không tạo mã định danh.",

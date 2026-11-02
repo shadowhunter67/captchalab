@@ -108,7 +108,7 @@ test("audio: play and type; the clips are the only requests", async ({ page }) =
 
 test("builder lists the five new CAPTCHAs with their own variants", async ({ page }) => {
   await page.goto("/builder?lang=en");
-  for (const [captcha, variants] of [["shape-matching", ["exact", "pattern"]], ["math-logic", ["arithmetic", "comparison"]], ["sequence", ["number", "visual"]], ["memory", ["sequence", "position"]], ["audio", ["spoken-digits", "noisy-digits"]]] as const) {
+  for (const [captcha, variants] of [["shape-matching", ["exact", "pattern", "object-silhouette"]], ["math-logic", ["arithmetic", "comparison"]], ["sequence", ["number", "visual"]], ["memory", ["sequence", "position"]], ["audio", ["spoken-digits", "noisy-digits"]]] as const) {
     await page.getByTestId("builder-captcha").selectOption(captcha);
     await expect(page.getByTestId("builder-preview")).toBeVisible();
     const values = await page.getByTestId("builder-variant").locator("option").evaluateAll((os) => os.map((o) => (o as HTMLOptionElement).value));

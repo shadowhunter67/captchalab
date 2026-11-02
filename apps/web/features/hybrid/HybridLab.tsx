@@ -73,15 +73,27 @@ function HybridBoard({ pair, onNewChallenge }: { pair: Pair; onNewChallenge: () 
         </button>
       </Card>
 
+      <ol aria-label={t("Các bước", "Steps")} data-testid="hybrid-stepper" className="flex flex-wrap items-center gap-2 text-sm">
+        <li data-testid="step-1" aria-current={!unlocked ? "step" : undefined} className={`flex items-center gap-2 rounded-full border px-3 py-1 ${!unlocked ? "border-accent bg-track font-medium" : "border-line text-muted"}`}>
+          <span aria-hidden="true">{verdict.pow === "passed" ? "✓" : "1"}</span>
+          {t("Bước 1: kiểm tra hệ thống", "Step 1: system check")}
+        </li>
+        <li aria-hidden="true" className="text-muted">→</li>
+        <li data-testid="step-2" aria-current={unlocked ? "step" : undefined} className={`flex items-center gap-2 rounded-full border px-3 py-1 ${unlocked ? "border-accent bg-track font-medium" : "border-line text-muted"}`}>
+          <span aria-hidden="true">{verdict.child === "passed" ? "✓" : "2"}</span>
+          {t(`Bước 2: ${childName}`, `Step 2: ${childName}`)}
+        </li>
+      </ol>
+
       <section aria-labelledby="stage1-h" data-testid="stage-pow" className="space-y-3">
-        <h2 id="stage1-h" className="text-base font-semibold">{t("Chặng 1 · Phép tính (bằng chứng công việc)", "Stage 1 · Computation (proof of work)")}</h2>
+        <h2 id="stage1-h" className="text-base font-semibold">{t("Bước 1 / 2 · Kiểm tra hệ thống", "Step 1 of 2 · System check")}</h2>
         <IdScope prefix={`${pair.kind}-pow-`}>
           <PowSession challenge={pair.pow} onNewChallenge={onNewChallenge} onResult={(o) => setOutcome("pow", o.passed, o.challengeId)} />
         </IdScope>
       </section>
 
       <section aria-labelledby="stage2-h" data-testid="stage-child" className="space-y-3">
-        <h2 id="stage2-h" className="text-base font-semibold">{t(`Chặng 2 · Tương tác (${childName})`, `Stage 2 · Interaction (${childName})`)}</h2>
+        <h2 id="stage2-h" className="text-base font-semibold">{t(`Bước 2 / 2 · ${childName}`, `Step 2 of 2 · ${childName}`)}</h2>
         {!unlocked ? (
           <p className="rounded-lg border border-dashed border-line p-4 text-sm text-muted" data-testid="stage-child-locked">
             {t("Chặng này mở khi chặng 1 có bằng chứng hợp lệ.", "This stage opens once stage 1 has a valid proof.")}

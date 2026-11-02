@@ -4,7 +4,7 @@ import { watchPrivacy } from "./privacy";
 // These tests do NOT use the English fixture: they check the real default (Vietnamese) and the switch.
 
 test("default is Vietnamese and the EN button switches the page to English and back", async ({ page }) => {
-  await page.goto("/playground/image-grid?seed=17");
+  await page.goto("/playground/image-grid?seed=17&variant=basic-shapes");
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("CAPTCHA lưới ảnh");
   await expect(page.locator("html")).toHaveAttribute("lang", "vi");
   await expect(page.getByTestId("verify")).toHaveText("Xác minh");
@@ -17,7 +17,7 @@ test("default is Vietnamese and the EN button switches the page to English and b
 });
 
 test("a Vietnamese result and metrics are shown after verifying", async ({ page }) => {
-  await page.goto("/playground/image-grid?seed=17");
+  await page.goto("/playground/image-grid?seed=17&variant=basic-shapes");
   await page.getByTestId("cell-c1").click();
   await page.getByTestId("verify").click();
   await expect(page.getByTestId("result")).toContainText("Chưa đạt");

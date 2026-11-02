@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { createRng } from "@captchalab/captcha-core";
-import { VARIANT_SETS, registry } from "@captchalab/captcha-plugins";
+import { registry } from "@captchalab/captcha-plugins";
+import { PLAYGROUND_SETS } from "@/lib/playground-sets";
 import { useT } from "@/lib/i18n";
 import { ChallengeControls } from "@/components/ChallengeControls";
 import { CaptchaLearn } from "@/components/CaptchaLearn";
@@ -15,7 +16,7 @@ const generateTileGame = (seed: number, choice: VariantChoice) =>
 
 export function TileGamePlayground() {
   const t = useT();
-  const { challenge, failed, round, newChallenge, choice, seed, setVariant, setDifficulty, setSeed } = useSeededChallenge(generateTileGame, VARIANT_SETS["tile-game"]);
+  const { challenge, failed, round, newChallenge, choice, seed, setVariant, setDifficulty, setSeed } = useSeededChallenge(generateTileGame, PLAYGROUND_SETS["tile-game"]);
   return (
     <main className="mx-auto max-w-3xl space-y-6 px-4 py-8 sm:px-6">
       <header>
@@ -28,7 +29,7 @@ export function TileGamePlayground() {
           )}
         </p>
       </header>
-      <ChallengeControls captcha="tile-game" variantSet={VARIANT_SETS["tile-game"]} choice={choice} seed={seed} onVariant={setVariant} onDifficulty={setDifficulty} onSeed={setSeed} />
+      <ChallengeControls captcha="tile-game" variantSet={PLAYGROUND_SETS["tile-game"]} choice={choice} seed={seed} onVariant={setVariant} onDifficulty={setDifficulty} onSeed={setSeed} />
       {failed && <p role="alert" className="text-sm text-bad">{t("Không tạo được thử thách. Hãy tải lại trang.", "Could not generate a challenge. Reload the page.")}</p>}
       {challenge === null && !failed && <p className="text-sm text-muted">{t("Đang tải…", "Loading…")}</p>}
       {challenge && (

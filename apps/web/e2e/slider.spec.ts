@@ -49,7 +49,7 @@ const replayTime = async (page: Page) => Number(await replay(page).getAttribute(
 const replayStatus = (page: Page) => replay(page).getAttribute("data-replay-status");
 
 test.beforeEach(async ({ page }) => {
-  await page.goto(`/playground/slider?seed=${SEED}`);
+  await page.goto(`/playground/slider?seed=${SEED}&variant=classic`);
   await expect(page.getByTestId("slider-handle")).toBeVisible();
 });
 

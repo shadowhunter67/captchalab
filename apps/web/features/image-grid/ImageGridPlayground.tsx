@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { createRng } from "@captchalab/captcha-core";
-import { VARIANT_SETS, registry } from "@captchalab/captcha-plugins";
+import { registry } from "@captchalab/captcha-plugins";
+import { PLAYGROUND_SETS } from "@/lib/playground-sets";
 import { useT } from "@/lib/i18n";
 import { ChallengeControls } from "@/components/ChallengeControls";
 import { ChallengeConfigProvider } from "@/components/inspect/ChallengeConfigCard";
@@ -17,7 +18,7 @@ export function ImageGridPlayground() {
   const t = useT();
   const { challenge, failed, round, newChallenge, choice, seed, setVariant, setDifficulty, setSeed } = useSeededChallenge(
     generateGrid,
-    VARIANT_SETS["image-grid"],
+    PLAYGROUND_SETS["image-grid"],
   );
   return (
     <main className="mx-auto max-w-3xl space-y-6 px-4 py-8 sm:px-6">
@@ -35,7 +36,7 @@ export function ImageGridPlayground() {
       </header>
       <ChallengeControls
         captcha="image-grid"
-        variantSet={VARIANT_SETS["image-grid"]}
+        variantSet={PLAYGROUND_SETS["image-grid"]}
         choice={choice}
         seed={seed}
         onVariant={setVariant}
