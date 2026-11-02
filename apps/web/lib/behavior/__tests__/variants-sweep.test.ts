@@ -16,7 +16,7 @@ describe("every variant of every Behavioral Lab challenge can be sampled and cla
       const set = VARIANT_SETS[id];
       for (const variant of set.variants) {
         for (const d of DIFFICULTIES) {
-          if (!supportedDifficulties(variant as never).includes(d)) continue;
+          if (!supportedDifficulties(variant).includes(d)) continue;
           const challenge = challengeFor(id, 11, variant.id, d);
           for (const profile of profilesFor(id)) {
             const sample = generateSyntheticSample({ captchaId: id, profile: profile.id, challenge, seed: 3 });
