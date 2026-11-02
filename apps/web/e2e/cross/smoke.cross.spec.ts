@@ -229,7 +229,17 @@ test("Proof of Work: Start completes; Cancel on a long hard run stops it with no
     if (searchNonces(c, 0, 150000) === null) break;
   }
   await page.goto(`/playground/proof-of-work?seed=${seed}&variant=hash-prefix&difficulty=hard`);
+  await expect(page.getByTestId("pow-start")).toBeEnabled();
+  // A fast browser can still find the nonce before Cancel arrives. Run the page's clock fast and stretch the yields between
+  // slices, so the run is always long enough to cancel mid-way.
+  await page.evaluate(() => {
+    const origNow = performance.now.bind(performance);
+    performance.now = () => origNow() * 100;
+    const origSet = window.setTimeout.bind(window);
+    (window as unknown as { setTimeout: unknown }).setTimeout = (fn: TimerHandler, ms?: number, ...args: unknown[]) => origSet(fn, ms === 0 ? 100 : ms, ...args);
+  });
   await page.getByTestId("pow-start").click();
+  await expect(page.getByTestId("pow-status")).toHaveAttribute("data-state", "running");
   await page.getByTestId("pow-cancel").click();
   await expect(page.getByTestId("pow-status")).toHaveAttribute("data-state", "cancelled");
   await page.waitForTimeout(1000);
