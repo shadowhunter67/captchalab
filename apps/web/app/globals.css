@@ -196,3 +196,26 @@ select option {
 html[data-embed="1"] main > header:first-child {
   display: none;
 }
+
+/* The workspace's Learn tab: two columns when the tab is wide enough, a plain readable column otherwise. */
+.cl-learn-cols {
+  container-type: inline-size;
+}
+@container (min-width: 46rem) {
+  .cl-learn-cols > section {
+    column-count: 2;
+    column-gap: 2rem;
+  }
+  .cl-learn-cols > section > h2,
+  .cl-learn-cols > section > h3,
+  .cl-learn-cols > section > h4 {
+    break-after: avoid;
+  }
+  .cl-learn-cols > section > h2:first-child {
+    column-span: all;
+  }
+  .cl-learn-cols > section > ul,
+  .cl-learn-cols > section > p {
+    break-inside: avoid;
+  }
+}

@@ -1,7 +1,7 @@
 "use client";
 
 import { catalogFor, type CatalogEntry } from "@/lib/catalog";
-import { useT } from "@/lib/i18n";
+import { useLang, useT } from "@/lib/i18n";
 
 function List({ items }: { items: readonly string[] }) {
   return (
@@ -16,6 +16,9 @@ function List({ items }: { items: readonly string[] }) {
 /** The Learn block under a playground, built from the catalog so it matches the /learn page (all eight sections). */
 export function CaptchaLearn({ id }: { id: CatalogEntry["id"] }) {
   const t = useT();
+  // In the home page's frame the shell shows this content in its "Learn" tab instead.
+  const { embedded } = useLang();
+  if (embedded) return null;
   const c = catalogFor(t).find((e) => e.id === id);
   if (!c) return null;
   return (

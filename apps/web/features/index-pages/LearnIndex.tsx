@@ -3,8 +3,7 @@
 import Link from "next/link";
 import { catalogFor } from "@/lib/catalog";
 import { CoverageMatrix } from "@/components/CoverageMatrix";
-import { labLearnFor } from "@/lib/lab-learn";
-import { realismFor } from "@/lib/realism";
+import { LabLearnCard, RealismBlock } from "@/components/LearnCards";
 import { FAMILIES, FAMILY_NAMES, taxonomyFor, type LabId } from "@/lib/taxonomy";
 import { BehavioralLearn } from "./BehavioralLearn";
 import { useT } from "@/lib/i18n";
@@ -68,22 +67,7 @@ export function LearnIndex() {
           </h3>
           <h3 className="font-semibold">{t("Cách hoạt động", "How it works")}</h3>
           <p className="text-muted">{c.learn.howItWorks}</p>
-          {(() => {
-            const r = realismFor(c.id, t);
-            return (
-              <div data-testid={`learn-realism-${c.id}`} data-level={r.level}>
-                <h3 className="font-semibold">{t("Giống thử thách thật ở đâu", "How it resembles the real thing")}</h3>
-                <p className="text-muted">
-                  <strong>{t("Họ thử thách: ", "Family: ")}</strong>
-                  {r.family}. {r.approximation}
-                </p>
-                <p className="mt-1 text-muted">
-                  <strong>{t("Cố ý không sao chép: ", "Intentionally not cloned: ")}</strong>
-                  {r.limits}
-                </p>
-              </div>
-            );
-          })()}
+          <RealismBlock id={c.id} />
           <h3 className="font-semibold">{t("Cách tạo thử thách", "Generation")}</h3>
           <p className="text-muted">{c.learn.generation}</p>
           <h3 className="font-semibold">{t("Cách xác minh", "Verification")}</h3>
@@ -107,29 +91,9 @@ export function LearnIndex() {
           </p>
         </section>
       ))}
-            {familyLabs.map((l) => {
-              const lab = labLearnFor(l.id as LabId, t);
-              return (
-                <section key={l.id} id={l.id} aria-labelledby={`${l.id}-h`} className="scroll-mt-4 space-y-3 rounded-lg border border-line bg-panel p-4 text-sm" data-testid={`learn-lab-${l.id}`}>
-                  <h3 id={`${l.id}-h`} className="text-lg font-semibold">{l.name}</h3>
-                  <h4 className="font-semibold">{t("Đây là gì", "What it is")}</h4>
-                  <p className="text-muted">{lab.what}</p>
-                  <h4 className="font-semibold">{t("CaptchaLab cài đặt thế nào", "How CaptchaLab implements it")}</h4>
-                  <p className="text-muted">{lab.how}</p>
-                  <h4 className="font-semibold">{t("Nó đo gì", "What it measures")}</h4>
-                  <p className="text-muted">{lab.measures}</p>
-                  <h4 className="font-semibold">{t("Nó KHÔNG chứng minh điều gì", "What it does NOT prove")}</h4>
-                  <p className="text-muted">{lab.notProve}</p>
-                  <h4 className="font-semibold">{t("Quyền riêng tư", "Privacy")}</h4>
-                  <p className="text-muted">{lab.privacy}</p>
-                  <h4 className="font-semibold">{t("Giới hạn", "Limitations")}</h4>
-                  <p className="text-muted">{lab.limits}</p>
-                  <p>
-                    <Link href={l.route} className="underline">{t(`Mở ${l.name}`, `Open ${l.name}`)}</Link>
-                  </p>
-                </section>
-              );
-            })}
+            {familyLabs.map((l) => (
+              <LabLearnCard key={l.id} id={l.id as LabId} name={l.name} route={l.route} />
+            ))}
           </div>
         );
       })}

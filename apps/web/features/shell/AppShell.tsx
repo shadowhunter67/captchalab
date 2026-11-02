@@ -1,14 +1,15 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type KeyboardEvent, type ReactNode } from "react";
 import { catalogFor } from "@/lib/catalog";
 import { FAMILIES, FAMILY_NAMES, TAXONOMY, taxonomyFor, type TaxonomyId } from "@/lib/taxonomy";
 import { isReportMessage, type SessionReport } from "@/lib/embed-report";
 import { useLang, useT } from "@/lib/i18n";
 import { translateReason } from "@/lib/i18n/reasons";
+import { LearnPanel } from "./LearnPanel";
 
 type ItemId = TaxonomyId | "behavior" | "builder" | "experiments" | "compare" | "learn";
-type Tab = "experience" | "events" | "analysis" | "access";
+type Tab = "experience" | "events" | "analysis" | "access" | "learn";
 type SideTab = "summary" | "log" | "features";
 
 interface Group {
@@ -49,6 +50,9 @@ const PATHS: Record<ItemId, string> = {
   compare: "compare/",
   learn: "learn/",
 };
+
+/** Challenges that show pictures and link to the audio challenge for people who cannot see them. */
+const ALTERNATIVE_TO_AUDIO: readonly ItemId[] = ["image-grid", "match-key", "tile-game"];
 
 const ALL_IDS = Object.keys(PATHS) as ItemId[];
 const isItemId = (v: string): v is ItemId => (ALL_IDS as string[]).includes(v);
@@ -111,18 +115,44 @@ function StatCard({ icon, label, value, note, testId }: { icon: ReactNode; label
   );
 }
 
-function TabBar<T extends string>({ tabs, value, onChange, label, testPrefix, compact }: { compact?: boolean; tabs: readonly (readonly [T, string])[]; value: T; onChange: (v: T) => void; label: string; testPrefix: string }) {
+interface TabBarProps<T extends string> {
+  compact?: boolean;
+  tabs: readonly (readonly [T, string])[];
+  value: T;
+  onChange: (v: T) => void;
+  label: string;
+  testPrefix: string;
+  /** One panel shared by every tab (the inspector); otherwise each tab controls `${testPrefix}-panel-${id}`. */
+  sharedPanelId?: string;
+}
+
+/** Tabs with the WAI-ARIA pattern: roving tabindex, Left/Right/Home/End move and select, the row scrolls sideways when narrow. */
+function TabBar<T extends string>({ tabs, value, onChange, label, testPrefix, compact, sharedPanelId }: TabBarProps<T>) {
+  const onKeyDown = (e: KeyboardEvent<HTMLDivElement>): void => {
+    const keys = ["ArrowLeft", "ArrowRight", "Home", "End"];
+    if (!keys.includes(e.key)) return;
+    const at = tabs.findIndex(([id]) => id === value);
+    const next = e.key === "Home" ? 0 : e.key === "End" ? tabs.length - 1 : (at + (e.key === "ArrowRight" ? 1 : -1) + tabs.length) % tabs.length;
+    const target = tabs[next];
+    if (!target) return;
+    e.preventDefault();
+    onChange(target[0]);
+    e.currentTarget.querySelectorAll<HTMLElement>('[role="tab"]')[next]?.focus();
+  };
   return (
-    <div role="tablist" aria-label={label} className="flex flex-wrap gap-1 rounded-lg border border-line bg-panel p-1">
+    <div role="tablist" aria-label={label} onKeyDown={onKeyDown} className="flex shrink-0 gap-1 overflow-x-auto rounded-lg border border-line bg-panel p-1">
       {tabs.map(([id, text]) => (
         <button
           key={id}
           type="button"
           role="tab"
+          id={`${testPrefix}-tab-${id}`}
           aria-selected={value === id}
+          aria-controls={sharedPanelId ?? `${testPrefix}-panel-${id}`}
+          tabIndex={value === id ? 0 : -1}
           data-testid={`${testPrefix}-${id}`}
           onClick={() => onChange(id)}
-          className={`rounded-md font-medium ${compact ? "px-2 py-1 text-xs" : "px-3 py-1.5 text-sm"} ${value === id ? "bg-track text-accent" : "text-muted hover:bg-track"}`}
+          className={`shrink-0 whitespace-nowrap rounded-md font-medium ${compact ? "px-2 py-1 text-xs" : "px-3 py-1.5 text-sm"} ${value === id ? "bg-track text-accent" : "text-muted hover:bg-track"}`}
         >
           {text}
         </button>
@@ -261,7 +291,7 @@ export function AppShell() {
     );
 
   return (
-    <div className="flex min-h-screen flex-col">
+    <div className="flex min-h-screen flex-col lg:h-dvh lg:overflow-hidden">
       <header className="flex flex-wrap items-center gap-x-4 gap-y-2 border-b border-line bg-panel py-3 pl-4 pr-32 sm:pl-6">
         <span className="text-accent drop-shadow-[0_0_10px_rgba(98,173,255,0.8)]">
           <Icon id="logo" />
@@ -276,8 +306,8 @@ export function AppShell() {
         </span>
       </header>
 
-      <div className="grid flex-1 gap-4 p-4 sm:px-6 lg:grid-cols-[15rem_minmax(0,1fr)_21rem]">
-        <nav aria-label={t("Danh mục thử thách", "Challenge menu")} className="space-y-5">
+      <div className="grid flex-1 gap-4 p-4 sm:px-6 lg:min-h-0 lg:grid-cols-[15rem_minmax(0,1fr)_21rem]">
+        <nav aria-label={t("Danh mục thử thách", "Challenge menu")} className="space-y-5 lg:min-h-0 lg:overflow-y-auto lg:pr-1">
           {GROUPS.map((g) => (
             <div key={g.title[1]}>
               <h2 className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted">{t(...g.title)}</h2>
@@ -311,8 +341,8 @@ export function AppShell() {
           ))}
         </nav>
 
-        <main className="min-w-0 space-y-4">
-          <div>
+        <main className="flex min-w-0 flex-col gap-4 lg:min-h-0">
+          <div className="shrink-0">
             <p className="text-sm text-muted">
               {t("Thử thách", "Challenge")} / {nameOf(selected)}
             </p>
@@ -332,83 +362,90 @@ export function AppShell() {
               ["events", t("Sự kiện", "Events")],
               ["analysis", t("Phân tích hành vi", "Behavior analysis")],
               ["access", t("Khả năng tiếp cận", "Accessibility")],
+              ["learn", t("Tìm hiểu", "Learn")],
             ]}
           />
 
-          {tab === "experience" && (
-            <section aria-label={t("Thử thách", "Challenge")} className="rounded-lg border border-line bg-panel">
-              <iframe
-                ref={frameRef}
-                key={`${selected}:${lang}:${frameKey}`}
-                src={`${PATHS[selected]}?lang=${lang}&embed=1`}
-                title={nameOf(selected)}
-                data-testid="preview"
-                className="h-[54vh] min-h-[400px] w-full rounded-lg bg-bg"
-              />
-            </section>
-          )}
-
-          {tab === "events" && (
-            <section aria-label={t("Sự kiện", "Events")} className="rounded-lg border border-line bg-panel p-4" data-testid="panel-events">
-              {report ? eventsTable(report.events, 0, "events-table", "max-h-[60vh]") : empty}
-            </section>
-          )}
-
-          {tab === "analysis" && (
-            <section aria-label={t("Phân tích hành vi", "Behavior analysis")} className="space-y-3 rounded-lg border border-line bg-panel p-4" data-testid="panel-analysis">
-              {report ? (
-                <>
-                  <p className="text-sm">{translateReason(report.reason, t)}</p>
-                  {featuresTable("analysis-table")}
-                  <p className="text-xs text-muted">
-                    {t(
-                      "Đây chỉ là số đo mô tả một lần tương tác, không phải bằng chứng cho thấy do người hay phần mềm thực hiện.",
-                      "These are descriptive measurements of one interaction, not evidence that it was made by a person or by software.",
-                    )}
-                  </p>
-                </>
-              ) : (
-                empty
-              )}
-            </section>
-          )}
-
-          {tab === "access" && (
-            <section aria-label={t("Khả năng tiếp cận", "Accessibility")} className="space-y-2 rounded-lg border border-line bg-panel p-4 text-sm" data-testid="panel-access">
-              <p>{entry ? entry.learn.accessibility : t("Trang này là văn bản và bảng thông thường, dùng được bằng bàn phím.", "This page is plain text and tables, usable with a keyboard.")}</p>
-            </section>
-          )}
-
-          {hasSession && (
-            <div className="grid gap-3 sm:grid-cols-3">
-              <StatCard testId="main-stat-time" icon={<Icon id="clock" />} label={t("Thời gian hoàn thành", "Completion time")} value={report ? formatSeconds(report.durationMs, lang) : "—"} />
-              <StatCard testId="main-stat-events" icon={<Icon id="pulse" />} label={t("Số sự kiện", "Event count")} value={report ? String(report.eventCount) : "—"} />
-              <StatCard testId="main-stat-input" icon={<Icon id="pointer" />} label={t("Kiểu đầu vào", "Input type")} value={report ? modalityText(report.inputModality) : "—"} />
+          {/* Every panel stays in the DOM (aria-controls always resolves); only the active one is shown. On wide screens this is the
+              one area that scrolls, so the tabs stay put; on narrow screens the page scrolls as usual. The frame is never unmounted
+              by a tab change, which is what keeps the challenge, its answer and its session. */}
+          <div className="lg:min-h-0 lg:flex-1 lg:overflow-y-auto">
+            <div role="tabpanel" id="tab-panel-experience" aria-labelledby="tab-tab-experience" hidden={tab !== "experience"} className="lg:h-full">
+              <section aria-label={t("Thử thách", "Challenge")} className="rounded-lg border border-line bg-panel lg:h-full">
+                <iframe
+                  ref={frameRef}
+                  key={`${selected}:${lang}:${frameKey}`}
+                  src={`${PATHS[selected]}?lang=${lang}&embed=1`}
+                  title={nameOf(selected)}
+                  data-testid="preview"
+                  className="h-[78svh] min-h-[400px] w-full rounded-lg bg-bg lg:h-full"
+                />
+              </section>
             </div>
-          )}
 
-          {entry && (
-            <details className="group rounded-lg border border-line bg-panel p-4 text-sm">
-              <summary className="flex cursor-pointer list-none items-center gap-3">
-                <span className="text-accent">
-                  <Icon id="doc" />
-                </span>
-                <span className="flex-1">
-                  <span className="block font-semibold">{t("Cách hoạt động và giới hạn", "How it works and its limits")}</span>
-                  <span className="block text-xs text-muted">{t("Cơ chế, dữ liệu được thu thập và các giới hạn của thử thách này.", "The mechanism, the data collected and this challenge's limits.")}</span>
-                </span>
-                <Icon id="chevron" />
-              </summary>
-              <div className="mt-3 space-y-2 text-muted">
-                <p>{entry.learn.generation}</p>
-                <p>{entry.learn.verification}</p>
-                <p>{entry.learn.weaknesses.join(" ")}</p>
-              </div>
-            </details>
-          )}
+            <div role="tabpanel" id="tab-panel-events" aria-labelledby="tab-tab-events" hidden={tab !== "events"} data-testid="panel-events">
+              {tab === "events" && (
+                <section aria-label={t("Sự kiện", "Events")} className="rounded-lg border border-line bg-panel p-4">
+                  {report ? eventsTable(report.events, 0, "events-table") : empty}
+                </section>
+              )}
+            </div>
+
+            <div role="tabpanel" id="tab-panel-analysis" aria-labelledby="tab-tab-analysis" hidden={tab !== "analysis"} data-testid="panel-analysis">
+              {tab === "analysis" && (
+                <section aria-label={t("Phân tích hành vi", "Behavior analysis")} className="space-y-3 rounded-lg border border-line bg-panel p-4">
+                  {hasSession && (
+                    <div className="grid gap-3 sm:grid-cols-3">
+                      <StatCard testId="main-stat-time" icon={<Icon id="clock" />} label={t("Thời gian hoàn thành", "Completion time")} value={report ? formatSeconds(report.durationMs, lang) : "—"} />
+                      <StatCard testId="main-stat-events" icon={<Icon id="pulse" />} label={t("Số sự kiện", "Event count")} value={report ? String(report.eventCount) : "—"} />
+                      <StatCard testId="main-stat-input" icon={<Icon id="pointer" />} label={t("Kiểu đầu vào", "Input type")} value={report ? modalityText(report.inputModality) : "—"} />
+                    </div>
+                  )}
+                  {report ? (
+                    <>
+                      <p className="text-sm">{translateReason(report.reason, t)}</p>
+                      {featuresTable("analysis-table")}
+                      <p className="text-xs text-muted">
+                        {t(
+                          "Đây chỉ là số đo mô tả một lần tương tác, không phải bằng chứng cho thấy do người hay phần mềm thực hiện.",
+                          "These are descriptive measurements of one interaction, not evidence that it was made by a person or by software.",
+                        )}
+                      </p>
+                    </>
+                  ) : hasSession ? (
+                    empty
+                  ) : (
+                    <p className="text-sm text-muted" data-testid="analysis-empty">
+                      {t("Mục này không tạo phiên riêng nên không có phân tích hành vi chuyên biệt. Chọn một thử thách ở bên trái.", "This page has no session of its own, so there is no dedicated behavior analysis. Pick a challenge on the left.")}
+                    </p>
+                  )}
+                </section>
+              )}
+            </div>
+
+            <div role="tabpanel" id="tab-panel-access" aria-labelledby="tab-tab-access" hidden={tab !== "access"} data-testid="panel-access">
+              {tab === "access" && (
+                <section aria-label={t("Khả năng tiếp cận", "Accessibility")} className="space-y-2 rounded-lg border border-line bg-panel p-4 text-sm">
+                  <p>{entry ? entry.learn.accessibility : t("Trang này là văn bản và bảng thông thường, dùng được bằng bàn phím.", "This page is plain text and tables, usable with a keyboard.")}</p>
+                  {ALTERNATIVE_TO_AUDIO.includes(selected) && (
+                    <p>
+                      {t("Nếu không xem được ảnh, hãy dùng thử thách thay thế: ", "If you cannot see the pictures, use the alternative challenge: ")}
+                      <button type="button" onClick={() => select("audio")} data-testid="access-alternative" className="underline">
+                        {t("Âm thanh", "Audio")}
+                      </button>
+                    </p>
+                  )}
+                </section>
+              )}
+            </div>
+
+            <div role="tabpanel" id="tab-panel-learn" aria-labelledby="tab-tab-learn" hidden={tab !== "learn"} data-testid="panel-learn">
+              {tab === "learn" && <LearnPanel id={selected} />}
+            </div>
+          </div>
         </main>
 
-        <aside aria-label="Session Inspector" className="space-y-3 lg:sticky lg:top-4 lg:self-start" data-testid="inspector">
+        <aside aria-label="Session Inspector" className="space-y-3 lg:min-h-0 lg:overflow-y-auto lg:pr-1" data-testid="inspector">
           <div className="flex items-center justify-between gap-2">
             <h2 className="text-lg font-semibold">Session Inspector</h2>
             <button type="button" onClick={clearSession} data-testid="clear-session" className="inline-flex items-center gap-1.5 rounded-md border border-line bg-panel px-3 py-1.5 text-sm hover:bg-track">
@@ -449,6 +486,7 @@ export function AppShell() {
                 compact
                 value={sideTab}
                 onChange={setSideTab}
+                sharedPanelId="side-panel"
                 tabs={[
                   ["summary", t("Tóm tắt", "Summary")],
                   ["log", t("Nhật ký sự kiện", "Event log")],
@@ -456,7 +494,7 @@ export function AppShell() {
                 ]}
               />
             </div>
-            <div className="p-4">
+            <div role="tabpanel" id="side-panel" aria-labelledby={`side-tab-${sideTab}`} className="p-4">
               {!report && empty}
               {report && sideTab === "summary" && (
                 <div className="space-y-4">

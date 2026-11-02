@@ -1,10 +1,13 @@
 "use client";
 
-import { useT } from "@/lib/i18n";
+import { useLang, useT } from "@/lib/i18n";
 
 /** Short educational content for the Image Grid CAPTCHA. */
 export function ImageGridLearn() {
   const t = useT();
+  // In the home page's frame the shell shows this content in its "Learn" tab instead.
+  const { embedded } = useLang();
+  if (embedded) return null;
   return (
     <section aria-labelledby="learn-h" className="space-y-3 rounded-lg border border-line bg-panel p-4 text-sm" data-testid="learn">
       <h2 id="learn-h" className="text-base font-semibold">

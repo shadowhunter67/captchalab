@@ -126,3 +126,10 @@ Plugin `text`, route `/playground/text`: SVG distorted text deterministic, verif
 - `PLAYGROUND_SETS` (`lib/playground-sets.ts`): Playground mở bằng biến thể thực tế; Compare/Builder/Experiments/dataset vẫn dùng default của plugin. Test cũ phụ thuộc default phải ghi `variant=` tường minh.
 - Skin widget: class `cl-widget` (globals.css) đổi token màu trong thẻ "Try"; kết quả/Inspect nằm ngoài thẻ. Hệ thống PoW/PoS/BC: `StatusBadge` + `<details>` chi tiết kỹ thuật. `lib/realism.ts` là nơi duy nhất chứa tuyên bố realism (Learn + ma trận).
 - Bẫy: heredoc dài hỏng (dùng Write + python); `<use href>`/clipPath của slider puzzle cần id duy nhất (useId) — đã kiểm Firefox/WebKit; không sửa mã nguồn khi E2E dev đang chạy (hot reload làm test nhảy).
+
+## v1.1 layout: tab "Tìm hiểu" (2026-11-02)
+- Chỉ đổi bố cục shell (`features/shell/AppShell.tsx`, `LearnPanel.tsx`), KHÔNG đổi challenge/verifier/classifier/dataset/evaluation. Trang chủ nhúng playground trong iframe (`?embed=1`); Learn trước đây nằm TRONG iframe dưới challenge.
+- 5 tab: Trải nghiệm / Sự kiện / Phân tích hành vi / Khả năng tiếp cận / Tìm hiểu. Mọi panel luôn có trong DOM (`hidden` khi không chọn) để aria-controls hợp lệ; iframe KHÔNG bị unmount khi đổi tab nên giữ challenge/seed/đáp án/session. Đừng quay lại `tab === "experience" && <iframe>`.
+- Learn: các `*Learn` (Text/Rotation/ImageGrid/DragDrop/Checkbox/Slider/CaptchaLearn) trả null khi `useLang().embedded`; shell render lại đúng component đó trong tab Tìm hiểu (+ `RealismBlock`; lab dùng `LabLearnCard` trong `components/LearnCards.tsx`, dùng chung với trang /learn). Trang playground đứng riêng vẫn có Learn. Playground mới có Learn phải làm theo cách này.
+- Desktop (lg): `h-dvh`, ba cột tự cuộn, vùng tab cuộn trong; di động cuộn trang bình thường. Thẻ chỉ số (main-stat-*) chuyển vào tab Phân tích hành vi. Hàng tab cuộn ngang, có phím Left/Right/Home/End.
+- Test: `e2e/workspace.spec.ts`.
